@@ -26,6 +26,7 @@ public partial class MainWindow : Window
     private bool _hasShownClickThroughTrayMessage;
     private readonly Forms.NotifyIcon _notifyIcon = new();
     private readonly DispatcherTimer _toastTimer = new();
+    private readonly DispatcherTimer _colorButtonClickTimer = new();
     private Forms.ToolStripMenuItem? _trayEnableClickThroughMenuItem;
     private Forms.ToolStripMenuItem? _trayDisableClickThroughMenuItem;
     private ToolMode _currentTool = ToolMode.Pen;
@@ -357,6 +358,7 @@ public partial class MainWindow : Window
         UpdateToolHighlight();
         InitializeNotifyIcon();
         InitializeToastTimer();
+        InitializeColorButtonClickTimer();
 
         Loaded += MainWindow_Loaded;
         Closed += MainWindow_Closed;
@@ -394,6 +396,7 @@ public partial class MainWindow : Window
     private void MainWindow_Closed(object? sender, EventArgs e)
     {
         _toastTimer.Stop();
+        _colorButtonClickTimer.Stop();
         _notifyIcon.Visible = false;
         _notifyIcon.Dispose();
 
@@ -622,6 +625,7 @@ public partial class MainWindow : Window
                 break;
         }
 
+        _colorButtonClickTimer.Stop();
         ColorPopup.IsOpen = false;
         _currentInteractionState = InteractionState.None;
     }
@@ -743,6 +747,12 @@ public partial class MainWindow : Window
         _toastTimer.Tick += ToastTimer_Tick;
     }
 
+    private void InitializeColorButtonClickTimer()
+    {
+        _colorButtonClickTimer.Interval = TimeSpan.FromMilliseconds(220);
+        _colorButtonClickTimer.Tick += ColorButtonClickTimer_Tick;
+    }
+
     private void ShowClickThroughToastIfNeeded()
     {
         if (_hasShownClickThroughTrayMessage)
@@ -772,6 +782,18 @@ public partial class MainWindow : Window
     private void ToastTimer_Tick(object? sender, EventArgs e)
     {
         HideToastMessage();
+    }
+
+    private void ColorButtonClickTimer_Tick(object? sender, EventArgs e)
+    {
+        _colorButtonClickTimer.Stop();
+
+        if (_isClickThroughEnabled)
+        {
+            return;
+        }
+
+        ColorPopup.IsOpen = true;
     }
 
     private void TrayEnableClickThroughMenuItem_Click(object? sender, EventArgs e)
@@ -2402,20 +2424,24 @@ public partial class MainWindow : Window
         UpdateToolHighlight();
     }
 
-    private void ColorButton_Click(object sender, RoutedEventArgs e)
-    {
-        ColorPopup.IsOpen = true;
-    }
-
     private void ColorButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.ClickCount < 2)
+        if (_isClickThroughEnabled)
         {
             return;
         }
 
+        if (e.ClickCount >= 2)
+        {
+            _colorButtonClickTimer.Stop();
+            e.Handled = true;
+            OpenCurrentColorEditor();
+            return;
+        }
+
+        _colorButtonClickTimer.Stop();
+        _colorButtonClickTimer.Start();
         e.Handled = true;
-        OpenCurrentColorEditor();
     }
 
     private void OpenCurrentColorEditor()
@@ -2538,6 +2564,7 @@ public partial class MainWindow : Window
             : Visibility.Visible;
 
         ColorPopup.IsOpen = false;
+        _colorButtonClickTimer.Stop();
 
         IntPtr hwnd = new WindowInteropHelper(this).Handle;
         if (hwnd != IntPtr.Zero)

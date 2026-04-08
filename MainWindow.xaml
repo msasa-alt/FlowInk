@@ -135,8 +135,7 @@
                         Style="{StaticResource ToolbarButtonStyle}"
                         Content="●"
                         ToolTip="Color（ダブルクリックで現在色を編集）"
-                        PreviewMouseLeftButtonDown="ColorButton_PreviewMouseLeftButtonDown"
-                        Click="ColorButton_Click"/>
+                        PreviewMouseLeftButtonDown="ColorButton_PreviewMouseLeftButtonDown"/>
 
                 <Popup x:Name="ColorPopup"
                        PlacementTarget="{Binding ElementName=ColorButton}"
