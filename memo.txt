@@ -1,0 +1,343 @@
+# FlowInk 引継ぎサマリ（Undo/Redo基盤完成＋UI最適化版）
+
+---
+
+## ■ 概要
+
+WPF / .NET 8 のオーバーレイ描画ツール。
+画面上に重ねて描画する用途に特化。
+
+### 設計方針
+
+* シンプル
+* 即描画
+* 最小操作
+* UIを増やさない
+
+---
+
+## ■ 現在の完成機能
+
+### 【描画】
+
+* ペン描画（InkCanvas）
+* Shiftで直線
+* Shift + Alt で矢印
+* 長方形描画
+* 消しゴム（Erase）
+
+---
+
+### 【テキスト】
+
+* クリックで入力
+* Enterで確定
+* Shift+Enterで改行（暫定）
+* Escでキャンセル
+* ドラッグ移動
+* ダブルクリックで再編集
+* Ctrl+ホイールでサイズ変更
+* TextボタンダブルクリックでFontDialog
+
+---
+
+### 【色】
+
+* Preset / Recent カラー
+* Presetダブルクリックで編集
+* ColorDialogあり
+
+---
+
+### 【線幅】
+
+* Penボタンダブルクリックで変更（PenWidthDialog）
+
+---
+
+### 【UI】
+
+* 右側フローティングツールバー
+* 半透明表示
+* CT状態と連動して表示/非表示
+
+---
+
+### 【ClickThrough】
+
+* Ctrl + Alt + T で切替
+
+---
+
+### 【トレイ】
+
+* 常駐
+* ON/OFF切替
+* Exit
+* ダブルクリックで復帰
+
+---
+
+## ■ Undo / Redo（完成状態）
+
+### 【操作】
+
+* Ctrl + Z：Undo
+* Ctrl + Y：Redo
+* Ctrl + Shift + Z：Redo
+
+---
+
+### 【履歴対象】
+
+* ペン
+* 直線
+* 矢印
+* 長方形
+* 消しゴム
+* テキスト追加 / 編集 / 移動
+* Clear
+
+---
+
+### 【履歴仕様】
+
+* 1操作 = 1履歴
+* プレビューは履歴に含めない
+* 矢印は複数Strokeでも1履歴
+* Eraseは1ドラッグ = 1履歴
+* Clearは1履歴
+* 履歴上限あり（200）
+
+---
+
+## ■ 進行中操作 × Undo / Redo / Clear
+
+### 【基本ルール】
+
+① 進行中操作を処理
+② Undo / Redo / Clear 実行
+
+---
+
+### 【未確定操作】
+
+→ キャンセル
+
+対象：
+
+* ペン描画中
+* 直線 / 矢印プレビュー
+* 長方形プレビュー
+* テキスト編集中
+* テキスト移動中
+
+---
+
+### 【確定扱い】
+
+→ 1履歴として確定してからUndo
+
+対象：
+
+* Erase（削除済みのため）
+
+---
+
+### 【意図】
+
+* 今の操作はなかったことにして戻る
+* ただし削除はUndoで戻す
+
+---
+
+## ■ Clear仕様
+
+* 描画 + テキストを全削除
+* 1履歴として管理
+* Undoで復元可能
+
+---
+
+## ■ 内部構造
+
+### 【状態管理】
+
+```csharp
+enum InteractionState
+{
+    None,
+    DrawingPen,
+    DrawingLine,
+    DrawingArrow,
+    DrawingRect,
+    Erasing,
+    EditingText,
+    MovingText
+}
+```
+
+---
+
+### 【Undo管理】
+
+* UndoHistoryManager を使用
+* Stack操作はManagerに集約
+* 履歴上限もManagerで管理
+
+---
+
+### 【Action設計】
+
+* IUndoableAction ベース
+* 操作ごとにActionクラス作成
+* PushHistoryで登録
+
+---
+
+### 【共通処理】
+
+```csharp
+void FinalizeOrCancelCurrentOperation()
+{
+    switch (CurrentState)
+    {
+        case DrawingPen:
+        case DrawingLine:
+        case DrawingArrow:
+        case DrawingRect:
+        case EditingText:
+        case MovingText:
+            CancelCurrentOperation();
+            break;
+
+        case Erasing:
+            CommitEraseOperation();
+            break;
+    }
+
+    CurrentState = None;
+}
+```
+
+---
+
+## ■ 実装ルール（超重要）
+
+1. 新機能は必ずUndo対応込みで実装する
+2. 1操作 = 1履歴を守る
+3. プレビューは履歴に入れない
+4. Undo/Redo/Clear前に状態整理
+5. 未確定はキャンセル、変更済みは確定
+6. 履歴は PushHistory 経由のみ
+7. Stackを直接触らない
+
+---
+
+## ■ UI仕様（最新）
+
+### 【ツールバー設計】
+
+* 右側固定
+* 縦並び
+* 半透明
+* 最小幅設計
+
+---
+
+### 【サイズ仕様】
+
+* ボタンサイズ：36 × 36 px
+* Padding：0
+* Margin：2
+* MinWidth：0
+
+---
+
+### 【表示ルール】
+
+* アイコンのみ表示
+* テキストは表示しない
+* ToolTipで補助
+
+---
+
+### 【例外】
+
+* CTボタンのみ文字表示（視認性のため）
+
+---
+
+### 【操作ルール】
+
+* シングルクリック：ツール選択
+* ダブルクリック：設定UI
+
+  * Pen → 線幅
+  * Text → フォント
+  * Color → プリセット編集
+
+---
+
+## ■ 現在の状態
+
+* Undo/Redo基盤：完成
+* 操作状態管理：安定
+* UI：最小構成確立
+* 拡張可能状態
+
+---
+
+## ■ 次の対応予定
+
+### 【最優先】
+
+■ テキスト個別削除
+
+* Deleteキー対応
+* 1履歴管理
+* Undo/Redo対応
+
+---
+
+### 【次】
+
+■ テキスト選択表示
+
+* 枠表示
+* 削除対象の明確化
+
+---
+
+### 【後回し】
+
+■ 線種追加
+
+* 点線
+* 破線
+* ハイライト
+
+---
+
+## ■ 再開時のルール
+
+* Undo/Redoは触らない
+* 新機能はActionから設計
+* PushHistoryで履歴登録
+* 操作中Undoの挙動を必ず確認
+
+---
+
+## ■ 最重要まとめ
+
+* 未確定 → キャンセル
+* 変更済み → 確定してUndo
+* Eraseのみ例外（強制確定）
+
+---
+
+## ■ 状態
+
+👉 Undo/Redoは完成
+👉 ここからは機能追加フェーズ
+👉 追加しても自然にUndo対応される構造
