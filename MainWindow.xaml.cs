@@ -345,6 +345,7 @@ public partial class MainWindow : Window
         InitializeButtonStyles();
 
         LoadAppSettings();
+        _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
 
         BuildPresetColorButtons();
         BuildRecentColorButtons();
@@ -999,6 +1000,8 @@ public partial class MainWindow : Window
     {
         string filePath = GetColorFilePath(AppSettingsFileName);
 
+        _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
+
         var settings = new AppSettings
         {
             PresetColors = ToHexColorList(_presetColors),
@@ -1286,9 +1289,11 @@ public partial class MainWindow : Window
 
     private void BuildPenWidthPresetButtons()
     {
+        _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
+
         PenWidthPresetGrid.Children.Clear();
 
-        for (int i = 0; i < _penWidthPresets.Count; i++)
+        for (int i = 0; i < PenWidthPresetCount; i++)
         {
             double width = _penWidthPresets[i];
             var button = CreatePenWidthPresetButton(i, width);
@@ -1445,7 +1450,9 @@ public partial class MainWindow : Window
 
     private void EditPenWidthPreset(int index)
     {
-        if (index < 0 || index >= _penWidthPresets.Count)
+        _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
+
+        if (index < 0 || index >= PenWidthPresetCount)
         {
             return;
         }
@@ -1463,8 +1470,11 @@ public partial class MainWindow : Window
         }
 
         double updated = NormalizePenWidth(dialog.SelectedWidth);
-        _penWidthPresets[index] = updated;
-        _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
+
+        var nextPresets = new List<double>(_penWidthPresets);
+        nextPresets[index] = updated;
+        _penWidthPresets = NormalizePenWidthPresets(nextPresets);
+
         SelectPenWidth(updated);
         SaveAppSettings();
         BuildPenWidthPresetButtons();
