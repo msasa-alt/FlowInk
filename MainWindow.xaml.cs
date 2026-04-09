@@ -2229,6 +2229,7 @@ public partial class MainWindow : Window
         host.MouseMove += TextElement_MouseMove;
         host.MouseLeftButtonUp += TextElement_MouseLeftButtonUp;
         host.LostMouseCapture += TextElement_LostMouseCapture;
+        host.MouseRightButtonDown += TextElement_MouseRightButtonDown;
     }
 
     private void DetachTextElementHandlers(Border host)
@@ -2237,6 +2238,7 @@ public partial class MainWindow : Window
         host.MouseMove -= TextElement_MouseMove;
         host.MouseLeftButtonUp -= TextElement_MouseLeftButtonUp;
         host.LostMouseCapture -= TextElement_LostMouseCapture;
+        host.MouseRightButtonDown -= TextElement_MouseRightButtonDown;
     }
 
     private void TextElement_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -2291,6 +2293,57 @@ public partial class MainWindow : Window
         _currentInteractionState = InteractionState.MovingText;
 
         host.CaptureMouse();
+        e.Handled = true;
+    }
+
+
+    private void TextElement_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (_isClickThroughEnabled || _currentTool != ToolMode.Text)
+        {
+            return;
+        }
+
+        if (sender is not Border host)
+        {
+            return;
+        }
+
+        if (_activeTextBox != null)
+        {
+            CommitActiveTextInput();
+        }
+
+        SelectTextElement(host);
+
+        var menu = new ContextMenu();
+
+        var editItem = new MenuItem
+        {
+            Header = "編集"
+        };
+        editItem.Click += (_, _) =>
+        {
+            BeginTextEdit(host);
+        };
+
+        var deleteItem = new MenuItem
+        {
+            Header = "削除"
+        };
+        deleteItem.Click += (_, _) =>
+        {
+            if (ReferenceEquals(_selectedTextElement, host))
+            {
+                DeleteSelectedTextElement();
+            }
+        };
+
+        menu.Items.Add(editItem);
+        menu.Items.Add(deleteItem);
+
+        host.ContextMenu = menu;
+        menu.IsOpen = true;
         e.Handled = true;
     }
 
