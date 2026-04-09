@@ -27,6 +27,8 @@ public partial class MainWindow : Window
     private readonly Forms.NotifyIcon _notifyIcon = new();
     private readonly DispatcherTimer _toastTimer = new();
     private readonly DispatcherTimer _colorButtonClickTimer = new();
+    private readonly DispatcherTimer _penButtonClickTimer = new();
+    private readonly DispatcherTimer _penWidthPresetClickTimer = new();
     private Forms.ToolStripMenuItem? _trayEnableClickThroughMenuItem;
     private Forms.ToolStripMenuItem? _trayDisableClickThroughMenuItem;
     private ToolMode _currentTool = ToolMode.Pen;
@@ -42,6 +44,10 @@ public partial class MainWindow : Window
     private List<Color> _presetColors = new();
     private List<Color> _recentColors = new();
     private List<int> _customColorValues = new();
+    private List<double> _penWidthPresets = new();
+
+    private bool _pendingPenButtonSingleClick;
+    private int? _pendingPenWidthPresetIndex;
 
     private bool _isStraightLineDrawing;
     private Point _straightLineStartPoint;
@@ -79,6 +85,7 @@ public partial class MainWindow : Window
     private const int MaxRecentColors = 8;
     private const int MaxHistory = 200;
     private const int MaxCustomColors = 16;
+    private const int PenWidthPresetCount = 3;
 
     private const string DefaultTextFontFamilyName = "Segoe UI";
     private const double DefaultTextFontSize = 28.0;
@@ -316,6 +323,7 @@ public partial class MainWindow : Window
         public List<string> RecentColors { get; set; } = new();
         public List<int> CustomColors { get; set; } = new();
         public double PenWidth { get; set; } = 4.0;
+        public List<double> PenWidthPresets { get; set; } = new();
         public string? CurrentColor { get; set; }
         public string? TextFontFamily { get; set; }
         public double TextFontSize { get; set; } = DefaultTextFontSize;
@@ -335,9 +343,11 @@ public partial class MainWindow : Window
         InitializeButtonStyles();
 
         LoadAppSettings();
+        _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
 
         BuildPresetColorButtons();
         BuildRecentColorButtons();
+        BuildPenWidthPresetButtons();
 
         ApplyPenColor(_currentPenColor, addToRecent: true);
 
@@ -359,6 +369,8 @@ public partial class MainWindow : Window
         InitializeNotifyIcon();
         InitializeToastTimer();
         InitializeColorButtonClickTimer();
+        InitializePenButtonClickTimer();
+        InitializePenWidthPresetClickTimer();
 
         Loaded += MainWindow_Loaded;
         Closed += MainWindow_Closed;
@@ -749,8 +761,20 @@ public partial class MainWindow : Window
 
     private void InitializeColorButtonClickTimer()
     {
-        _colorButtonClickTimer.Interval = TimeSpan.FromMilliseconds(220);
+        _colorButtonClickTimer.Interval = TimeSpan.FromMilliseconds(Forms.SystemInformation.DoubleClickTime + 50);
         _colorButtonClickTimer.Tick += ColorButtonClickTimer_Tick;
+    }
+
+    private void InitializePenButtonClickTimer()
+    {
+        _penButtonClickTimer.Interval = TimeSpan.FromMilliseconds(Forms.SystemInformation.DoubleClickTime + 50);
+        _penButtonClickTimer.Tick += PenButtonClickTimer_Tick;
+    }
+
+    private void InitializePenWidthPresetClickTimer()
+    {
+        _penWidthPresetClickTimer.Interval = TimeSpan.FromMilliseconds(Forms.SystemInformation.DoubleClickTime + 50);
+        _penWidthPresetClickTimer.Tick += PenWidthPresetClickTimer_Tick;
     }
 
     private void ShowClickThroughToastIfNeeded()
@@ -794,6 +818,42 @@ public partial class MainWindow : Window
         }
 
         ColorPopup.IsOpen = true;
+    }
+
+    private void PenButtonClickTimer_Tick(object? sender, EventArgs e)
+    {
+        _penButtonClickTimer.Stop();
+
+        if (!_pendingPenButtonSingleClick || _isClickThroughEnabled)
+        {
+            _pendingPenButtonSingleClick = false;
+            return;
+        }
+
+        _pendingPenButtonSingleClick = false;
+
+        if (_currentTool == ToolMode.Pen)
+        {
+            OpenPenWidthPresetPopup();
+            return;
+        }
+
+        ActivatePenTool();
+    }
+
+    private void PenWidthPresetClickTimer_Tick(object? sender, EventArgs e)
+    {
+        _penWidthPresetClickTimer.Stop();
+
+        if (_pendingPenWidthPresetIndex == null)
+        {
+            return;
+        }
+
+        int index = _pendingPenWidthPresetIndex.Value;
+        _pendingPenWidthPresetIndex = null;
+
+        ApplyPenWidthPreset(index);
     }
 
     private void TrayEnableClickThroughMenuItem_Click(object? sender, EventArgs e)
@@ -855,6 +915,7 @@ public partial class MainWindow : Window
                 _recentColors = new List<Color>();
                 _customColorValues = new List<int>();
                 _currentPenWidth = 4.0;
+                _penWidthPresets = new List<double>(GetDefaultPenWidthPresets());
                 _currentTextFontFamilyName = DefaultTextFontFamilyName;
                 _currentTextFontSize = DefaultTextFontSize;
                 _currentTextFontStyle = FontStyles.Normal;
@@ -873,6 +934,7 @@ public partial class MainWindow : Window
                 _recentColors = new List<Color>();
                 _customColorValues = new List<int>();
                 _currentPenWidth = 4.0;
+                _penWidthPresets = new List<double>(GetDefaultPenWidthPresets());
                 _currentTextFontFamilyName = DefaultTextFontFamilyName;
                 _currentTextFontSize = DefaultTextFontSize;
                 _currentTextFontStyle = FontStyles.Normal;
@@ -885,6 +947,7 @@ public partial class MainWindow : Window
             _recentColors = ParseColorList(settings.RecentColors, new List<Color>());
             _customColorValues = NormalizeCustomColors(settings.CustomColors);
             _currentPenWidth = NormalizePenWidth(settings.PenWidth);
+            _penWidthPresets = NormalizePenWidthPresets(settings.PenWidthPresets);
             _currentTextFontFamilyName = NormalizeTextFontFamilyName(settings.TextFontFamily);
             _currentTextFontSize = NormalizeTextFontSize(settings.TextFontSize);
             _currentTextFontStyle = settings.TextItalic ? FontStyles.Italic : FontStyles.Normal;
@@ -911,6 +974,7 @@ public partial class MainWindow : Window
             _recentColors = new List<Color>();
             _customColorValues = new List<int>();
             _currentPenWidth = 4.0;
+            _penWidthPresets = new List<double>(GetDefaultPenWidthPresets());
             _currentTextFontFamilyName = DefaultTextFontFamilyName;
             _currentTextFontSize = DefaultTextFontSize;
             _currentTextFontStyle = FontStyles.Normal;
@@ -922,12 +986,15 @@ public partial class MainWindow : Window
     {
         string filePath = GetColorFilePath(AppSettingsFileName);
 
+        _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
+
         var settings = new AppSettings
         {
             PresetColors = ToHexColorList(_presetColors),
             RecentColors = ToHexColorList(_recentColors),
             CustomColors = new List<int>(_customColorValues),
             PenWidth = NormalizePenWidth(_currentPenWidth),
+            PenWidthPresets = new List<double>(_penWidthPresets),
             CurrentColor = _currentPenColor.ToString(),
             TextFontFamily = _currentTextFontFamilyName,
             TextFontSize = NormalizeTextFontSize(_currentTextFontSize),
@@ -992,6 +1059,65 @@ public partial class MainWindow : Window
         }
 
         return result;
+    }
+
+    private static List<double> GetDefaultPenWidthPresets()
+    {
+        return new List<double> { 2.0, 5.0, 10.0 };
+    }
+
+    private static List<double> NormalizePenWidthPresets(List<double>? presets)
+    {
+        var normalized = new List<double>();
+
+        if (presets != null)
+        {
+            foreach (double value in presets)
+            {
+                double normalizedValue = NormalizePenWidth(value);
+
+                if (normalized.Contains(normalizedValue))
+                {
+                    continue;
+                }
+
+                normalized.Add(normalizedValue);
+
+                if (normalized.Count >= PenWidthPresetCount)
+                {
+                    break;
+                }
+            }
+        }
+
+        foreach (double fallback in GetDefaultPenWidthPresets())
+        {
+            double normalizedFallback = NormalizePenWidth(fallback);
+
+            if (normalized.Contains(normalizedFallback))
+            {
+                continue;
+            }
+
+            normalized.Add(normalizedFallback);
+
+            if (normalized.Count >= PenWidthPresetCount)
+            {
+                break;
+            }
+        }
+
+        return normalized;
+    }
+
+    private static string FormatPenWidthText(double width)
+    {
+        return width.ToString("0.#");
+    }
+
+    private static bool ArePenWidthsEqual(double left, double right)
+    {
+        return Math.Abs(left - right) < 0.001;
     }
 
     private static string NormalizeTextFontFamilyName(string? fontFamilyName)
@@ -1147,6 +1273,52 @@ public partial class MainWindow : Window
         }
     }
 
+    private void BuildPenWidthPresetButtons()
+    {
+        _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
+
+        PenWidthPresetGrid.Children.Clear();
+
+        for (int i = 0; i < PenWidthPresetCount; i++)
+        {
+            double width = _penWidthPresets[i];
+            var button = CreatePenWidthPresetButton(i, width);
+            PenWidthPresetGrid.Children.Add(button);
+        }
+
+        UpdatePenWidthPresetButtonHighlight();
+    }
+
+    private Button CreatePenWidthPresetButton(int index, double width)
+    {
+        var button = new Button
+        {
+            Style = (Style)FindResource("PenWidthPresetButtonStyle"),
+            Content = FormatPenWidthText(width),
+            Tag = index,
+            ToolTip = $"{FormatPenWidthText(width)}  (クリック: 選択 / ダブルクリック: 編集)"
+        };
+
+        button.PreviewMouseLeftButtonDown += PenWidthPresetButton_PreviewMouseLeftButtonDown;
+        return button;
+    }
+
+    private void UpdatePenWidthPresetButtonHighlight()
+    {
+        foreach (object child in PenWidthPresetGrid.Children)
+        {
+            if (child is not Button button || button.Tag is not int index || index < 0 || index >= _penWidthPresets.Count)
+            {
+                continue;
+            }
+
+            bool isSelected = ArePenWidthsEqual(_penWidthPresets[index], _currentPenWidth);
+            button.BorderBrush = isSelected ? Brushes.White : new SolidColorBrush(Color.FromRgb(102, 102, 102));
+            button.BorderThickness = isSelected ? new Thickness(2) : new Thickness(1);
+            button.FontWeight = isSelected ? FontWeights.Bold : FontWeights.Normal;
+        }
+    }
+
     private Button CreateColorSwatchButton(Color color)
     {
         return new Button
@@ -1219,6 +1391,110 @@ public partial class MainWindow : Window
 
         ApplyPenColor(color, addToRecent: true);
         ColorPopup.IsOpen = false;
+    }
+
+    private void PenWidthPresetButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not Button button || button.Tag is not int index)
+        {
+            return;
+        }
+
+        if (e.ClickCount >= 2)
+        {
+            _penWidthPresetClickTimer.Stop();
+            _pendingPenWidthPresetIndex = null;
+            e.Handled = true;
+            EditPenWidthPreset(index);
+            return;
+        }
+
+        _penWidthPresetClickTimer.Stop();
+        _pendingPenWidthPresetIndex = index;
+        _penWidthPresetClickTimer.Start();
+        e.Handled = true;
+    }
+
+    private void OpenPenWidthPresetPopup()
+    {
+        _colorButtonClickTimer.Stop();
+        ColorPopup.IsOpen = false;
+        BuildPenWidthPresetButtons();
+        PenWidthPopup.IsOpen = true;
+    }
+
+    private void ApplyPenWidthPreset(int index)
+    {
+        if (index < 0 || index >= _penWidthPresets.Count)
+        {
+            return;
+        }
+
+        SelectPenWidth(_penWidthPresets[index]);
+        PenWidthPopup.IsOpen = false;
+    }
+
+    private void EditPenWidthPreset(int index)
+    {
+        _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
+
+        if (index < 0 || index >= PenWidthPresetCount)
+        {
+            return;
+        }
+
+        ActivatePenTool();
+
+        var dialog = new PenWidthDialog(_penWidthPresets[index], _currentPenColor)
+        {
+            Owner = this
+        };
+
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        double updated = NormalizePenWidth(dialog.SelectedWidth);
+
+        var nextPresets = new List<double>(_penWidthPresets);
+        nextPresets[index] = updated;
+        _penWidthPresets = NormalizePenWidthPresets(nextPresets);
+
+        SelectPenWidth(updated);
+        SaveAppSettings();
+        BuildPenWidthPresetButtons();
+        PenWidthPopup.IsOpen = false;
+    }
+
+    private void ActivatePenTool()
+    {
+        FinalizeOrCancelCurrentOperation();
+
+        _isStraightLineDrawing = false;
+        _isRectangleDrawing = false;
+
+        _currentTool = ToolMode.Pen;
+        DrawingCanvas.EditingMode = InkCanvasEditingMode.Ink;
+        UpdateToolHighlight();
+    }
+
+    private void OpenCurrentPenWidthEditor()
+    {
+        ActivatePenTool();
+
+        var dialog = new PenWidthDialog(_currentPenWidth, _currentPenColor)
+        {
+            Owner = this
+        };
+
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        SelectPenWidth(dialog.SelectedWidth);
+        BuildPenWidthPresetButtons();
     }
 
     private void ApplyPenColor(Color color, bool addToRecent)
@@ -2269,6 +2545,7 @@ public partial class MainWindow : Window
     {
         _currentPenWidth = NormalizePenWidth(width);
         DrawingCanvas.DefaultDrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth);
+        UpdatePenWidthPresetButtonHighlight();
         SaveAppSettings();
     }
 
@@ -2333,48 +2610,30 @@ public partial class MainWindow : Window
 
     private void PenButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.ClickCount < 2)
+        if (_isClickThroughEnabled)
         {
             return;
         }
 
-        FinalizeOrCancelCurrentOperation();
-
-        _isStraightLineDrawing = false;
-        _isRectangleDrawing = false;
-
-        _currentTool = ToolMode.Pen;
-        DrawingCanvas.EditingMode = InkCanvasEditingMode.Ink;
-        UpdateToolHighlight();
-
-        var dialog = new PenWidthDialog(_currentPenWidth, _currentPenColor)
+        if (e.ClickCount >= 2)
         {
-            Owner = this
-        };
-
-        bool? result = dialog.ShowDialog();
-        if (result == true)
-        {
-            SelectPenWidth(dialog.SelectedWidth);
+            _pendingPenButtonSingleClick = false;
+            _penButtonClickTimer.Stop();
+            PenWidthPopup.IsOpen = false;
+            e.Handled = true;
+            OpenCurrentPenWidthEditor();
+            return;
         }
 
+        _penButtonClickTimer.Stop();
+        _pendingPenButtonSingleClick = true;
         e.Handled = true;
-    }
-
-    private void PenButton_Click(object sender, RoutedEventArgs e)
-    {
-        FinalizeOrCancelCurrentOperation();
-
-        _isStraightLineDrawing = false;
-        _isRectangleDrawing = false;
-
-        _currentTool = ToolMode.Pen;
-        DrawingCanvas.EditingMode = InkCanvasEditingMode.Ink;
-        UpdateToolHighlight();
+        _penButtonClickTimer.Start();
     }
 
     private void RectangleButton_Click(object sender, RoutedEventArgs e)
     {
+        PenWidthPopup.IsOpen = false;
         FinalizeOrCancelCurrentOperation();
 
         _isStraightLineDrawing = false;
@@ -2387,6 +2646,7 @@ public partial class MainWindow : Window
 
     private void TextButton_Click(object sender, RoutedEventArgs e)
     {
+        PenWidthPopup.IsOpen = false;
         FinalizeOrCancelCurrentOperation();
 
         _isStraightLineDrawing = false;
@@ -2414,6 +2674,7 @@ public partial class MainWindow : Window
 
     private void EraserButton_Click(object sender, RoutedEventArgs e)
     {
+        PenWidthPopup.IsOpen = false;
         FinalizeOrCancelCurrentOperation();
 
         _isStraightLineDrawing = false;
@@ -2434,11 +2695,13 @@ public partial class MainWindow : Window
         if (e.ClickCount >= 2)
         {
             _colorButtonClickTimer.Stop();
+            PenWidthPopup.IsOpen = false;
             e.Handled = true;
             OpenCurrentColorEditor();
             return;
         }
 
+        PenWidthPopup.IsOpen = false;
         _colorButtonClickTimer.Stop();
         _colorButtonClickTimer.Start();
         e.Handled = true;
@@ -2564,7 +2827,12 @@ public partial class MainWindow : Window
             : Visibility.Visible;
 
         ColorPopup.IsOpen = false;
+        PenWidthPopup.IsOpen = false;
         _colorButtonClickTimer.Stop();
+        _penButtonClickTimer.Stop();
+        _penWidthPresetClickTimer.Stop();
+        _pendingPenButtonSingleClick = false;
+        _pendingPenWidthPresetIndex = null;
 
         IntPtr hwnd = new WindowInteropHelper(this).Handle;
         if (hwnd != IntPtr.Zero)

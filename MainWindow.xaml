@@ -1,4 +1,4 @@
-<Window x:Class="FlowInk.MainWindow"
+﻿<Window x:Class="FlowInk.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="FlowInk"
@@ -90,6 +90,19 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="PenWidthPresetButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="72"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="MinWidth" Value="0"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Background" Value="#FF2D2D2D"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FF666666"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -108,9 +121,30 @@
                 <Button x:Name="PenButton"
                         Style="{StaticResource ToolbarButtonStyle}"
                         Content="✎"
-                        ToolTip="Pen（ダブルクリックで線幅設定）"
-                        PreviewMouseLeftButtonDown="PenButton_PreviewMouseLeftButtonDown"
-                        Click="PenButton_Click"/>
+                        ToolTip="Pen（選択済みでクリック: 線幅プリセット / ダブルクリック: 線幅設定）"
+                        PreviewMouseLeftButtonDown="PenButton_PreviewMouseLeftButtonDown"/>
+
+                <Popup x:Name="PenWidthPopup"
+                       PlacementTarget="{Binding ElementName=PenButton}"
+                       Placement="Left"
+                       StaysOpen="False"
+                       AllowsTransparency="True">
+                    <Border Background="#EE1E1E1E"
+                            Padding="10"
+                            CornerRadius="10"
+                            BorderBrush="#FF555555"
+                            BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="Pen Width"
+                                       Foreground="White"
+                                       Margin="0,0,0,8"
+                                       FontWeight="Bold"/>
+
+                            <UniformGrid x:Name="PenWidthPresetGrid"
+                                         Columns="1"/>
+                        </StackPanel>
+                    </Border>
+                </Popup>
 
                 <Button x:Name="RectangleButton"
                         Style="{StaticResource ToolbarButtonStyle}"
