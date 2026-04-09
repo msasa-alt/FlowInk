@@ -9,6 +9,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using Forms = System.Windows.Forms;
 using Drawing = System.Drawing;
@@ -61,6 +62,7 @@ public partial class MainWindow : Window
     private TextBox? _activeTextBox;
     private Point _activeTextStartPoint;
     private readonly List<Border> _textElements = new();
+    private Border? _selectedTextElement;
 
     private readonly UndoHistoryManager<IUndoableAction, MainWindow> _history;
     private bool _isApplyingHistory;
@@ -343,7 +345,6 @@ public partial class MainWindow : Window
         InitializeButtonStyles();
 
         LoadAppSettings();
-        _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
 
         BuildPresetColorButtons();
         BuildRecentColorButtons();
@@ -428,6 +429,16 @@ public partial class MainWindow : Window
 
         if (_activeTextBox != null && _activeTextBox.IsKeyboardFocusWithin)
         {
+            return;
+        }
+
+        if (e.Key == Key.Delete && _currentTool == ToolMode.Text)
+        {
+            if (DeleteSelectedTextElement())
+            {
+                e.Handled = true;
+            }
+
             return;
         }
 
@@ -580,6 +591,7 @@ public partial class MainWindow : Window
         try
         {
             _history.Undo(this);
+            ClearSelectedTextElement();
         }
         finally
         {
@@ -600,6 +612,7 @@ public partial class MainWindow : Window
         try
         {
             _history.Redo(this);
+            ClearSelectedTextElement();
         }
         finally
         {
@@ -986,8 +999,6 @@ public partial class MainWindow : Window
     {
         string filePath = GetColorFilePath(AppSettingsFileName);
 
-        _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
-
         var settings = new AppSettings
         {
             PresetColors = ToHexColorList(_presetColors),
@@ -1275,11 +1286,9 @@ public partial class MainWindow : Window
 
     private void BuildPenWidthPresetButtons()
     {
-        _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
-
         PenWidthPresetGrid.Children.Clear();
 
-        for (int i = 0; i < PenWidthPresetCount; i++)
+        for (int i = 0; i < _penWidthPresets.Count; i++)
         {
             double width = _penWidthPresets[i];
             var button = CreatePenWidthPresetButton(i, width);
@@ -1436,9 +1445,7 @@ public partial class MainWindow : Window
 
     private void EditPenWidthPreset(int index)
     {
-        _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
-
-        if (index < 0 || index >= PenWidthPresetCount)
+        if (index < 0 || index >= _penWidthPresets.Count)
         {
             return;
         }
@@ -1456,11 +1463,8 @@ public partial class MainWindow : Window
         }
 
         double updated = NormalizePenWidth(dialog.SelectedWidth);
-
-        var nextPresets = new List<double>(_penWidthPresets);
-        nextPresets[index] = updated;
-        _penWidthPresets = NormalizePenWidthPresets(nextPresets);
-
+        _penWidthPresets[index] = updated;
+        _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
         SelectPenWidth(updated);
         SaveAppSettings();
         BuildPenWidthPresetButtons();
@@ -1470,6 +1474,7 @@ public partial class MainWindow : Window
     private void ActivatePenTool()
     {
         FinalizeOrCancelCurrentOperation();
+        ClearSelectedTextElement();
 
         _isStraightLineDrawing = false;
         _isRectangleDrawing = false;
@@ -1573,6 +1578,7 @@ public partial class MainWindow : Window
                 CommitActiveTextInput();
             }
 
+            ClearSelectedTextElement();
             BeginTextInput(startPoint);
             e.Handled = true;
             return;
@@ -1923,6 +1929,7 @@ public partial class MainWindow : Window
     private void BeginTextInput(Point startPoint)
     {
         CancelActiveTextInput();
+        ClearSelectedTextElement();
         EndTextElementDrag();
 
         _activeTextStartPoint = startPoint;
@@ -2256,6 +2263,13 @@ public partial class MainWindow : Window
             CommitActiveTextInput();
         }
 
+        if (!ReferenceEquals(_selectedTextElement, host))
+        {
+            SelectTextElement(host);
+            e.Handled = true;
+            return;
+        }
+
         _draggingTextElement = host;
         _isDraggingTextElement = true;
         _textDragStartMousePoint = e.GetPosition(DrawingCanvas);
@@ -2320,6 +2334,7 @@ public partial class MainWindow : Window
 
         host.ReleaseMouseCapture();
         EndTextElementDrag();
+        SelectTextElement(host);
 
         if (!ArePointsClose(_textDragCommittedStartPoint, endPoint))
         {
@@ -2342,6 +2357,7 @@ public partial class MainWindow : Window
         if (_draggingTextElement != null)
         {
             SetTextElementPosition(_draggingTextElement, _textDragCommittedStartPoint);
+            SelectTextElement(_draggingTextElement);
         }
 
         EndTextElementDrag();
@@ -2366,6 +2382,7 @@ public partial class MainWindow : Window
     private void BeginTextEdit(Border host)
     {
         CancelActiveTextInput();
+        ClearSelectedTextElement();
         EndTextElementDrag();
 
         if (host.Child is not TextBlock textBlock)
@@ -2475,6 +2492,66 @@ public partial class MainWindow : Window
         return false;
     }
 
+    private void SelectTextElement(Border host)
+    {
+        if (ReferenceEquals(_selectedTextElement, host))
+        {
+            UpdateSelectedTextVisual(host, true);
+            return;
+        }
+
+        ClearSelectedTextElement();
+
+        _selectedTextElement = host;
+        UpdateSelectedTextVisual(host, true);
+    }
+
+    private void ClearSelectedTextElement()
+    {
+        if (_selectedTextElement != null)
+        {
+            UpdateSelectedTextVisual(_selectedTextElement, false);
+            _selectedTextElement = null;
+        }
+    }
+
+    private bool DeleteSelectedTextElement()
+    {
+        if (_selectedTextElement == null)
+        {
+            return false;
+        }
+
+        Border target = _selectedTextElement;
+        ClearSelectedTextElement();
+        RemoveCommittedTextElement(target);
+        PushHistory(new TextRemoveAction(target));
+        return true;
+    }
+
+    private void UpdateSelectedTextVisual(Border host, bool isSelected)
+    {
+        if (isSelected)
+        {
+            host.BorderBrush = Brushes.White;
+            host.BorderThickness = new Thickness(1);
+            host.Background = new SolidColorBrush(Color.FromArgb(20, 255, 255, 255));
+            host.Effect = new DropShadowEffect
+            {
+                Color = Colors.Black,
+                BlurRadius = 0,
+                ShadowDepth = 0,
+                Opacity = 1
+            };
+            return;
+        }
+
+        host.BorderBrush = Brushes.Transparent;
+        host.BorderThickness = new Thickness(0);
+        host.Background = Brushes.Transparent;
+        host.Effect = null;
+    }
+
     private void AddCommittedTextElement(Border host)
     {
         if (_textElements.Contains(host))
@@ -2482,6 +2559,7 @@ public partial class MainWindow : Window
             return;
         }
 
+        UpdateSelectedTextVisual(host, false);
         DrawingCanvas.Children.Add(host);
         _textElements.Add(host);
     }
@@ -2491,6 +2569,11 @@ public partial class MainWindow : Window
         if (_draggingTextElement == host)
         {
             EndTextElementDrag();
+        }
+
+        if (ReferenceEquals(_selectedTextElement, host))
+        {
+            ClearSelectedTextElement();
         }
 
         DrawingCanvas.Children.Remove(host);
@@ -2504,6 +2587,7 @@ public partial class MainWindow : Window
 
     private void RemoveCommittedTextElements()
     {
+        ClearSelectedTextElement();
         EndTextElementDrag();
 
         foreach (Border element in GetCommittedTextElementsSnapshot())
@@ -2635,6 +2719,7 @@ public partial class MainWindow : Window
     {
         PenWidthPopup.IsOpen = false;
         FinalizeOrCancelCurrentOperation();
+        ClearSelectedTextElement();
 
         _isStraightLineDrawing = false;
         _isRectangleDrawing = false;
@@ -2648,6 +2733,7 @@ public partial class MainWindow : Window
     {
         PenWidthPopup.IsOpen = false;
         FinalizeOrCancelCurrentOperation();
+        ClearSelectedTextElement();
 
         _isStraightLineDrawing = false;
         _isRectangleDrawing = false;
@@ -2676,6 +2762,7 @@ public partial class MainWindow : Window
     {
         PenWidthPopup.IsOpen = false;
         FinalizeOrCancelCurrentOperation();
+        ClearSelectedTextElement();
 
         _isStraightLineDrawing = false;
         _isRectangleDrawing = false;
@@ -2793,6 +2880,7 @@ public partial class MainWindow : Window
     private void ClearButton_Click(object sender, RoutedEventArgs e)
     {
         FinalizeOrCancelCurrentOperation();
+        ClearSelectedTextElement();
 
         List<Stroke> removedStrokes = ToStrokeList(DrawingCanvas.Strokes);
         List<Border> removedTextElements = GetCommittedTextElementsSnapshot();
@@ -2816,6 +2904,7 @@ public partial class MainWindow : Window
     private void SetClickThrough(bool enabled)
     {
         FinalizeOrCancelCurrentOperation();
+        ClearSelectedTextElement();
 
         _isStraightLineDrawing = false;
         _isRectangleDrawing = false;
