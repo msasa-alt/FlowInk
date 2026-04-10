@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -58,7 +59,9 @@ public partial class MainWindow : Window
     private bool _isRectangleDrawing;
     private Point _rectangleStartPoint;
     private Stroke? _rectanglePreviewStroke;
+    private List<Stroke>? _rectanglePreviewFillStrokes;
     private bool _isRectangleFilled;
+    private int _rectangleFillOpacityPercent = 35;
 
     private TextBox? _activeTextBox;
     private Point _activeTextStartPoint;
@@ -332,6 +335,8 @@ public partial class MainWindow : Window
         public double TextFontSize { get; set; } = DefaultTextFontSize;
         public bool TextBold { get; set; }
         public bool TextItalic { get; set; }
+        public bool RectangleFillEnabled { get; set; }
+        public int RectangleFillOpacity { get; set; } = 35;
     }
 
     public MainWindow()
@@ -347,6 +352,7 @@ public partial class MainWindow : Window
 
         LoadAppSettings();
         UpdateRectangleButtonToolTip();
+        UpdateRectangleSettingsUi();
         _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
 
         BuildPresetColorButtons();
@@ -847,13 +853,6 @@ public partial class MainWindow : Window
         }
 
         _pendingPenButtonSingleClick = false;
-
-        if (_currentTool == ToolMode.Pen)
-        {
-            OpenPenWidthPresetPopup();
-            return;
-        }
-
         ActivatePenTool();
     }
 
@@ -937,6 +936,7 @@ public partial class MainWindow : Window
                 _currentTextFontStyle = FontStyles.Normal;
                 _currentTextFontWeight = FontWeights.Normal;
                 _isRectangleFilled = false;
+                _rectangleFillOpacityPercent = 35;
 
                 SaveAppSettings();
                 return;
@@ -957,6 +957,7 @@ public partial class MainWindow : Window
                 _currentTextFontStyle = FontStyles.Normal;
                 _currentTextFontWeight = FontWeights.Normal;
                 _isRectangleFilled = false;
+                _rectangleFillOpacityPercent = 35;
                 SaveAppSettings();
                 return;
             }
@@ -970,7 +971,8 @@ public partial class MainWindow : Window
             _currentTextFontSize = NormalizeTextFontSize(settings.TextFontSize);
             _currentTextFontStyle = settings.TextItalic ? FontStyles.Italic : FontStyles.Normal;
             _currentTextFontWeight = settings.TextBold ? FontWeights.Bold : FontWeights.Normal;
-            _isRectangleFilled = false;
+            _isRectangleFilled = settings.RectangleFillEnabled;
+            _rectangleFillOpacityPercent = NormalizeRectangleFillOpacity(settings.RectangleFillOpacity);
 
             if (!string.IsNullOrWhiteSpace(settings.CurrentColor))
             {
@@ -999,6 +1001,7 @@ public partial class MainWindow : Window
             _currentTextFontStyle = FontStyles.Normal;
             _currentTextFontWeight = FontWeights.Normal;
             _isRectangleFilled = false;
+            _rectangleFillOpacityPercent = 35;
         }
     }
 
@@ -1019,7 +1022,9 @@ public partial class MainWindow : Window
             TextFontFamily = _currentTextFontFamilyName,
             TextFontSize = NormalizeTextFontSize(_currentTextFontSize),
             TextBold = _currentTextFontWeight == FontWeights.Bold,
-            TextItalic = _currentTextFontStyle == FontStyles.Italic
+            TextItalic = _currentTextFontStyle == FontStyles.Italic,
+            RectangleFillEnabled = _isRectangleFilled,
+            RectangleFillOpacity = NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent)
         };
 
         string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions
@@ -1218,6 +1223,21 @@ public partial class MainWindow : Window
         }
 
         return Math.Round(fontSize);
+    }
+
+    private static int NormalizeRectangleFillOpacity(int opacityPercent)
+    {
+        if (opacityPercent < 0)
+        {
+            return 0;
+        }
+
+        if (opacityPercent > 100)
+        {
+            return 100;
+        }
+
+        return opacityPercent;
     }
 
     private static int GetWheelDirection(int delta)
@@ -1437,10 +1457,13 @@ public partial class MainWindow : Window
 
     private void OpenPenWidthPresetPopup()
     {
-        _colorButtonClickTimer.Stop();
-        ColorPopup.IsOpen = false;
-        BuildPenWidthPresetButtons();
-        PenWidthPopup.IsOpen = true;
+        OpenPopupDeferred(PenWidthPopup, () =>
+        {
+            _colorButtonClickTimer.Stop();
+            ColorPopup.IsOpen = false;
+            RectangleSettingsPopup.IsOpen = false;
+            BuildPenWidthPresetButtons();
+        });
     }
 
     private void ApplyPenWidthPreset(int index)
@@ -1570,9 +1593,62 @@ public partial class MainWindow : Window
 
     private void UpdateRectangleButtonToolTip()
     {
-        RectangleButton.ToolTip = _isRectangleFilled
-            ? "Rectangle（塗りつぶしON / ダブルクリックで切替）"
-            : "Rectangle（塗りつぶしOFF / ダブルクリックで切替）";
+        string fillText = _isRectangleFilled
+            ? $"Rectangle（塗りつぶしON {NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent)}% / 右クリックで設定）"
+            : "Rectangle（塗りつぶしOFF / 右クリックで設定）";
+
+        RectangleButton.ToolTip = fillText;
+    }
+
+    private void UpdateRectangleSettingsUi()
+    {
+        if (RectangleFillCheckBox != null)
+        {
+            RectangleFillCheckBox.IsChecked = _isRectangleFilled;
+        }
+
+        if (RectangleOpacitySlider != null)
+        {
+            RectangleOpacitySlider.Value = NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent);
+            RectangleOpacitySlider.IsEnabled = _isRectangleFilled;
+        }
+
+        if (RectangleOpacityLabel != null)
+        {
+            RectangleOpacityLabel.Text = $"透明度: {NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent)}%";
+            RectangleOpacityLabel.Opacity = _isRectangleFilled ? 1.0 : 0.55;
+        }
+    }
+
+    private void OpenRectangleSettingsPopup()
+    {
+        OpenPopupDeferred(RectangleSettingsPopup, () =>
+        {
+            PenWidthPopup.IsOpen = false;
+            ColorPopup.IsOpen = false;
+            UpdateRectangleSettingsUi();
+        });
+    }
+
+    private void OpenPopupDeferred(Popup popup, Action prepare)
+    {
+        Dispatcher.BeginInvoke(new Action(() =>
+        {
+            prepare();
+            popup.IsOpen = false;
+            popup.IsOpen = true;
+        }), DispatcherPriority.Background);
+    }
+
+    private DrawingAttributes CreateRectangleFillAttributes()
+    {
+        Color fillColor = Color.FromArgb(
+            (byte)Math.Round(255.0 * NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent) / 100.0),
+            _currentPenColor.R,
+            _currentPenColor.G,
+            _currentPenColor.B);
+
+        return CreatePenAttributes(fillColor, _currentPenWidth);
     }
 
     private void DrawingCanvas_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -1898,8 +1974,23 @@ public partial class MainWindow : Window
     {
         CancelRectanglePreview();
 
-        _rectanglePreviewStroke = CreateRectangleStroke(startPoint, endPoint);
-        ExecuteWithoutStrokeHistory(() => DrawingCanvas.Strokes.Add(_rectanglePreviewStroke));
+        Stroke outlineStroke = CreateRectangleOutlineStroke(startPoint, endPoint);
+        _rectanglePreviewStroke = outlineStroke;
+        ExecuteWithoutStrokeHistory(() => DrawingCanvas.Strokes.Add(outlineStroke));
+
+        if (_isRectangleFilled)
+        {
+            List<Stroke> fillStrokes = CreateFilledRectangleStrokes(startPoint, endPoint);
+            _rectanglePreviewFillStrokes = fillStrokes;
+
+            ExecuteWithoutStrokeHistory(() =>
+            {
+                foreach (Stroke fillStroke in fillStrokes)
+                {
+                    DrawingCanvas.Strokes.Add(fillStroke);
+                }
+            });
+        }
     }
 
     private void CommitRectangle(Point startPoint, Point endPoint)
@@ -1911,8 +2002,34 @@ public partial class MainWindow : Window
             return;
         }
 
-        Stroke finalStroke = CreateRectangleStroke(startPoint, endPoint);
-        DrawingCanvas.Strokes.Add(finalStroke);
+        Stroke outlineStroke = CreateRectangleOutlineStroke(startPoint, endPoint);
+
+        if (!_isRectangleFilled)
+        {
+            DrawingCanvas.Strokes.Add(outlineStroke);
+            return;
+        }
+
+        List<Stroke> fillStrokes = CreateFilledRectangleStrokes(startPoint, endPoint);
+
+        ExecuteWithoutStrokeHistory(() =>
+        {
+            foreach (Stroke fillStroke in fillStrokes)
+            {
+                DrawingCanvas.Strokes.Add(fillStroke);
+            }
+
+            DrawingCanvas.Strokes.Add(outlineStroke);
+        });
+
+        var addedStrokes = new List<Stroke>(fillStrokes)
+        {
+            outlineStroke
+        };
+
+        PushHistory(new StrokeCollectionAction(
+            addedStrokes,
+            Array.Empty<Stroke>()));
     }
 
     private void CancelRectanglePreview()
@@ -1923,13 +2040,73 @@ public partial class MainWindow : Window
             ExecuteWithoutStrokeHistory(() => DrawingCanvas.Strokes.Remove(previewStroke));
             _rectanglePreviewStroke = null;
         }
+
+        if (_rectanglePreviewFillStrokes != null)
+        {
+            List<Stroke> previewFillStrokes = _rectanglePreviewFillStrokes;
+            ExecuteWithoutStrokeHistory(() =>
+            {
+                foreach (Stroke previewFillStroke in previewFillStrokes)
+                {
+                    DrawingCanvas.Strokes.Remove(previewFillStroke);
+                }
+            });
+
+            _rectanglePreviewFillStrokes = null;
+        }
     }
 
-    private Stroke CreateRectangleStroke(Point startPoint, Point endPoint)
+    private List<Stroke> CreateFilledRectangleStrokes(Point startPoint, Point endPoint)
     {
-        return _isRectangleFilled
-            ? CreateFilledRectangleStroke(startPoint, endPoint)
-            : CreateRectangleOutlineStroke(startPoint, endPoint);
+        double left = Math.Min(startPoint.X, endPoint.X);
+        double top = Math.Min(startPoint.Y, endPoint.Y);
+        double right = Math.Max(startPoint.X, endPoint.X);
+        double bottom = Math.Max(startPoint.Y, endPoint.Y);
+
+        double width = right - left;
+        double height = bottom - top;
+
+        if (width < 1.0 || height < 1.0)
+        {
+            return new List<Stroke>();
+        }
+
+        double step = Math.Max(1.0, _currentPenWidth * 0.6);
+        var strokes = new List<Stroke>();
+
+        for (double y = top; y <= bottom; y += step)
+        {
+            var stylusPoints = new StylusPointCollection
+            {
+                new StylusPoint(left, y),
+                new StylusPoint(right, y)
+            };
+
+            strokes.Add(new Stroke(stylusPoints)
+            {
+                DrawingAttributes = CreateRectangleFillAttributes()
+            });
+        }
+
+        double lastY = strokes.Count > 0
+            ? strokes[^1].StylusPoints[0].Y
+            : top;
+
+        if (bottom - lastY > 0.1)
+        {
+            var stylusPoints = new StylusPointCollection
+            {
+                new StylusPoint(left, bottom),
+                new StylusPoint(right, bottom)
+            };
+
+            strokes.Add(new Stroke(stylusPoints)
+            {
+                DrawingAttributes = CreateRectangleFillAttributes()
+            });
+        }
+
+        return strokes;
     }
 
     private Stroke CreateRectangleOutlineStroke(Point startPoint, Point endPoint)
@@ -1947,62 +2124,6 @@ public partial class MainWindow : Window
             new StylusPoint(left, bottom),
             new StylusPoint(left, top)
         };
-
-        return new Stroke(stylusPoints)
-        {
-            DrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth)
-        };
-    }
-
-    private Stroke CreateFilledRectangleStroke(Point startPoint, Point endPoint)
-    {
-        double left = Math.Min(startPoint.X, endPoint.X);
-        double top = Math.Min(startPoint.Y, endPoint.Y);
-        double right = Math.Max(startPoint.X, endPoint.X);
-        double bottom = Math.Max(startPoint.Y, endPoint.Y);
-
-        double width = right - left;
-        double height = bottom - top;
-
-        if (width < 1.0 || height < 1.0)
-        {
-            return CreateRectangleOutlineStroke(startPoint, endPoint);
-        }
-
-        double step = Math.Max(1.0, _currentPenWidth * 0.6);
-        var stylusPoints = new StylusPointCollection();
-        bool leftToRight = true;
-
-        for (double y = top; y <= bottom; y += step)
-        {
-            if (leftToRight)
-            {
-                stylusPoints.Add(new StylusPoint(left, y));
-                stylusPoints.Add(new StylusPoint(right, y));
-            }
-            else
-            {
-                stylusPoints.Add(new StylusPoint(right, y));
-                stylusPoints.Add(new StylusPoint(left, y));
-            }
-
-            leftToRight = !leftToRight;
-        }
-
-        double lastY = stylusPoints.Count > 0 ? stylusPoints[stylusPoints.Count - 1].Y : top;
-        if (bottom - lastY > 0.1)
-        {
-            if (leftToRight)
-            {
-                stylusPoints.Add(new StylusPoint(left, bottom));
-                stylusPoints.Add(new StylusPoint(right, bottom));
-            }
-            else
-            {
-                stylusPoints.Add(new StylusPoint(right, bottom));
-                stylusPoints.Add(new StylusPoint(left, bottom));
-            }
-        }
 
         return new Stroke(stylusPoints)
         {
@@ -2836,20 +2957,25 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (e.ClickCount >= 2)
-        {
-            _pendingPenButtonSingleClick = false;
-            _penButtonClickTimer.Stop();
-            PenWidthPopup.IsOpen = false;
-            e.Handled = true;
-            OpenCurrentPenWidthEditor();
-            return;
-        }
-
         _penButtonClickTimer.Stop();
         _pendingPenButtonSingleClick = true;
         e.Handled = true;
         _penButtonClickTimer.Start();
+    }
+
+    private void PenButton_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (_isClickThroughEnabled)
+        {
+            return;
+        }
+
+        _penButtonClickTimer.Stop();
+        _pendingPenButtonSingleClick = false;
+        e.Handled = true;
+
+        ActivatePenTool();
+        OpenPenWidthPresetPopup();
     }
 
     private void RectangleButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -2858,16 +2984,38 @@ public partial class MainWindow : Window
         {
             return;
         }
+    }
 
-        if (e.ClickCount < 2)
+    private void RectangleButton_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (_isClickThroughEnabled)
         {
             return;
         }
 
-        _isRectangleFilled = !_isRectangleFilled;
-        UpdateRectangleButtonToolTip();
-        ShowToastMessage(_isRectangleFilled ? "Rect塗りつぶし: ON" : "Rect塗りつぶし: OFF");
         e.Handled = true;
+
+        _currentTool = ToolMode.Rectangle;
+        DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
+        UpdateToolHighlight();
+
+        OpenRectangleSettingsPopup();
+    }
+
+    private void RectangleFillCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        _isRectangleFilled = RectangleFillCheckBox.IsChecked == true;
+        UpdateRectangleButtonToolTip();
+        UpdateRectangleSettingsUi();
+        SaveAppSettings();
+    }
+
+    private void RectangleOpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        _rectangleFillOpacityPercent = NormalizeRectangleFillOpacity((int)Math.Round(e.NewValue));
+        UpdateRectangleButtonToolTip();
+        UpdateRectangleSettingsUi();
+        SaveAppSettings();
     }
 
     private void RectangleButton_Click(object sender, RoutedEventArgs e)

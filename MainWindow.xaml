@@ -121,8 +121,9 @@
                 <Button x:Name="PenButton"
                         Style="{StaticResource ToolbarButtonStyle}"
                         Content="✎"
-                        ToolTip="Pen（選択済みでクリック: 線幅プリセット / ダブルクリック: 線幅設定）"
-                        PreviewMouseLeftButtonDown="PenButton_PreviewMouseLeftButtonDown"/>
+                        ToolTip="Pen（右クリック: 線幅設定）"
+                        PreviewMouseLeftButtonDown="PenButton_PreviewMouseLeftButtonDown"
+                        PreviewMouseRightButtonUp="PenButton_PreviewMouseRightButtonUp"/>
 
                 <Popup x:Name="PenWidthPopup"
                        PlacementTarget="{Binding ElementName=PenButton}"
@@ -149,9 +150,49 @@
                 <Button x:Name="RectangleButton"
                         Style="{StaticResource ToolbarButtonStyle}"
                         Content="▭"
-                        ToolTip="Rectangle（ダブルクリックで塗りつぶし切替）"
+                        ToolTip="Rectangle（右クリック: 設定）"
                         PreviewMouseLeftButtonDown="RectangleButton_PreviewMouseLeftButtonDown"
+                        PreviewMouseRightButtonUp="RectangleButton_PreviewMouseRightButtonUp"
                         Click="RectangleButton_Click"/>
+
+                <Popup x:Name="RectangleSettingsPopup"
+                       PlacementTarget="{Binding ElementName=RectangleButton}"
+                       Placement="Left"
+                       StaysOpen="False"
+                       AllowsTransparency="True">
+                    <Border Background="#EE1E1E1E"
+                            Padding="10"
+                            CornerRadius="10"
+                            BorderBrush="#FF555555"
+                            BorderThickness="1">
+                        <StackPanel Width="180">
+                            <TextBlock Text="Rectangle"
+                                       Foreground="White"
+                                       Margin="0,0,0,8"
+                                       FontWeight="Bold"/>
+
+                            <CheckBox x:Name="RectangleFillCheckBox"
+                                      Content="塗りつぶし"
+                                      Foreground="White"
+                                      Margin="0,0,0,10"
+                                      Checked="RectangleFillCheckBox_Changed"
+                                      Unchecked="RectangleFillCheckBox_Changed"/>
+
+                            <TextBlock x:Name="RectangleOpacityLabel"
+                                       Text="透明度: 35%"
+                                       Foreground="White"
+                                       Margin="0,0,0,4"/>
+
+                            <Slider x:Name="RectangleOpacitySlider"
+                                    Minimum="0"
+                                    Maximum="100"
+                                    Value="35"
+                                    TickFrequency="5"
+                                    IsSnapToTickEnabled="False"
+                                    ValueChanged="RectangleOpacitySlider_ValueChanged"/>
+                        </StackPanel>
+                    </Border>
+                </Popup>
 
                 <Button x:Name="TextButton"
                         Style="{StaticResource ToolbarButtonStyle}"
