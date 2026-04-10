@@ -58,6 +58,7 @@ public partial class MainWindow : Window
     private bool _isRectangleDrawing;
     private Point _rectangleStartPoint;
     private Stroke? _rectanglePreviewStroke;
+    private bool _isRectangleFilled;
 
     private TextBox? _activeTextBox;
     private Point _activeTextStartPoint;
@@ -345,6 +346,7 @@ public partial class MainWindow : Window
         InitializeButtonStyles();
 
         LoadAppSettings();
+        UpdateRectangleButtonToolTip();
         _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
 
         BuildPresetColorButtons();
@@ -934,6 +936,7 @@ public partial class MainWindow : Window
                 _currentTextFontSize = DefaultTextFontSize;
                 _currentTextFontStyle = FontStyles.Normal;
                 _currentTextFontWeight = FontWeights.Normal;
+                _isRectangleFilled = false;
 
                 SaveAppSettings();
                 return;
@@ -953,6 +956,7 @@ public partial class MainWindow : Window
                 _currentTextFontSize = DefaultTextFontSize;
                 _currentTextFontStyle = FontStyles.Normal;
                 _currentTextFontWeight = FontWeights.Normal;
+                _isRectangleFilled = false;
                 SaveAppSettings();
                 return;
             }
@@ -966,6 +970,7 @@ public partial class MainWindow : Window
             _currentTextFontSize = NormalizeTextFontSize(settings.TextFontSize);
             _currentTextFontStyle = settings.TextItalic ? FontStyles.Italic : FontStyles.Normal;
             _currentTextFontWeight = settings.TextBold ? FontWeights.Bold : FontWeights.Normal;
+            _isRectangleFilled = false;
 
             if (!string.IsNullOrWhiteSpace(settings.CurrentColor))
             {
@@ -993,6 +998,7 @@ public partial class MainWindow : Window
             _currentTextFontSize = DefaultTextFontSize;
             _currentTextFontStyle = FontStyles.Normal;
             _currentTextFontWeight = FontWeights.Normal;
+            _isRectangleFilled = false;
         }
     }
 
@@ -1562,6 +1568,13 @@ public partial class MainWindow : Window
         };
     }
 
+    private void UpdateRectangleButtonToolTip()
+    {
+        RectangleButton.ToolTip = _isRectangleFilled
+            ? "Rectangle（塗りつぶしON / ダブルクリックで切替）"
+            : "Rectangle（塗りつぶしOFF / ダブルクリックで切替）";
+    }
+
     private void DrawingCanvas_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (_isClickThroughEnabled)
@@ -1914,6 +1927,13 @@ public partial class MainWindow : Window
 
     private Stroke CreateRectangleStroke(Point startPoint, Point endPoint)
     {
+        return _isRectangleFilled
+            ? CreateFilledRectangleStroke(startPoint, endPoint)
+            : CreateRectangleOutlineStroke(startPoint, endPoint);
+    }
+
+    private Stroke CreateRectangleOutlineStroke(Point startPoint, Point endPoint)
+    {
         double left = Math.Min(startPoint.X, endPoint.X);
         double top = Math.Min(startPoint.Y, endPoint.Y);
         double right = Math.Max(startPoint.X, endPoint.X);
@@ -1928,12 +1948,66 @@ public partial class MainWindow : Window
             new StylusPoint(left, top)
         };
 
-        var stroke = new Stroke(stylusPoints)
+        return new Stroke(stylusPoints)
         {
             DrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth)
         };
+    }
 
-        return stroke;
+    private Stroke CreateFilledRectangleStroke(Point startPoint, Point endPoint)
+    {
+        double left = Math.Min(startPoint.X, endPoint.X);
+        double top = Math.Min(startPoint.Y, endPoint.Y);
+        double right = Math.Max(startPoint.X, endPoint.X);
+        double bottom = Math.Max(startPoint.Y, endPoint.Y);
+
+        double width = right - left;
+        double height = bottom - top;
+
+        if (width < 1.0 || height < 1.0)
+        {
+            return CreateRectangleOutlineStroke(startPoint, endPoint);
+        }
+
+        double step = Math.Max(1.0, _currentPenWidth * 0.6);
+        var stylusPoints = new StylusPointCollection();
+        bool leftToRight = true;
+
+        for (double y = top; y <= bottom; y += step)
+        {
+            if (leftToRight)
+            {
+                stylusPoints.Add(new StylusPoint(left, y));
+                stylusPoints.Add(new StylusPoint(right, y));
+            }
+            else
+            {
+                stylusPoints.Add(new StylusPoint(right, y));
+                stylusPoints.Add(new StylusPoint(left, y));
+            }
+
+            leftToRight = !leftToRight;
+        }
+
+        double lastY = stylusPoints.Count > 0 ? stylusPoints[stylusPoints.Count - 1].Y : top;
+        if (bottom - lastY > 0.1)
+        {
+            if (leftToRight)
+            {
+                stylusPoints.Add(new StylusPoint(left, bottom));
+                stylusPoints.Add(new StylusPoint(right, bottom));
+            }
+            else
+            {
+                stylusPoints.Add(new StylusPoint(right, bottom));
+                stylusPoints.Add(new StylusPoint(left, bottom));
+            }
+        }
+
+        return new Stroke(stylusPoints)
+        {
+            DrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth)
+        };
     }
 
     private void BeginTextInput(Point startPoint)
@@ -2776,6 +2850,24 @@ public partial class MainWindow : Window
         _pendingPenButtonSingleClick = true;
         e.Handled = true;
         _penButtonClickTimer.Start();
+    }
+
+    private void RectangleButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (_isClickThroughEnabled)
+        {
+            return;
+        }
+
+        if (e.ClickCount < 2)
+        {
+            return;
+        }
+
+        _isRectangleFilled = !_isRectangleFilled;
+        UpdateRectangleButtonToolTip();
+        ShowToastMessage(_isRectangleFilled ? "Rect塗りつぶし: ON" : "Rect塗りつぶし: OFF");
+        e.Handled = true;
     }
 
     private void RectangleButton_Click(object sender, RoutedEventArgs e)

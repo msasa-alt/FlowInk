@@ -149,7 +149,8 @@
                 <Button x:Name="RectangleButton"
                         Style="{StaticResource ToolbarButtonStyle}"
                         Content="▭"
-                        ToolTip="Rectangle"
+                        ToolTip="Rectangle（ダブルクリックで塗りつぶし切替）"
+                        PreviewMouseLeftButtonDown="RectangleButton_PreviewMouseLeftButtonDown"
                         Click="RectangleButton_Click"/>
 
                 <Button x:Name="TextButton"
