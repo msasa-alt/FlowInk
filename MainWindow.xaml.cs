@@ -188,10 +188,12 @@ public partial class MainWindow : Window
     private sealed class TextAddAction : IUndoableAction
     {
         private readonly Border _element;
+        private readonly int _index;
 
-        public TextAddAction(Border element)
+        public TextAddAction(Border element, int index)
         {
             _element = element;
+            _index = index;
         }
 
         public void Undo(MainWindow window)
@@ -201,22 +203,24 @@ public partial class MainWindow : Window
 
         public void Redo(MainWindow window)
         {
-            window.AddCommittedTextElement(_element);
+            window.AddCommittedTextElement(_element, _index);
         }
     }
 
     private sealed class TextRemoveAction : IUndoableAction
     {
         private readonly Border _element;
+        private readonly int _index;
 
-        public TextRemoveAction(Border element)
+        public TextRemoveAction(Border element, int index)
         {
             _element = element;
+            _index = index;
         }
 
         public void Undo(MainWindow window)
         {
-            window.AddCommittedTextElement(_element);
+            window.AddCommittedTextElement(_element, _index);
         }
 
         public void Redo(MainWindow window)
@@ -228,24 +232,28 @@ public partial class MainWindow : Window
     private sealed class TextReplaceAction : IUndoableAction
     {
         private readonly Border _before;
+        private readonly int _beforeIndex;
         private readonly Border _after;
+        private readonly int _afterIndex;
 
-        public TextReplaceAction(Border before, Border after)
+        public TextReplaceAction(Border before, int beforeIndex, Border after, int afterIndex)
         {
             _before = before;
+            _beforeIndex = beforeIndex;
             _after = after;
+            _afterIndex = afterIndex;
         }
 
         public void Undo(MainWindow window)
         {
             window.RemoveCommittedTextElement(_after);
-            window.AddCommittedTextElement(_before);
+            window.AddCommittedTextElement(_before, _beforeIndex);
         }
 
         public void Redo(MainWindow window)
         {
             window.RemoveCommittedTextElement(_before);
-            window.AddCommittedTextElement(_after);
+            window.AddCommittedTextElement(_after, _afterIndex);
         }
     }
 
@@ -273,15 +281,27 @@ public partial class MainWindow : Window
         }
     }
 
+    private sealed class ClearTextEntry
+    {
+        public ClearTextEntry(Border element, int index)
+        {
+            Element = element;
+            Index = index;
+        }
+
+        public Border Element { get; }
+        public int Index { get; }
+    }
+
     private sealed class ClearAction : IUndoableAction
     {
         private readonly List<Stroke> _removedStrokes;
-        private readonly List<Border> _removedTextElements;
+        private readonly List<ClearTextEntry> _removedTextEntries;
 
-        public ClearAction(IEnumerable<Stroke> removedStrokes, IEnumerable<Border> removedTextElements)
+        public ClearAction(IEnumerable<Stroke> removedStrokes, IEnumerable<ClearTextEntry> removedTextEntries)
         {
             _removedStrokes = new List<Stroke>(removedStrokes);
-            _removedTextElements = new List<Border>(removedTextElements);
+            _removedTextEntries = new List<ClearTextEntry>(removedTextEntries);
         }
 
         public void Undo(MainWindow window)
@@ -294,9 +314,9 @@ public partial class MainWindow : Window
                 }
             });
 
-            foreach (Border element in _removedTextElements)
+            foreach (ClearTextEntry entry in _removedTextEntries)
             {
-                window.AddCommittedTextElement(element);
+                window.AddCommittedTextElement(entry.Element, entry.Index);
             }
         }
 
@@ -310,9 +330,9 @@ public partial class MainWindow : Window
                 }
             });
 
-            foreach (Border element in _removedTextElements)
+            foreach (ClearTextEntry entry in _removedTextEntries)
             {
-                window.RemoveCommittedTextElement(element);
+                window.RemoveCommittedTextElement(entry.Element);
             }
         }
     }
@@ -2310,12 +2330,13 @@ public partial class MainWindow : Window
         DrawingCanvas.Children.Remove(textBox);
 
         Border? originalElement = _editingTextOriginalElement;
+        int originalIndex = originalElement != null ? GetStoredEditingOriginalIndex(originalElement) : -1;
 
         if (text.Length == 0)
         {
             if (originalElement != null)
             {
-                PushHistory(new TextRemoveAction(originalElement));
+                PushHistory(new TextRemoveAction(originalElement, originalIndex));
             }
 
             _editingTextOriginalElement = null;
@@ -2337,15 +2358,16 @@ public partial class MainWindow : Window
             commitFontStyle,
             commitFontWeight);
 
-        AddCommittedTextElement(committed);
+        int committedIndex = originalIndex >= 0 ? originalIndex : _textElements.Count;
+        AddCommittedTextElement(committed, committedIndex);
 
         if (originalElement != null)
         {
-            PushHistory(new TextReplaceAction(originalElement, committed));
+            PushHistory(new TextReplaceAction(originalElement, originalIndex, committed, committedIndex));
         }
         else
         {
-            PushHistory(new TextAddAction(committed));
+            PushHistory(new TextAddAction(committed, committedIndex));
         }
 
         _editingTextOriginalElement = null;
@@ -2356,6 +2378,29 @@ public partial class MainWindow : Window
         _editingTextOriginalFontWeight = null;
         _currentInteractionState = InteractionState.None;
     }
+
+    private int GetStoredEditingOriginalIndex(Border originalElement)
+    {
+        if (!_editingTextOriginalStoredIndex.HasValue)
+        {
+            return _textElements.Count;
+        }
+
+        int index = _editingTextOriginalStoredIndex.Value;
+        if (index < 0)
+        {
+            return 0;
+        }
+
+        if (index > _textElements.Count)
+        {
+            return _textElements.Count;
+        }
+
+        return index;
+    }
+
+    private int? _editingTextOriginalStoredIndex;
 
     private void CancelActiveTextInput()
     {
@@ -2375,10 +2420,12 @@ public partial class MainWindow : Window
 
         if (_editingTextOriginalElement != null)
         {
-            AddCommittedTextElement(_editingTextOriginalElement);
+            int restoreIndex = GetStoredEditingOriginalIndex(_editingTextOriginalElement);
+            AddCommittedTextElement(_editingTextOriginalElement, restoreIndex);
             _editingTextOriginalElement = null;
         }
 
+        _editingTextOriginalStoredIndex = null;
         _editingTextOriginalColor = null;
         _editingTextOriginalFontFamilyName = null;
         _editingTextOriginalFontSize = null;
@@ -2500,7 +2547,6 @@ public partial class MainWindow : Window
         host.CaptureMouse();
         e.Handled = true;
     }
-
 
     private void TextElement_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {
@@ -2665,6 +2711,7 @@ public partial class MainWindow : Window
         double top = InkCanvas.GetTop(host);
 
         _editingTextOriginalElement = host;
+        _editingTextOriginalStoredIndex = GetCommittedTextElementIndex(host);
         _editingTextOriginalColor = color;
         _editingTextOriginalFontFamilyName = fontFamilyName;
         _editingTextOriginalFontSize = fontSize;
@@ -2781,9 +2828,11 @@ public partial class MainWindow : Window
         }
 
         Border target = _selectedTextElement;
+        int index = GetCommittedTextElementIndex(target);
+
         ClearSelectedTextElement();
         RemoveCommittedTextElement(target);
-        PushHistory(new TextRemoveAction(target));
+        PushHistory(new TextRemoveAction(target, index));
         return true;
     }
 
@@ -2810,7 +2859,18 @@ public partial class MainWindow : Window
         host.Effect = null;
     }
 
+    private int GetCommittedTextElementIndex(Border host)
+    {
+        int index = _textElements.IndexOf(host);
+        return index >= 0 ? index : _textElements.Count;
+    }
+
     private void AddCommittedTextElement(Border host)
+    {
+        AddCommittedTextElement(host, _textElements.Count);
+    }
+
+    private void AddCommittedTextElement(Border host, int index)
     {
         if (_textElements.Contains(host))
         {
@@ -2818,8 +2878,50 @@ public partial class MainWindow : Window
         }
 
         UpdateSelectedTextVisual(host, false);
-        DrawingCanvas.Children.Add(host);
-        _textElements.Add(host);
+
+        int normalizedIndex = index;
+        if (normalizedIndex < 0)
+        {
+            normalizedIndex = 0;
+        }
+
+        if (normalizedIndex > _textElements.Count)
+        {
+            normalizedIndex = _textElements.Count;
+        }
+
+        int childIndex = GetTextCanvasInsertIndex(normalizedIndex);
+        DrawingCanvas.Children.Insert(childIndex, host);
+        _textElements.Insert(normalizedIndex, host);
+    }
+
+    private int GetTextCanvasInsertIndex(int textIndex)
+    {
+        int normalized = textIndex;
+        if (normalized < 0)
+        {
+            normalized = 0;
+        }
+
+        if (normalized > _textElements.Count)
+        {
+            normalized = _textElements.Count;
+        }
+
+        if (normalized == _textElements.Count)
+        {
+            return DrawingCanvas.Children.Count;
+        }
+
+        Border nextTextElement = _textElements[normalized];
+        int childIndex = DrawingCanvas.Children.IndexOf(nextTextElement);
+
+        if (childIndex < 0)
+        {
+            return DrawingCanvas.Children.Count;
+        }
+
+        return childIndex;
     }
 
     private void RemoveCommittedTextElement(Border host)
@@ -2838,9 +2940,16 @@ public partial class MainWindow : Window
         _textElements.Remove(host);
     }
 
-    private List<Border> GetCommittedTextElementsSnapshot()
+    private List<ClearTextEntry> GetCommittedTextEntriesSnapshot()
     {
-        return new List<Border>(_textElements);
+        var result = new List<ClearTextEntry>(_textElements.Count);
+
+        for (int i = 0; i < _textElements.Count; i++)
+        {
+            result.Add(new ClearTextEntry(_textElements[i], i));
+        }
+
+        return result;
     }
 
     private void RemoveCommittedTextElements()
@@ -2848,7 +2957,7 @@ public partial class MainWindow : Window
         ClearSelectedTextElement();
         EndTextElementDrag();
 
-        foreach (Border element in GetCommittedTextElementsSnapshot())
+        foreach (Border element in new List<Border>(_textElements))
         {
             RemoveCommittedTextElement(element);
         }
@@ -3186,9 +3295,9 @@ public partial class MainWindow : Window
         ClearSelectedTextElement();
 
         List<Stroke> removedStrokes = ToStrokeList(DrawingCanvas.Strokes);
-        List<Border> removedTextElements = GetCommittedTextElementsSnapshot();
+        List<ClearTextEntry> removedTextEntries = GetCommittedTextEntriesSnapshot();
 
-        if (removedStrokes.Count == 0 && removedTextElements.Count == 0)
+        if (removedStrokes.Count == 0 && removedTextEntries.Count == 0)
         {
             return;
         }
@@ -3196,7 +3305,7 @@ public partial class MainWindow : Window
         ExecuteWithoutStrokeHistory(() => DrawingCanvas.Strokes.Clear());
         RemoveCommittedTextElements();
 
-        PushHistory(new ClearAction(removedStrokes, removedTextElements));
+        PushHistory(new ClearAction(removedStrokes, removedTextEntries));
     }
 
     private void ClickThroughButton_Click(object sender, RoutedEventArgs e)
