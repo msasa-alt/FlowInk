@@ -1352,10 +1352,43 @@ public partial class MainWindow : Window
 
     private Button CreatePenWidthPresetButton(int index, double width)
     {
+        var previewLine = new Border
+        {
+            Width = 34,
+            Height = Math.Max(2.0, width),
+            Background = Brushes.White,
+            CornerRadius = new CornerRadius(Math.Max(1.0, width / 2.0)),
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+
+        var widthText = new TextBlock
+        {
+            Text = FormatPenWidthText(width),
+            Foreground = Brushes.White,
+            FontSize = 11,
+            Margin = new Thickness(8, 0, 0, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Right
+        };
+
+        var contentGrid = new Grid
+        {
+            Margin = new Thickness(8, 0, 8, 0)
+        };
+        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+        Grid.SetColumn(previewLine, 0);
+        Grid.SetColumn(widthText, 2);
+        contentGrid.Children.Add(previewLine);
+        contentGrid.Children.Add(widthText);
+
         var button = new Button
         {
             Style = (Style)FindResource("PenWidthPresetButtonStyle"),
-            Content = FormatPenWidthText(width),
+            Content = contentGrid,
             Tag = index,
             ToolTip = $"{FormatPenWidthText(width)}  (クリック: 選択 / ダブルクリック: 編集)"
         };
