@@ -114,8 +114,15 @@
                 Margin="8"
                 Padding="4"
                 CornerRadius="12"
-                Background="#881E1E1E">
+                Background="#881E1E1E"
+                PreviewMouseLeftButtonDown="ToolbarPanel_PreviewMouseLeftButtonDown"
+                PreviewMouseMove="ToolbarPanel_PreviewMouseMove"
+                PreviewMouseLeftButtonUp="ToolbarPanel_PreviewMouseLeftButtonUp"
+                LostMouseCapture="ToolbarPanel_LostMouseCapture">
             <StackPanel Orientation="Vertical">
+                <Border Height="10"
+                        Background="#01000000"/>
+
                 <Button x:Name="PenButton"
                         Style="{StaticResource ToolbarButtonStyle}"
                         Content="✎"
@@ -274,6 +281,9 @@
                         Content="×"
                         ToolTip="Exit"
                         Click="ExitButton_Click"/>
+
+                <Border Height="10"
+                        Background="#01000000"/>
             </StackPanel>
         </Border>
 

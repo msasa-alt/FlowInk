@@ -81,6 +81,13 @@ public partial class MainWindow : Window
     private Point _textDragStartMousePoint;
     private Point _textDragStartElementPoint;
 
+    private bool _isToolbarDragging;
+    private Point _toolbarDragStartMousePoint;
+    private Point _toolbarDragStartPanelPoint;
+    private bool _hasPendingToolbarPosition;
+    private double _toolbarLeft;
+    private double _toolbarTop;
+
     private Border? _editingTextOriginalElement;
     private int? _editingTextOriginalStoredIndex;
     private Color? _editingTextOriginalColor;
@@ -115,6 +122,8 @@ public partial class MainWindow : Window
     private const uint VK_T = 0x54;
 
     private const string AppSettingsFileName = "app-settings.json";
+
+    private const double ToolbarViewportMargin = 0.0;
 
     private enum ToolMode
     {
@@ -358,6 +367,8 @@ public partial class MainWindow : Window
         public bool TextItalic { get; set; }
         public bool RectangleFillEnabled { get; set; }
         public int RectangleFillOpacity { get; set; } = 35;
+        public double? ToolbarLeft { get; set; }
+        public double? ToolbarTop { get; set; }
     }
 
     public MainWindow()
@@ -405,10 +416,12 @@ public partial class MainWindow : Window
 
         Loaded += MainWindow_Loaded;
         Closed += MainWindow_Closed;
+        SizeChanged += MainWindow_SizeChanged;
     }
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
+        ApplyInitialToolbarPosition();
         SetClickThrough(false);
 
         IntPtr hwnd = new WindowInteropHelper(this).Handle;
@@ -436,10 +449,21 @@ public partial class MainWindow : Window
         }
     }
 
+    private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (!IsLoaded)
+        {
+            return;
+        }
+
+        ClampToolbarPositionToViewport(saveSettings: false);
+    }
+
     private void MainWindow_Closed(object? sender, EventArgs e)
     {
         _toastTimer.Stop();
         _colorButtonClickTimer.Stop();
+        EndToolbarDrag(saveSettings: false);
         _notifyIcon.Visible = false;
         _notifyIcon.Dispose();
 
@@ -756,6 +780,184 @@ public partial class MainWindow : Window
         return new List<Stroke>(strokes);
     }
 
+
+    private void ApplyInitialToolbarPosition()
+    {
+        if (_hasPendingToolbarPosition)
+        {
+            ClampToolbarPositionToViewport(saveSettings: false);
+            return;
+        }
+
+        PositionToolbarAtDefault(saveSettings: false);
+    }
+
+    private void PositionToolbarAtDefault(bool saveSettings)
+    {
+        if (!EnsureToolbarReadyForPositioning())
+        {
+            return;
+        }
+
+        double defaultLeft = Math.Max(ToolbarViewportMargin, ActualWidth - ToolbarPanel.ActualWidth - ToolbarViewportMargin);
+        double defaultTop = Math.Max(ToolbarViewportMargin, (ActualHeight - ToolbarPanel.ActualHeight) / 2.0);
+
+        SetToolbarPosition(defaultLeft, defaultTop, saveSettings);
+    }
+
+    private bool EnsureToolbarReadyForPositioning()
+    {
+        if (ToolbarPanel == null)
+        {
+            return false;
+        }
+
+        ToolbarPanel.HorizontalAlignment = HorizontalAlignment.Left;
+        ToolbarPanel.VerticalAlignment = VerticalAlignment.Top;
+
+        if (ToolbarPanel.ActualWidth <= 0 || ToolbarPanel.ActualHeight <= 0 || ActualWidth <= 0 || ActualHeight <= 0)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void ClampToolbarPositionToViewport(bool saveSettings)
+    {
+        if (!EnsureToolbarReadyForPositioning())
+        {
+            return;
+        }
+
+        double maxLeft = Math.Max(ToolbarViewportMargin, ActualWidth - ToolbarPanel.ActualWidth - ToolbarViewportMargin);
+        double maxTop = Math.Max(ToolbarViewportMargin, ActualHeight - ToolbarPanel.ActualHeight - ToolbarViewportMargin);
+
+        double clampedLeft = Math.Min(Math.Max(_toolbarLeft, ToolbarViewportMargin), maxLeft);
+        double clampedTop = Math.Min(Math.Max(_toolbarTop, ToolbarViewportMargin), maxTop);
+
+        SetToolbarPosition(clampedLeft, clampedTop, saveSettings);
+    }
+
+    private void SetToolbarPosition(double left, double top, bool saveSettings)
+    {
+        if (ToolbarPanel == null)
+        {
+            return;
+        }
+
+        _toolbarLeft = left;
+        _toolbarTop = top;
+        _hasPendingToolbarPosition = true;
+
+        ToolbarPanel.Margin = new Thickness(left, top, 0, 0);
+
+        if (saveSettings)
+        {
+            SaveAppSettings();
+        }
+    }
+
+    private void ToolbarPanel_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (_isClickThroughEnabled)
+        {
+            return;
+        }
+
+        if (!IsToolbarDragHandleHit(e.OriginalSource))
+        {
+            return;
+        }
+
+        _isToolbarDragging = true;
+        _toolbarDragStartMousePoint = e.GetPosition(this);
+        _toolbarDragStartPanelPoint = new Point(_toolbarLeft, _toolbarTop);
+
+        ToolbarPanel.CaptureMouse();
+        e.Handled = true;
+    }
+
+    private void ToolbarPanel_PreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        if (!_isToolbarDragging)
+        {
+            return;
+        }
+
+        Point currentPoint = e.GetPosition(this);
+        Vector delta = currentPoint - _toolbarDragStartMousePoint;
+
+        double nextLeft = _toolbarDragStartPanelPoint.X + delta.X;
+        double nextTop = _toolbarDragStartPanelPoint.Y + delta.Y;
+
+        if (!EnsureToolbarReadyForPositioning())
+        {
+            return;
+        }
+
+        double maxLeft = Math.Max(ToolbarViewportMargin, ActualWidth - ToolbarPanel.ActualWidth - ToolbarViewportMargin);
+        double maxTop = Math.Max(ToolbarViewportMargin, ActualHeight - ToolbarPanel.ActualHeight - ToolbarViewportMargin);
+
+        nextLeft = Math.Min(Math.Max(nextLeft, ToolbarViewportMargin), maxLeft);
+        nextTop = Math.Min(Math.Max(nextTop, ToolbarViewportMargin), maxTop);
+
+        SetToolbarPosition(nextLeft, nextTop, saveSettings: false);
+        e.Handled = true;
+    }
+
+    private void ToolbarPanel_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (!_isToolbarDragging)
+        {
+            return;
+        }
+
+        EndToolbarDrag(saveSettings: true);
+        e.Handled = true;
+    }
+
+    private void ToolbarPanel_LostMouseCapture(object sender, MouseEventArgs e)
+    {
+        if (_isToolbarDragging)
+        {
+            EndToolbarDrag(saveSettings: true);
+        }
+    }
+
+    private void EndToolbarDrag(bool saveSettings)
+    {
+        if (ToolbarPanel.IsMouseCaptured)
+        {
+            ToolbarPanel.ReleaseMouseCapture();
+        }
+
+        _isToolbarDragging = false;
+        ClampToolbarPositionToViewport(saveSettings);
+    }
+
+    private static bool IsToolbarDragHandleHit(object originalSource)
+    {
+        DependencyObject? current = originalSource as DependencyObject;
+
+        while (current != null)
+        {
+            if (current is Button || current is Popup || current is ContextMenu || current is MenuItem || current is Slider || current is CheckBox)
+            {
+                return false;
+            }
+
+            if (current is Border border && string.Equals(border.Name, "ToolbarPanel", StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            current = VisualTreeHelper.GetParent(current);
+        }
+
+        return false;
+    }
+
     private void InitializeNotifyIcon()
     {
         _trayEnableClickThroughMenuItem = new Forms.ToolStripMenuItem("描画OFFにする");
@@ -958,6 +1160,7 @@ public partial class MainWindow : Window
                 _currentTextFontWeight = FontWeights.Normal;
                 _isRectangleFilled = false;
                 _rectangleFillOpacityPercent = 35;
+                _hasPendingToolbarPosition = false;
 
                 SaveAppSettings();
                 return;
@@ -979,6 +1182,7 @@ public partial class MainWindow : Window
                 _currentTextFontWeight = FontWeights.Normal;
                 _isRectangleFilled = false;
                 _rectangleFillOpacityPercent = 35;
+                _hasPendingToolbarPosition = false;
                 SaveAppSettings();
                 return;
             }
@@ -994,6 +1198,12 @@ public partial class MainWindow : Window
             _currentTextFontWeight = settings.TextBold ? FontWeights.Bold : FontWeights.Normal;
             _isRectangleFilled = settings.RectangleFillEnabled;
             _rectangleFillOpacityPercent = NormalizeRectangleFillOpacity(settings.RectangleFillOpacity);
+            _hasPendingToolbarPosition = settings.ToolbarLeft.HasValue && settings.ToolbarTop.HasValue;
+            if (_hasPendingToolbarPosition)
+            {
+                _toolbarLeft = settings.ToolbarLeft!.Value;
+                _toolbarTop = settings.ToolbarTop!.Value;
+            }
 
             if (!string.IsNullOrWhiteSpace(settings.CurrentColor))
             {
@@ -1023,6 +1233,7 @@ public partial class MainWindow : Window
             _currentTextFontWeight = FontWeights.Normal;
             _isRectangleFilled = false;
             _rectangleFillOpacityPercent = 35;
+            _hasPendingToolbarPosition = false;
         }
     }
 
@@ -1045,7 +1256,9 @@ public partial class MainWindow : Window
             TextBold = _currentTextFontWeight == FontWeights.Bold,
             TextItalic = _currentTextFontStyle == FontStyles.Italic,
             RectangleFillEnabled = _isRectangleFilled,
-            RectangleFillOpacity = NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent)
+            RectangleFillOpacity = NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent),
+            ToolbarLeft = _hasPendingToolbarPosition ? _toolbarLeft : null,
+            ToolbarTop = _hasPendingToolbarPosition ? _toolbarTop : null
         };
 
         string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions
