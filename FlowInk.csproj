@@ -9,7 +9,21 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<AssemblyName>FlowInk</AssemblyName>
 		<RootNamespace>FlowInk</RootNamespace>
+		<ApplicationIcon>Assets\FlowInk.ico</ApplicationIcon>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove=".gitattributes" />
+	  <None Remove="Assets\FlowInk.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Assets\FlowInk.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include=".gitattributes" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<None Update="preset-colors.json">
