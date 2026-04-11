@@ -60,6 +60,10 @@ public partial class MainWindow : Window
     private Point _rectangleStartPoint;
     private Stroke? _rectanglePreviewStroke;
     private List<Stroke>? _rectanglePreviewFillStrokes;
+    private bool _isCircleDrawing;
+    private Point _circleStartPoint;
+    private Stroke? _circlePreviewStroke;
+    private List<Stroke>? _circlePreviewFillStrokes;
     private bool _isRectangleFilled;
     private int _rectangleFillOpacityPercent = 35;
 
@@ -129,6 +133,7 @@ public partial class MainWindow : Window
     {
         Pen,
         Rectangle,
+        Circle,
         Text,
         Eraser
     }
@@ -140,6 +145,7 @@ public partial class MainWindow : Window
         DrawingLine,
         DrawingArrow,
         DrawingRect,
+        DrawingCircle,
         Erasing,
         EditingText,
         MovingText
@@ -383,7 +389,7 @@ public partial class MainWindow : Window
         InitializeButtonStyles();
 
         LoadAppSettings();
-        UpdateRectangleButtonToolTip();
+        UpdateShapeButtonToolTips();
         UpdateRectangleSettingsUi();
         _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
 
@@ -691,6 +697,10 @@ public partial class MainWindow : Window
                 CancelRectangleInteraction();
                 break;
 
+            case InteractionState.DrawingCircle:
+                CancelCircleInteraction();
+                break;
+
             case InteractionState.EditingText:
                 CancelTextEditingInteraction();
                 break;
@@ -728,6 +738,17 @@ public partial class MainWindow : Window
     {
         CancelRectanglePreview();
         _isRectangleDrawing = false;
+
+        if (DrawingCanvas.IsMouseCaptured)
+        {
+            DrawingCanvas.ReleaseMouseCapture();
+        }
+    }
+
+    private void CancelCircleInteraction()
+    {
+        CancelCirclePreview();
+        _isCircleDrawing = false;
 
         if (DrawingCanvas.IsMouseCaptured)
         {
@@ -1126,7 +1147,7 @@ public partial class MainWindow : Window
     {
         foreach (var button in new[]
                  {
-                     PenButton, RectangleButton, TextButton, EraserButton, ColorButton,
+                     PenButton, RectangleButton, CircleButton, TextButton, EraserButton, ColorButton,
                      ClearButton, ClickThroughButton, ExitButton
                  })
         {
@@ -1862,13 +1883,18 @@ public partial class MainWindow : Window
         };
     }
 
-    private void UpdateRectangleButtonToolTip()
+    private void UpdateShapeButtonToolTips()
     {
-        string fillText = _isRectangleFilled
+        string rectangleText = _isRectangleFilled
             ? $"Rectangle（塗りつぶしON {NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent)}% / 右クリックで設定）"
             : "Rectangle（塗りつぶしOFF / 右クリックで設定）";
 
-        RectangleButton.ToolTip = fillText;
+        string circleText = _isRectangleFilled
+            ? $"Circle（塗りつぶしON {NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent)}% / 右クリックで設定）"
+            : "Circle（塗りつぶしOFF / 右クリックで設定）";
+
+        RectangleButton.ToolTip = rectangleText;
+        CircleButton.ToolTip = circleText;
     }
 
     private void UpdateRectangleSettingsUi()
@@ -1891,10 +1917,11 @@ public partial class MainWindow : Window
         }
     }
 
-    private void OpenRectangleSettingsPopup()
+    private void OpenShapeSettingsPopup(Button placementTarget)
     {
         OpenPopupDeferred(RectangleSettingsPopup, () =>
         {
+            RectangleSettingsPopup.PlacementTarget = placementTarget;
             PenWidthPopup.IsOpen = false;
             ColorPopup.IsOpen = false;
             UpdateRectangleSettingsUi();
@@ -1969,6 +1996,21 @@ public partial class MainWindow : Window
             return;
         }
 
+        if (_currentTool == ToolMode.Circle)
+        {
+            CommitActiveTextInput();
+
+            _isCircleDrawing = true;
+            _currentInteractionState = InteractionState.DrawingCircle;
+            _circleStartPoint = e.GetPosition(DrawingCanvas);
+
+            CancelCirclePreview();
+
+            DrawingCanvas.CaptureMouse();
+            e.Handled = true;
+            return;
+        }
+
         if (_currentTool == ToolMode.Eraser)
         {
             CommitActiveTextInput();
@@ -2029,6 +2071,14 @@ public partial class MainWindow : Window
             return;
         }
 
+        if (_isCircleDrawing)
+        {
+            Point currentPoint = e.GetPosition(DrawingCanvas);
+            UpdateCirclePreview(_circleStartPoint, currentPoint);
+            e.Handled = true;
+            return;
+        }
+
         if (_currentTool == ToolMode.Eraser && _isEraserGestureActive)
         {
             return;
@@ -2052,6 +2102,18 @@ public partial class MainWindow : Window
             CommitRectangle(_rectangleStartPoint, endPoint);
 
             _isRectangleDrawing = false;
+            _currentInteractionState = InteractionState.None;
+            DrawingCanvas.ReleaseMouseCapture();
+            e.Handled = true;
+            return;
+        }
+
+        if (_isCircleDrawing)
+        {
+            Point endPoint = e.GetPosition(DrawingCanvas);
+            CommitCircle(_circleStartPoint, endPoint);
+
+            _isCircleDrawing = false;
             _currentInteractionState = InteractionState.None;
             DrawingCanvas.ReleaseMouseCapture();
             e.Handled = true;
@@ -2108,6 +2170,13 @@ public partial class MainWindow : Window
         {
             CancelRectanglePreview();
             _isRectangleDrawing = false;
+            _currentInteractionState = InteractionState.None;
+        }
+
+        if (_isCircleDrawing)
+        {
+            CancelCirclePreview();
+            _isCircleDrawing = false;
             _currentInteractionState = InteractionState.None;
         }
 
@@ -2327,6 +2396,93 @@ public partial class MainWindow : Window
         }
     }
 
+
+    private void UpdateCirclePreview(Point startPoint, Point endPoint)
+    {
+        CancelCirclePreview();
+
+        Stroke outlineStroke = CreateEllipseOutlineStroke(startPoint, endPoint);
+        _circlePreviewStroke = outlineStroke;
+        ExecuteWithoutStrokeHistory(() => DrawingCanvas.Strokes.Add(outlineStroke));
+
+        if (_isRectangleFilled)
+        {
+            List<Stroke> fillStrokes = CreateFilledEllipseStrokes(startPoint, endPoint);
+            _circlePreviewFillStrokes = fillStrokes;
+
+            ExecuteWithoutStrokeHistory(() =>
+            {
+                foreach (Stroke fillStroke in fillStrokes)
+                {
+                    DrawingCanvas.Strokes.Add(fillStroke);
+                }
+            });
+        }
+    }
+
+    private void CommitCircle(Point startPoint, Point endPoint)
+    {
+        CancelCirclePreview();
+
+        if (Math.Abs(endPoint.X - startPoint.X) < 1 && Math.Abs(endPoint.Y - startPoint.Y) < 1)
+        {
+            return;
+        }
+
+        Stroke outlineStroke = CreateEllipseOutlineStroke(startPoint, endPoint);
+
+        if (!_isRectangleFilled)
+        {
+            DrawingCanvas.Strokes.Add(outlineStroke);
+            return;
+        }
+
+        List<Stroke> fillStrokes = CreateFilledEllipseStrokes(startPoint, endPoint);
+
+        ExecuteWithoutStrokeHistory(() =>
+        {
+            foreach (Stroke fillStroke in fillStrokes)
+            {
+                DrawingCanvas.Strokes.Add(fillStroke);
+            }
+
+            DrawingCanvas.Strokes.Add(outlineStroke);
+        });
+
+        var addedStrokes = new List<Stroke>(fillStrokes)
+        {
+            outlineStroke
+        };
+
+        PushHistory(new StrokeCollectionAction(
+            addedStrokes,
+            Array.Empty<Stroke>()));
+    }
+
+    private void CancelCirclePreview()
+    {
+        if (_circlePreviewStroke != null)
+        {
+            Stroke previewStroke = _circlePreviewStroke;
+            ExecuteWithoutStrokeHistory(() => DrawingCanvas.Strokes.Remove(previewStroke));
+            _circlePreviewStroke = null;
+        }
+
+        if (_circlePreviewFillStrokes != null)
+        {
+            List<Stroke> previewFillStrokes = _circlePreviewFillStrokes;
+            ExecuteWithoutStrokeHistory(() =>
+            {
+                foreach (Stroke previewFillStroke in previewFillStrokes)
+                {
+                    DrawingCanvas.Strokes.Remove(previewFillStroke);
+                }
+            });
+
+            _circlePreviewFillStrokes = null;
+        }
+    }
+
     private List<Stroke> CreateFilledRectangleStrokes(Point startPoint, Point endPoint)
     {
         double left = Math.Min(startPoint.X, endPoint.X);
@@ -2400,6 +2556,92 @@ public partial class MainWindow : Window
         {
             DrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth)
         };
+    }
+
+
+    private Stroke CreateEllipseOutlineStroke(Point startPoint, Point endPoint)
+    {
+        double left = Math.Min(startPoint.X, endPoint.X);
+        double top = Math.Min(startPoint.Y, endPoint.Y);
+        double right = Math.Max(startPoint.X, endPoint.X);
+        double bottom = Math.Max(startPoint.Y, endPoint.Y);
+
+        double width = right - left;
+        double height = bottom - top;
+        if (width < 1.0 || height < 1.0)
+        {
+            return CreateRectangleOutlineStroke(startPoint, endPoint);
+        }
+
+        double centerX = left + (width / 2.0);
+        double centerY = top + (height / 2.0);
+        double radiusX = width / 2.0;
+        double radiusY = height / 2.0;
+
+        int segmentCount = Math.Max(24, (int)Math.Ceiling((radiusX + radiusY) * 0.35));
+        var stylusPoints = new StylusPointCollection();
+
+        for (int i = 0; i <= segmentCount; i++)
+        {
+            double angle = (Math.PI * 2.0 * i) / segmentCount;
+            double x = centerX + (Math.Cos(angle) * radiusX);
+            double y = centerY + (Math.Sin(angle) * radiusY);
+            stylusPoints.Add(new StylusPoint(x, y));
+        }
+
+        return new Stroke(stylusPoints)
+        {
+            DrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth)
+        };
+    }
+
+    private List<Stroke> CreateFilledEllipseStrokes(Point startPoint, Point endPoint)
+    {
+        double left = Math.Min(startPoint.X, endPoint.X);
+        double top = Math.Min(startPoint.Y, endPoint.Y);
+        double right = Math.Max(startPoint.X, endPoint.X);
+        double bottom = Math.Max(startPoint.Y, endPoint.Y);
+
+        double width = right - left;
+        double height = bottom - top;
+        if (width < 1.0 || height < 1.0)
+        {
+            return new List<Stroke>();
+        }
+
+        double centerX = left + (width / 2.0);
+        double centerY = top + (height / 2.0);
+        double radiusX = width / 2.0;
+        double radiusY = height / 2.0;
+        double step = Math.Max(1.0, _currentPenWidth * 0.6);
+        var strokes = new List<Stroke>();
+
+        for (double y = top; y <= bottom; y += step)
+        {
+            double normalizedY = (y - centerY) / radiusY;
+            double inside = 1.0 - (normalizedY * normalizedY);
+            if (inside <= 0.0)
+            {
+                continue;
+            }
+
+            double horizontalRadius = radiusX * Math.Sqrt(inside);
+            double x1 = centerX - horizontalRadius;
+            double x2 = centerX + horizontalRadius;
+
+            var stylusPoints = new StylusPointCollection
+            {
+                new StylusPoint(x1, y),
+                new StylusPoint(x2, y)
+            };
+
+            strokes.Add(new Stroke(stylusPoints)
+            {
+                DrawingAttributes = CreateRectangleFillAttributes()
+            });
+        }
+
+        return strokes;
     }
 
     private void BeginTextInput(Point startPoint)
@@ -3303,11 +3545,12 @@ public partial class MainWindow : Window
         {
             ToolMode.Pen => PenButton,
             ToolMode.Rectangle => RectangleButton,
+            ToolMode.Circle => CircleButton,
             ToolMode.Text => TextButton,
             _ => EraserButton
         };
 
-        SetButtonSelected(selectedButton, PenButton, RectangleButton, TextButton, EraserButton);
+        SetButtonSelected(selectedButton, PenButton, RectangleButton, CircleButton, TextButton, EraserButton);
     }
 
     private void PenButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -3359,13 +3602,37 @@ public partial class MainWindow : Window
         DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
         UpdateToolHighlight();
 
-        OpenRectangleSettingsPopup();
+        OpenShapeSettingsPopup(RectangleButton);
+    }
+
+    private void CircleButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (_isClickThroughEnabled)
+        {
+            return;
+        }
+    }
+
+    private void CircleButton_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (_isClickThroughEnabled)
+        {
+            return;
+        }
+
+        e.Handled = true;
+
+        _currentTool = ToolMode.Circle;
+        DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
+        UpdateToolHighlight();
+
+        OpenShapeSettingsPopup(CircleButton);
     }
 
     private void RectangleFillCheckBox_Changed(object sender, RoutedEventArgs e)
     {
         _isRectangleFilled = RectangleFillCheckBox.IsChecked == true;
-        UpdateRectangleButtonToolTip();
+        UpdateShapeButtonToolTips();
         UpdateRectangleSettingsUi();
         SaveAppSettings();
     }
@@ -3373,7 +3640,7 @@ public partial class MainWindow : Window
     private void RectangleOpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         _rectangleFillOpacityPercent = NormalizeRectangleFillOpacity((int)Math.Round(e.NewValue));
-        UpdateRectangleButtonToolTip();
+        UpdateShapeButtonToolTips();
         UpdateRectangleSettingsUi();
         SaveAppSettings();
     }
@@ -3386,8 +3653,24 @@ public partial class MainWindow : Window
 
         _isStraightLineDrawing = false;
         _isRectangleDrawing = false;
+        _isCircleDrawing = false;
 
         _currentTool = ToolMode.Rectangle;
+        DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
+        UpdateToolHighlight();
+    }
+
+    private void CircleButton_Click(object sender, RoutedEventArgs e)
+    {
+        PenWidthPopup.IsOpen = false;
+        FinalizeOrCancelCurrentOperation();
+        ClearSelectedTextElement();
+
+        _isStraightLineDrawing = false;
+        _isRectangleDrawing = false;
+        _isCircleDrawing = false;
+
+        _currentTool = ToolMode.Circle;
         DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
         UpdateToolHighlight();
     }
@@ -3400,6 +3683,7 @@ public partial class MainWindow : Window
 
         _isStraightLineDrawing = false;
         _isRectangleDrawing = false;
+        _isCircleDrawing = false;
 
         _currentTool = ToolMode.Text;
         DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
@@ -3429,6 +3713,7 @@ public partial class MainWindow : Window
 
         _isStraightLineDrawing = false;
         _isRectangleDrawing = false;
+        _isCircleDrawing = false;
 
         _currentTool = ToolMode.Eraser;
         DrawingCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
@@ -3571,6 +3856,7 @@ public partial class MainWindow : Window
 
         _isStraightLineDrawing = false;
         _isRectangleDrawing = false;
+        _isCircleDrawing = false;
 
         _isClickThroughEnabled = enabled;
 
@@ -3610,6 +3896,7 @@ public partial class MainWindow : Window
                 {
                     ToolMode.Pen => InkCanvasEditingMode.Ink,
                     ToolMode.Rectangle => InkCanvasEditingMode.None,
+                    ToolMode.Circle => InkCanvasEditingMode.None,
                     ToolMode.Text => InkCanvasEditingMode.None,
                     _ => InkCanvasEditingMode.EraseByPoint
                 };

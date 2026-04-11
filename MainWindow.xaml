@@ -160,6 +160,14 @@
                         PreviewMouseRightButtonUp="RectangleButton_PreviewMouseRightButtonUp"
                         Click="RectangleButton_Click"/>
 
+                <Button x:Name="CircleButton"
+                        Style="{StaticResource ToolbarButtonStyle}"
+                        Content="◯"
+                        ToolTip="Circle（右クリック: 設定）"
+                        PreviewMouseLeftButtonDown="CircleButton_PreviewMouseLeftButtonDown"
+                        PreviewMouseRightButtonUp="CircleButton_PreviewMouseRightButtonUp"
+                        Click="CircleButton_Click"/>
+
                 <Popup x:Name="RectangleSettingsPopup"
                        PlacementTarget="{Binding ElementName=RectangleButton}"
                        Placement="Left"
@@ -171,7 +179,7 @@
                             BorderBrush="#FF555555"
                             BorderThickness="1">
                         <StackPanel Width="180">
-                            <TextBlock Text="Rectangle"
+                            <TextBlock Text="Shape"
                                        Foreground="White"
                                        Margin="0,0,0,8"
                                        FontWeight="Bold"/>
