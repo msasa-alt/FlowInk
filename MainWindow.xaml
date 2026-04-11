@@ -32,8 +32,8 @@
         </VisualBrush>
 
         <Style x:Key="ToolbarButtonStyle" TargetType="Button">
-            <Setter Property="Width" Value="36"/>
-            <Setter Property="Height" Value="36"/>
+            <Setter Property="Width" Value="34"/>
+            <Setter Property="Height" Value="34"/>
             <Setter Property="MinWidth" Value="0"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Margin" Value="2"/>
@@ -112,15 +112,15 @@
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
                 Margin="8"
-                Padding="4"
-                CornerRadius="12"
+                Padding="2"
+                CornerRadius="11"
                 Background="#881E1E1E"
                 PreviewMouseLeftButtonDown="ToolbarPanel_PreviewMouseLeftButtonDown"
                 PreviewMouseMove="ToolbarPanel_PreviewMouseMove"
                 PreviewMouseLeftButtonUp="ToolbarPanel_PreviewMouseLeftButtonUp"
                 LostMouseCapture="ToolbarPanel_LostMouseCapture">
             <StackPanel Orientation="Vertical">
-                <Border Height="10"
+                <Border Height="8"
                         Background="#01000000"/>
 
                 <Button x:Name="PenButton"
@@ -282,7 +282,7 @@
                         ToolTip="Exit"
                         Click="ExitButton_Click"/>
 
-                <Border Height="10"
+                <Border Height="8"
                         Background="#01000000"/>
             </StackPanel>
         </Border>
