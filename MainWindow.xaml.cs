@@ -82,6 +82,7 @@ public partial class MainWindow : Window
     private Point _textDragStartElementPoint;
 
     private Border? _editingTextOriginalElement;
+    private int? _editingTextOriginalStoredIndex;
     private Color? _editingTextOriginalColor;
     private string? _editingTextOriginalFontFamilyName;
     private double? _editingTextOriginalFontSize;
@@ -1566,7 +1567,11 @@ public partial class MainWindow : Window
         _currentPenColor = color;
         DrawingCanvas.DefaultDrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth);
 
-        ColorButton.Foreground = new SolidColorBrush(_currentPenColor);
+        if (CurrentColorPreviewEllipse != null)
+        {
+            CurrentColorPreviewEllipse.Fill = new SolidColorBrush(_currentPenColor);
+        }
+
         ColorButton.FontWeight = FontWeights.Bold;
 
         if (_activeTextBox != null)
@@ -2330,7 +2335,7 @@ public partial class MainWindow : Window
         DrawingCanvas.Children.Remove(textBox);
 
         Border? originalElement = _editingTextOriginalElement;
-        int originalIndex = originalElement != null ? GetStoredEditingOriginalIndex(originalElement) : -1;
+        int originalIndex = originalElement != null ? GetStoredEditingOriginalIndex() : -1;
 
         if (text.Length == 0)
         {
@@ -2340,6 +2345,7 @@ public partial class MainWindow : Window
             }
 
             _editingTextOriginalElement = null;
+            _editingTextOriginalStoredIndex = null;
             _editingTextOriginalColor = null;
             _editingTextOriginalFontFamilyName = null;
             _editingTextOriginalFontSize = null;
@@ -2371,6 +2377,7 @@ public partial class MainWindow : Window
         }
 
         _editingTextOriginalElement = null;
+        _editingTextOriginalStoredIndex = null;
         _editingTextOriginalColor = null;
         _editingTextOriginalFontFamilyName = null;
         _editingTextOriginalFontSize = null;
@@ -2379,7 +2386,7 @@ public partial class MainWindow : Window
         _currentInteractionState = InteractionState.None;
     }
 
-    private int GetStoredEditingOriginalIndex(Border originalElement)
+    private int GetStoredEditingOriginalIndex()
     {
         if (!_editingTextOriginalStoredIndex.HasValue)
         {
@@ -2400,8 +2407,6 @@ public partial class MainWindow : Window
         return index;
     }
 
-    private int? _editingTextOriginalStoredIndex;
-
     private void CancelActiveTextInput()
     {
         if (_activeTextBox == null)
@@ -2420,7 +2425,7 @@ public partial class MainWindow : Window
 
         if (_editingTextOriginalElement != null)
         {
-            int restoreIndex = GetStoredEditingOriginalIndex(_editingTextOriginalElement);
+            int restoreIndex = GetStoredEditingOriginalIndex();
             AddCommittedTextElement(_editingTextOriginalElement, restoreIndex);
             _editingTextOriginalElement = null;
         }

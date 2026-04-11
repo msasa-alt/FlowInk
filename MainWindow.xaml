@@ -11,6 +11,26 @@
         WindowState="Maximized">
 
     <Window.Resources>
+        <VisualBrush x:Key="CheckerBrush"
+                     TileMode="Tile"
+                     Viewport="0,0,8,8"
+                     ViewportUnits="Absolute">
+            <VisualBrush.Visual>
+                <Grid Width="8" Height="8" Background="#FFFFFFFF">
+                    <Rectangle Width="4"
+                               Height="4"
+                               Fill="#FFD0D0D0"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Top"/>
+                    <Rectangle Width="4"
+                               Height="4"
+                               Fill="#FFD0D0D0"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Bottom"/>
+                </Grid>
+            </VisualBrush.Visual>
+        </VisualBrush>
+
         <Style x:Key="ToolbarButtonStyle" TargetType="Button">
             <Setter Property="Width" Value="36"/>
             <Setter Property="Height" Value="36"/>
@@ -35,40 +55,18 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="OuterBorder"
-                        Background="Transparent"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="4"
-                        SnapsToDevicePixels="True">
+                                Background="Transparent"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                SnapsToDevicePixels="True">
                             <Grid Margin="2" ClipToBounds="True">
-                                <Grid.Resources>
-                                    <VisualBrush x:Key="CheckerBrush"
-                                         TileMode="Tile"
-                                         Viewport="0,0,8,8"
-                                         ViewportUnits="Absolute">
-                                        <VisualBrush.Visual>
-                                            <Grid Width="8" Height="8" Background="#FFFFFFFF">
-                                                <Rectangle Width="4"
-                                                   Height="4"
-                                                   Fill="#FFD0D0D0"
-                                                   HorizontalAlignment="Left"
-                                                   VerticalAlignment="Top"/>
-                                                <Rectangle Width="4"
-                                                   Height="4"
-                                                   Fill="#FFD0D0D0"
-                                                   HorizontalAlignment="Right"
-                                                   VerticalAlignment="Bottom"/>
-                                            </Grid>
-                                        </VisualBrush.Visual>
-                                    </VisualBrush>
-                                </Grid.Resources>
-
                                 <Border CornerRadius="2"
-                                Background="{StaticResource CheckerBrush}"/>
+                                        Background="{StaticResource CheckerBrush}"/>
 
                                 <Border x:Name="InnerBorder"
-                                CornerRadius="2"
-                                Background="{TemplateBinding Background}"/>
+                                        CornerRadius="2"
+                                        Background="{TemplateBinding Background}"/>
                             </Grid>
                         </Border>
 
@@ -209,9 +207,23 @@
 
                 <Button x:Name="ColorButton"
                         Style="{StaticResource ToolbarButtonStyle}"
-                        Content="●"
                         ToolTip="Color（ダブルクリックで現在色を編集）"
-                        PreviewMouseLeftButtonDown="ColorButton_PreviewMouseLeftButtonDown"/>
+                        PreviewMouseLeftButtonDown="ColorButton_PreviewMouseLeftButtonDown">
+                    <Grid Width="18" Height="18">
+                        <Ellipse Fill="{StaticResource CheckerBrush}"
+                                 Stroke="#AAFFFFFF"
+                                 StrokeThickness="1"/>
+
+                        <Ellipse x:Name="CurrentColorPreviewEllipse"
+                                 Fill="#FFFF0000"
+                                 Stroke="#AAFFFFFF"
+                                 StrokeThickness="1"/>
+
+                        <Ellipse Stroke="#55000000"
+                                 StrokeThickness="1"
+                                 IsHitTestVisible="False"/>
+                    </Grid>
+                </Button>
 
                 <Popup x:Name="ColorPopup"
                        PlacementTarget="{Binding ElementName=ColorButton}"
