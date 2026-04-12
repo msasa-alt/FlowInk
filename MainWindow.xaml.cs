@@ -38,6 +38,9 @@ public partial class MainWindow : Window
     private ToolMode _currentTool = ToolMode.Pen;
     private InteractionState _currentInteractionState = InteractionState.None;
 
+    private readonly Cursor _penCursor = Cursors.Cross;
+    private readonly Cursor _eraserCursor = Cursors.Cross;
+
     private Color _currentPenColor = Color.FromArgb(255, 255, 0, 0);
     private double _currentPenWidth = 4;
     private string _currentTextFontFamilyName = DefaultTextFontFamilyName;
@@ -423,6 +426,7 @@ public partial class MainWindow : Window
         PreviewKeyDown += MainWindow_PreviewKeyDown;
 
         UpdateToolHighlight();
+        UpdateCursor();
         InitializeNotifyIcon();
         InitializeToastTimer();
         InitializeColorButtonClickTimer();
@@ -1926,6 +1930,7 @@ public partial class MainWindow : Window
         _currentTool = ToolMode.Pen;
         DrawingCanvas.EditingMode = InkCanvasEditingMode.Ink;
         UpdateToolHighlight();
+        UpdateCursor();
     }
 
     private void OpenCurrentPenWidthEditor()
@@ -3670,6 +3675,32 @@ public partial class MainWindow : Window
         SetButtonSelected(selectedButton, PenButton, RectangleButton, CircleButton, TextButton, EraserButton);
     }
 
+    private void UpdateCursor()
+    {
+        Cursor nextCursor;
+
+        if (_isClickThroughEnabled)
+        {
+            nextCursor = Cursors.Arrow;
+        }
+        else
+        {
+            nextCursor = _currentTool switch
+            {
+                ToolMode.Pen => _penCursor,
+                ToolMode.Rectangle => _penCursor,
+                ToolMode.Circle => _penCursor,
+                ToolMode.Text => Cursors.IBeam,
+                ToolMode.Eraser => _eraserCursor,
+                _ => Cursors.Arrow
+            };
+        }
+
+        Cursor = nextCursor;
+        DrawingCanvas.Cursor = nextCursor;
+    }
+
+
     private void PenButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (_isClickThroughEnabled)
@@ -3775,6 +3806,7 @@ public partial class MainWindow : Window
         _currentTool = ToolMode.Rectangle;
         DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
         UpdateToolHighlight();
+        UpdateCursor();
     }
 
     private void CircleButton_Click(object sender, RoutedEventArgs e)
@@ -3790,6 +3822,7 @@ public partial class MainWindow : Window
         _currentTool = ToolMode.Circle;
         DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
         UpdateToolHighlight();
+        UpdateCursor();
     }
 
     private void TextButton_Click(object sender, RoutedEventArgs e)
@@ -3805,6 +3838,7 @@ public partial class MainWindow : Window
         _currentTool = ToolMode.Text;
         DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
         UpdateToolHighlight();
+        UpdateCursor();
     }
 
     private void TextButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -3835,6 +3869,7 @@ public partial class MainWindow : Window
         _currentTool = ToolMode.Eraser;
         DrawingCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
         UpdateToolHighlight();
+        UpdateCursor();
     }
 
     private void ColorButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -4014,6 +4049,7 @@ public partial class MainWindow : Window
             _clickThroughHoverTimer.Stop();
         }
 
+        UpdateCursor();
         UpdateClickThroughTransparentState();
         UpdateNotifyIconMenu();
 
