@@ -14,15 +14,16 @@
 
 	<ItemGroup>
 	  <None Remove=".gitattributes" />
+	  <None Remove="Assets\eraser.cur" />
 	  <None Remove="Assets\FlowInk.ico" />
 	  <None Remove="Assets\mouse-pointer-2-off.png" />
 	  <None Remove="Assets\mouse-pointer-2.png" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Include="Assets\FlowInk.ico">
+	  <Resource Include="Assets\FlowInk.ico">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
+	  </Resource>
 	  <Content Include="Assets\mouse-pointer-2-off.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>

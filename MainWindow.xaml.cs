@@ -39,8 +39,7 @@ public partial class MainWindow : Window
     private InteractionState _currentInteractionState = InteractionState.None;
 
     private readonly Cursor _penCursor = Cursors.Cross;
-    private readonly Cursor _eraserCursor = Cursors.Cross;
-
+    
     private Color _currentPenColor = Color.FromArgb(255, 255, 0, 0);
     private double _currentPenWidth = 4;
     private string _currentTextFontFamilyName = DefaultTextFontFamilyName;
@@ -396,6 +395,7 @@ public partial class MainWindow : Window
 
         InitializeComponent();
 
+        
         InitializeButtonStyles();
 
         LoadAppSettings();
@@ -437,6 +437,28 @@ public partial class MainWindow : Window
         Loaded += MainWindow_Loaded;
         Closed += MainWindow_Closed;
         SizeChanged += MainWindow_SizeChanged;
+    }
+
+    private Cursor? LoadCursorResource(string relativePath)
+    {
+        try
+        {
+            string fullPath = Path.Combine(AppContext.BaseDirectory, relativePath);
+            if (!File.Exists(fullPath))
+            {
+                return null;
+            }
+
+            using var sourceStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var memoryStream = new MemoryStream();
+            sourceStream.CopyTo(memoryStream);
+            memoryStream.Position = 0;
+            return new Cursor(memoryStream);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -3691,7 +3713,7 @@ public partial class MainWindow : Window
                 ToolMode.Rectangle => _penCursor,
                 ToolMode.Circle => _penCursor,
                 ToolMode.Text => Cursors.IBeam,
-                ToolMode.Eraser => _eraserCursor,
+                ToolMode.Eraser => _penCursor,
                 _ => Cursors.Arrow
             };
         }
@@ -3749,6 +3771,7 @@ public partial class MainWindow : Window
         _currentTool = ToolMode.Rectangle;
         DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
         UpdateToolHighlight();
+        UpdateCursor();
 
         OpenShapeSettingsPopup(RectangleButton);
     }
@@ -3773,6 +3796,7 @@ public partial class MainWindow : Window
         _currentTool = ToolMode.Circle;
         DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
         UpdateToolHighlight();
+        UpdateCursor();
 
         OpenShapeSettingsPopup(CircleButton);
     }
@@ -3851,6 +3875,7 @@ public partial class MainWindow : Window
         _currentTool = ToolMode.Text;
         DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
         UpdateToolHighlight();
+        UpdateCursor();
 
         ShowFontDialog();
         e.Handled = true;
