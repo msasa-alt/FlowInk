@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -39,7 +39,10 @@ public partial class MainWindow : Window
     private InteractionState _currentInteractionState = InteractionState.None;
 
     private readonly Cursor _penCursor = Cursors.Cross;
-    
+    private uint _clickThroughHotkeyModifiers = DefaultHotkeyModifiers;
+    private Forms.Keys _clickThroughHotkeyKey = DefaultHotkeyKey;
+    private bool _isHotKeyRegistered;
+
     private Color _currentPenColor = Color.FromArgb(255, 255, 0, 0);
     private double _currentPenWidth = 4;
     private string _currentTextFontFamilyName = DefaultTextFontFamilyName;
@@ -130,7 +133,11 @@ public partial class MainWindow : Window
 
     private const uint MOD_ALT = 0x0001;
     private const uint MOD_CONTROL = 0x0002;
-    private const uint VK_T = 0x54;
+    private const uint MOD_SHIFT = 0x0004;
+    private const uint MOD_WIN = 0x0008;
+
+    private const uint DefaultHotkeyModifiers = MOD_CONTROL | MOD_ALT;
+    private const Forms.Keys DefaultHotkeyKey = Forms.Keys.T;
 
     private const string AppSettingsFileName = "app-settings.json";
     private const string ClickThroughOffIconPath = "Assets/mouse-pointer-2.png";
@@ -384,6 +391,11 @@ public partial class MainWindow : Window
         public int RectangleFillOpacity { get; set; } = 35;
         public double? ToolbarLeft { get; set; }
         public double? ToolbarTop { get; set; }
+        public bool HotkeyCtrl { get; set; } = true;
+        public bool HotkeyAlt { get; set; } = true;
+        public bool HotkeyShift { get; set; }
+        public bool HotkeyWin { get; set; }
+        public string? HotkeyKey { get; set; } = DefaultHotkeyKey.ToString();
     }
 
     public MainWindow()
@@ -395,7 +407,7 @@ public partial class MainWindow : Window
 
         InitializeComponent();
 
-        
+
         InitializeButtonStyles();
 
         LoadAppSettings();
@@ -433,33 +445,13 @@ public partial class MainWindow : Window
         InitializePenButtonClickTimer();
         InitializePenWidthPresetClickTimer();
         InitializeClickThroughHoverTimer();
+        InitializeHotkeySettingsControls();
 
         Loaded += MainWindow_Loaded;
         Closed += MainWindow_Closed;
         SizeChanged += MainWindow_SizeChanged;
     }
 
-    private Cursor? LoadCursorResource(string relativePath)
-    {
-        try
-        {
-            string fullPath = Path.Combine(AppContext.BaseDirectory, relativePath);
-            if (!File.Exists(fullPath))
-            {
-                return null;
-            }
-
-            using var sourceStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var memoryStream = new MemoryStream();
-            sourceStream.CopyTo(memoryStream);
-            memoryStream.Position = 0;
-            return new Cursor(memoryStream);
-        }
-        catch
-        {
-            return null;
-        }
-    }
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
@@ -475,20 +467,7 @@ public partial class MainWindow : Window
         HwndSource? source = HwndSource.FromHwnd(hwnd);
         source?.AddHook(WndProc);
 
-        bool registered = RegisterHotKey(
-            hwnd,
-            HOTKEY_ID_TOGGLE_CLICKTHROUGH,
-            MOD_CONTROL | MOD_ALT,
-            VK_T);
-
-        if (!registered)
-        {
-            MessageBox.Show(
-                "Ctrl + Alt + T のグローバルホットキー登録に失敗しました。\n他のアプリで使われている可能性があります。",
-                "FlowInk",
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning);
-        }
+        RegisterCurrentHotKey(showFailureMessage: true);
     }
 
     private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -510,11 +489,7 @@ public partial class MainWindow : Window
         _notifyIcon.Visible = false;
         _notifyIcon.Dispose();
 
-        IntPtr hwnd = new WindowInteropHelper(this).Handle;
-        if (hwnd != IntPtr.Zero)
-        {
-            UnregisterHotKey(hwnd, HOTKEY_ID_TOGGLE_CLICKTHROUGH);
-        }
+        UnregisterCurrentHotKey();
     }
 
     private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -1291,7 +1266,7 @@ public partial class MainWindow : Window
         foreach (var button in new[]
                  {
                      PenButton, RectangleButton, CircleButton, TextButton, EraserButton, ColorButton,
-                     ClearButton, ClickThroughButton, ExitButton
+                     ClearButton, ClickThroughButton, SettingsButton, ExitButton
                  })
         {
             button.Background = _normalButtonBackground;
@@ -1299,6 +1274,274 @@ public partial class MainWindow : Window
             button.BorderBrush = Brushes.DimGray;
         }
     }
+
+
+    private void InitializeHotkeySettingsControls()
+    {
+        if (HotkeyKeyComboBox == null)
+        {
+            return;
+        }
+
+        HotkeyKeyComboBox.ItemsSource = GetAvailableHotkeyKeys();
+        UpdateHotkeySettingsUi();
+    }
+
+    private static List<string> GetAvailableHotkeyKeys()
+    {
+        var keys = new List<string>();
+
+        for (char c = 'A'; c <= 'Z'; c++)
+        {
+            keys.Add(c.ToString());
+        }
+
+        for (char c = '0'; c <= '9'; c++)
+        {
+            keys.Add(c.ToString());
+        }
+
+        for (int i = 1; i <= 12; i++)
+        {
+            keys.Add($"F{i}");
+        }
+
+        return keys;
+    }
+
+    private static Forms.Keys NormalizeHotkeyKey(string? keyText)
+    {
+        if (string.IsNullOrWhiteSpace(keyText))
+        {
+            return DefaultHotkeyKey;
+        }
+
+        if (Enum.TryParse(keyText.Trim(), true, out Forms.Keys parsed))
+        {
+            parsed &= Forms.Keys.KeyCode;
+            if (parsed != Forms.Keys.None)
+            {
+                return parsed;
+            }
+        }
+
+        return DefaultHotkeyKey;
+    }
+
+    private static uint BuildHotkeyModifiers(bool ctrl, bool alt, bool shift, bool win)
+    {
+        uint modifiers = 0;
+
+        if (ctrl)
+        {
+            modifiers |= MOD_CONTROL;
+        }
+
+        if (alt)
+        {
+            modifiers |= MOD_ALT;
+        }
+
+        if (shift)
+        {
+            modifiers |= MOD_SHIFT;
+        }
+
+        if (win)
+        {
+            modifiers |= MOD_WIN;
+        }
+
+        return modifiers;
+    }
+
+    private string GetCurrentHotkeyDisplayText()
+    {
+        return BuildHotkeyDisplayText(_clickThroughHotkeyModifiers, _clickThroughHotkeyKey);
+    }
+
+    private static string BuildHotkeyDisplayText(uint modifiers, Forms.Keys key)
+    {
+        var parts = new List<string>();
+
+        if ((modifiers & MOD_CONTROL) != 0)
+        {
+            parts.Add("Ctrl");
+        }
+
+        if ((modifiers & MOD_ALT) != 0)
+        {
+            parts.Add("Alt");
+        }
+
+        if ((modifiers & MOD_SHIFT) != 0)
+        {
+            parts.Add("Shift");
+        }
+
+        if ((modifiers & MOD_WIN) != 0)
+        {
+            parts.Add("Win");
+        }
+
+        parts.Add(key.ToString());
+        return string.Join(" + ", parts);
+    }
+
+    private void UpdateHotkeySettingsUi()
+    {
+        if (HotkeyCtrlCheckBox == null || HotkeyAltCheckBox == null || HotkeyShiftCheckBox == null || HotkeyWinCheckBox == null || HotkeyKeyComboBox == null)
+        {
+            return;
+        }
+
+        HotkeyCtrlCheckBox.IsChecked = (_clickThroughHotkeyModifiers & MOD_CONTROL) != 0;
+        HotkeyAltCheckBox.IsChecked = (_clickThroughHotkeyModifiers & MOD_ALT) != 0;
+        HotkeyShiftCheckBox.IsChecked = (_clickThroughHotkeyModifiers & MOD_SHIFT) != 0;
+        HotkeyWinCheckBox.IsChecked = (_clickThroughHotkeyModifiers & MOD_WIN) != 0;
+        HotkeyKeyComboBox.SelectedItem = _clickThroughHotkeyKey.ToString();
+
+        UpdateHotkeyPreviewFromEditor();
+    }
+
+    private void UpdateHotkeyPreviewFromEditor()
+    {
+        if (HotkeyPreviewTextBlock == null || HotkeyCtrlCheckBox == null || HotkeyAltCheckBox == null || HotkeyShiftCheckBox == null || HotkeyWinCheckBox == null || HotkeyKeyComboBox == null)
+        {
+            return;
+        }
+
+        uint modifiers = BuildHotkeyModifiers(
+            HotkeyCtrlCheckBox.IsChecked == true,
+            HotkeyAltCheckBox.IsChecked == true,
+            HotkeyShiftCheckBox.IsChecked == true,
+            HotkeyWinCheckBox.IsChecked == true);
+
+        Forms.Keys key = NormalizeHotkeyKey(HotkeyKeyComboBox.SelectedItem as string);
+        HotkeyPreviewTextBlock.Text = BuildHotkeyDisplayText(modifiers, key);
+    }
+
+    private bool RegisterCurrentHotKey(bool showFailureMessage)
+    {
+        IntPtr hwnd = new WindowInteropHelper(this).Handle;
+        if (hwnd == IntPtr.Zero)
+        {
+            return false;
+        }
+
+        UnregisterCurrentHotKey();
+
+        bool registered = RegisterHotKey(
+            hwnd,
+            HOTKEY_ID_TOGGLE_CLICKTHROUGH,
+            _clickThroughHotkeyModifiers,
+            (uint)_clickThroughHotkeyKey);
+
+        _isHotKeyRegistered = registered;
+
+        if (!registered && showFailureMessage)
+        {
+            MessageBox.Show(
+                $"グローバルホットキー {GetCurrentHotkeyDisplayText()} の登録に失敗しました。\n他のアプリで使われている可能性があります。",
+                "FlowInk",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
+
+        return registered;
+    }
+
+    private void UnregisterCurrentHotKey()
+    {
+        if (!_isHotKeyRegistered)
+        {
+            return;
+        }
+
+        IntPtr hwnd = new WindowInteropHelper(this).Handle;
+        if (hwnd == IntPtr.Zero)
+        {
+            _isHotKeyRegistered = false;
+            return;
+        }
+
+        UnregisterHotKey(hwnd, HOTKEY_ID_TOGGLE_CLICKTHROUGH);
+        _isHotKeyRegistered = false;
+    }
+
+    private void SettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_isClickThroughEnabled)
+        {
+            return;
+        }
+
+        UpdateHotkeySettingsUi();
+        HotkeySettingsPopup.IsOpen = false;
+        HotkeySettingsPopup.IsOpen = true;
+    }
+
+    private void HotkeySettingControl_Changed(object sender, RoutedEventArgs e)
+    {
+        UpdateHotkeyPreviewFromEditor();
+    }
+
+    private void HotkeyKeyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        UpdateHotkeyPreviewFromEditor();
+    }
+
+    private void HotkeySaveButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (HotkeyCtrlCheckBox == null || HotkeyAltCheckBox == null || HotkeyShiftCheckBox == null || HotkeyWinCheckBox == null || HotkeyKeyComboBox == null)
+        {
+            return;
+        }
+
+        uint newModifiers = BuildHotkeyModifiers(
+            HotkeyCtrlCheckBox.IsChecked == true,
+            HotkeyAltCheckBox.IsChecked == true,
+            HotkeyShiftCheckBox.IsChecked == true,
+            HotkeyWinCheckBox.IsChecked == true);
+
+        if (newModifiers == 0)
+        {
+            MessageBox.Show(
+                "修飾キーを1つ以上選択してください。",
+                "FlowInk",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+            return;
+        }
+
+        Forms.Keys newKey = NormalizeHotkeyKey(HotkeyKeyComboBox.SelectedItem as string);
+
+        uint previousModifiers = _clickThroughHotkeyModifiers;
+        Forms.Keys previousKey = _clickThroughHotkeyKey;
+
+        _clickThroughHotkeyModifiers = newModifiers;
+        _clickThroughHotkeyKey = newKey;
+
+        if (!RegisterCurrentHotKey(showFailureMessage: true))
+        {
+            _clickThroughHotkeyModifiers = previousModifiers;
+            _clickThroughHotkeyKey = previousKey;
+            RegisterCurrentHotKey(showFailureMessage: false);
+            UpdateHotkeySettingsUi();
+            return;
+        }
+
+        SaveAppSettings();
+        HotkeySettingsPopup.IsOpen = false;
+        ShowToastMessage($"CTホットキーを {GetCurrentHotkeyDisplayText()} に変更しました。");
+    }
+
+    private void HotkeyCancelButton_Click(object sender, RoutedEventArgs e)
+    {
+        HotkeySettingsPopup.IsOpen = false;
+        UpdateHotkeySettingsUi();
+    }
+
 
     private string GetColorFilePath(string fileName)
     {
@@ -1325,6 +1568,8 @@ public partial class MainWindow : Window
                 _isRectangleFilled = false;
                 _rectangleFillOpacityPercent = 35;
                 _hasPendingToolbarPosition = false;
+                _clickThroughHotkeyModifiers = DefaultHotkeyModifiers;
+                _clickThroughHotkeyKey = DefaultHotkeyKey;
 
                 SaveAppSettings();
                 return;
@@ -1347,6 +1592,8 @@ public partial class MainWindow : Window
                 _isRectangleFilled = false;
                 _rectangleFillOpacityPercent = 35;
                 _hasPendingToolbarPosition = false;
+                _clickThroughHotkeyModifiers = DefaultHotkeyModifiers;
+                _clickThroughHotkeyKey = DefaultHotkeyKey;
                 SaveAppSettings();
                 return;
             }
@@ -1368,6 +1615,14 @@ public partial class MainWindow : Window
                 _toolbarLeft = settings.ToolbarLeft!.Value;
                 _toolbarTop = settings.ToolbarTop!.Value;
             }
+
+            _clickThroughHotkeyModifiers = BuildHotkeyModifiers(
+                settings.HotkeyCtrl,
+                settings.HotkeyAlt,
+                settings.HotkeyShift,
+                settings.HotkeyWin);
+
+            _clickThroughHotkeyKey = NormalizeHotkeyKey(settings.HotkeyKey);
 
             if (!string.IsNullOrWhiteSpace(settings.CurrentColor))
             {
@@ -1398,6 +1653,8 @@ public partial class MainWindow : Window
             _isRectangleFilled = false;
             _rectangleFillOpacityPercent = 35;
             _hasPendingToolbarPosition = false;
+            _clickThroughHotkeyModifiers = DefaultHotkeyModifiers;
+            _clickThroughHotkeyKey = DefaultHotkeyKey;
         }
     }
 
@@ -1422,7 +1679,12 @@ public partial class MainWindow : Window
             RectangleFillEnabled = _isRectangleFilled,
             RectangleFillOpacity = NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent),
             ToolbarLeft = _hasPendingToolbarPosition ? _toolbarLeft : null,
-            ToolbarTop = _hasPendingToolbarPosition ? _toolbarTop : null
+            ToolbarTop = _hasPendingToolbarPosition ? _toolbarTop : null,
+            HotkeyCtrl = (_clickThroughHotkeyModifiers & MOD_CONTROL) != 0,
+            HotkeyAlt = (_clickThroughHotkeyModifiers & MOD_ALT) != 0,
+            HotkeyShift = (_clickThroughHotkeyModifiers & MOD_SHIFT) != 0,
+            HotkeyWin = (_clickThroughHotkeyModifiers & MOD_WIN) != 0,
+            HotkeyKey = _clickThroughHotkeyKey.ToString()
         };
 
         string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions

@@ -1,0 +1,44 @@
+{
+  "PresetColors": [
+    "#FFFF0000",
+    "#FF00BFFF",
+    "#FFFFFF00",
+    "#FF32CD32",
+    "#FFFFA500",
+    "#FFFF00FF",
+    "#FFFFFFFF",
+    "#FF000000",
+    "#80FF0000",
+    "#8000BFFF",
+    "#60FFFF00",
+    "#8032CD32",
+    "#80FFA500",
+    "#80FF00FF",
+    "#6EFFFFFF",
+    "#6E000000"
+  ],
+  "RecentColors": [
+    "#FFFF0000"
+  ],
+  "CustomColors": [],
+  "PenWidth": 4,
+  "PenWidthPresets": [
+    2,
+    5,
+    10
+  ],
+  "CurrentColor": "#FFFF0000",
+  "TextFontFamily": "Segoe UI",
+  "TextFontSize": 28,
+  "TextBold": false,
+  "TextItalic": false,
+  "RectangleFillEnabled": false,
+  "RectangleFillOpacity": 35,
+  "ToolbarLeft": null,
+  "ToolbarTop": null,
+  "HotkeyCtrl": true,
+  "HotkeyAlt": true,
+  "HotkeyShift": false,
+  "HotkeyWin": false,
+  "HotkeyKey": "T"
+}
