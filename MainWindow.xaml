@@ -119,180 +119,201 @@
                 PreviewMouseMove="ToolbarPanel_PreviewMouseMove"
                 PreviewMouseLeftButtonUp="ToolbarPanel_PreviewMouseLeftButtonUp"
                 LostMouseCapture="ToolbarPanel_LostMouseCapture">
-            <StackPanel Orientation="Vertical">
-                <Border Height="8"
-                        Background="#01000000"/>
+            <Grid>
+                <StackPanel x:Name="FullToolbarPanel"
+                            Orientation="Vertical">
+                    <Border Height="8"
+                            Background="#01000000"/>
 
-                <Button x:Name="PenButton"
-                        Style="{StaticResource ToolbarButtonStyle}"
-                        Content="✎"
-                        ToolTip="Pen（右クリック: 線幅設定）"
-                        PreviewMouseLeftButtonDown="PenButton_PreviewMouseLeftButtonDown"
-                        PreviewMouseRightButtonUp="PenButton_PreviewMouseRightButtonUp"/>
+                    <Button x:Name="PenButton"
+                            Style="{StaticResource ToolbarButtonStyle}"
+                            Content="✎"
+                            ToolTip="Pen（右クリック: 線幅設定）"
+                            PreviewMouseLeftButtonDown="PenButton_PreviewMouseLeftButtonDown"
+                            PreviewMouseRightButtonUp="PenButton_PreviewMouseRightButtonUp"/>
 
-                <Popup x:Name="PenWidthPopup"
-                       PlacementTarget="{Binding ElementName=PenButton}"
-                       Placement="Left"
-                       StaysOpen="False"
-                       AllowsTransparency="True">
-                    <Border Background="#EE1E1E1E"
-                            Padding="10"
-                            CornerRadius="10"
-                            BorderBrush="#FF555555"
-                            BorderThickness="1">
-                        <StackPanel>
-                            <TextBlock Text="Pen Width"
-                                       Foreground="White"
-                                       Margin="0,0,0,8"
-                                       FontWeight="Bold"/>
+                    <Popup x:Name="PenWidthPopup"
+                           PlacementTarget="{Binding ElementName=PenButton}"
+                           Placement="Left"
+                           StaysOpen="False"
+                           AllowsTransparency="True">
+                        <Border Background="#EE1E1E1E"
+                                Padding="10"
+                                CornerRadius="10"
+                                BorderBrush="#FF555555"
+                                BorderThickness="1">
+                            <StackPanel>
+                                <TextBlock Text="Pen Width"
+                                           Foreground="White"
+                                           Margin="0,0,0,8"
+                                           FontWeight="Bold"/>
 
-                            <UniformGrid x:Name="PenWidthPresetGrid"
-                                         Columns="1"/>
-                        </StackPanel>
-                    </Border>
-                </Popup>
+                                <UniformGrid x:Name="PenWidthPresetGrid"
+                                             Columns="1"/>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
 
-                <Button x:Name="RectangleButton"
-                        Style="{StaticResource ToolbarButtonStyle}"
-                        Content="▭"
-                        ToolTip="Rectangle（右クリック: 設定）"
-                        PreviewMouseLeftButtonDown="RectangleButton_PreviewMouseLeftButtonDown"
-                        PreviewMouseRightButtonUp="RectangleButton_PreviewMouseRightButtonUp"
-                        Click="RectangleButton_Click"/>
+                    <Button x:Name="RectangleButton"
+                            Style="{StaticResource ToolbarButtonStyle}"
+                            Content="▭"
+                            ToolTip="Rectangle（右クリック: 設定）"
+                            PreviewMouseLeftButtonDown="RectangleButton_PreviewMouseLeftButtonDown"
+                            PreviewMouseRightButtonUp="RectangleButton_PreviewMouseRightButtonUp"
+                            Click="RectangleButton_Click"/>
 
-                <Button x:Name="CircleButton"
-                        Style="{StaticResource ToolbarButtonStyle}"
-                        Content="◯"
-                        ToolTip="Circle（右クリック: 設定）"
-                        PreviewMouseLeftButtonDown="CircleButton_PreviewMouseLeftButtonDown"
-                        PreviewMouseRightButtonUp="CircleButton_PreviewMouseRightButtonUp"
-                        Click="CircleButton_Click"/>
+                    <Button x:Name="CircleButton"
+                            Style="{StaticResource ToolbarButtonStyle}"
+                            Content="◯"
+                            ToolTip="Circle（右クリック: 設定）"
+                            PreviewMouseLeftButtonDown="CircleButton_PreviewMouseLeftButtonDown"
+                            PreviewMouseRightButtonUp="CircleButton_PreviewMouseRightButtonUp"
+                            Click="CircleButton_Click"/>
 
-                <Popup x:Name="RectangleSettingsPopup"
-                       PlacementTarget="{Binding ElementName=RectangleButton}"
-                       Placement="Left"
-                       StaysOpen="False"
-                       AllowsTransparency="True">
-                    <Border Background="#EE1E1E1E"
-                            Padding="10"
-                            CornerRadius="10"
-                            BorderBrush="#FF555555"
-                            BorderThickness="1">
-                        <StackPanel Width="180">
-                            <TextBlock Text="Shape"
-                                       Foreground="White"
-                                       Margin="0,0,0,8"
-                                       FontWeight="Bold"/>
+                    <Popup x:Name="RectangleSettingsPopup"
+                           PlacementTarget="{Binding ElementName=RectangleButton}"
+                           Placement="Left"
+                           StaysOpen="False"
+                           AllowsTransparency="True">
+                        <Border Background="#EE1E1E1E"
+                                Padding="10"
+                                CornerRadius="10"
+                                BorderBrush="#FF555555"
+                                BorderThickness="1">
+                            <StackPanel Width="180">
+                                <TextBlock Text="Shape"
+                                           Foreground="White"
+                                           Margin="0,0,0,8"
+                                           FontWeight="Bold"/>
 
-                            <CheckBox x:Name="RectangleFillCheckBox"
-                                      Content="塗りつぶし"
-                                      Foreground="White"
-                                      Margin="0,0,0,10"
-                                      Checked="RectangleFillCheckBox_Changed"
-                                      Unchecked="RectangleFillCheckBox_Changed"/>
+                                <CheckBox x:Name="RectangleFillCheckBox"
+                                          Content="塗りつぶし"
+                                          Foreground="White"
+                                          Margin="0,0,0,10"
+                                          Checked="RectangleFillCheckBox_Changed"
+                                          Unchecked="RectangleFillCheckBox_Changed"/>
 
-                            <TextBlock x:Name="RectangleOpacityLabel"
-                                       Text="透明度: 35%"
-                                       Foreground="White"
-                                       Margin="0,0,0,4"/>
+                                <TextBlock x:Name="RectangleOpacityLabel"
+                                           Text="透明度: 35%"
+                                           Foreground="White"
+                                           Margin="0,0,0,4"/>
 
-                            <Slider x:Name="RectangleOpacitySlider"
-                                    Minimum="0"
-                                    Maximum="100"
-                                    Value="35"
-                                    TickFrequency="5"
-                                    IsSnapToTickEnabled="False"
-                                    ValueChanged="RectangleOpacitySlider_ValueChanged"/>
-                        </StackPanel>
-                    </Border>
-                </Popup>
+                                <Slider x:Name="RectangleOpacitySlider"
+                                        Minimum="0"
+                                        Maximum="100"
+                                        Value="35"
+                                        TickFrequency="5"
+                                        IsSnapToTickEnabled="False"
+                                        ValueChanged="RectangleOpacitySlider_ValueChanged"/>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
 
-                <Button x:Name="TextButton"
-                        Style="{StaticResource ToolbarButtonStyle}"
-                        Content="T"
-                        ToolTip="Text（ダブルクリックでフォント設定）"
-                        PreviewMouseLeftButtonDown="TextButton_PreviewMouseLeftButtonDown"
-                        Click="TextButton_Click"/>
+                    <Button x:Name="TextButton"
+                            Style="{StaticResource ToolbarButtonStyle}"
+                            Content="T"
+                            ToolTip="Text（ダブルクリックでフォント設定）"
+                            PreviewMouseLeftButtonDown="TextButton_PreviewMouseLeftButtonDown"
+                            Click="TextButton_Click"/>
 
-                <Button x:Name="EraserButton"
-                        Style="{StaticResource ToolbarButtonStyle}"
-                        Content="⌫"
-                        ToolTip="Erase"
-                        Click="EraserButton_Click"/>
+                    <Button x:Name="EraserButton"
+                            Style="{StaticResource ToolbarButtonStyle}"
+                            Content="⌫"
+                            ToolTip="Erase"
+                            Click="EraserButton_Click"/>
 
-                <Button x:Name="ColorButton"
-                        Style="{StaticResource ToolbarButtonStyle}"
-                        ToolTip="Color（ダブルクリックで現在色を編集）"
-                        PreviewMouseLeftButtonDown="ColorButton_PreviewMouseLeftButtonDown">
-                    <Grid Width="18" Height="18">
-                        <Ellipse Fill="{StaticResource CheckerBrush}"
-                                 Stroke="#AAFFFFFF"
-                                 StrokeThickness="1"/>
+                    <Button x:Name="ColorButton"
+                            Style="{StaticResource ToolbarButtonStyle}"
+                            ToolTip="Color（ダブルクリックで現在色を編集）"
+                            PreviewMouseLeftButtonDown="ColorButton_PreviewMouseLeftButtonDown">
+                        <Grid Width="18" Height="18">
+                            <Ellipse Fill="{StaticResource CheckerBrush}"
+                                     Stroke="#AAFFFFFF"
+                                     StrokeThickness="1"/>
 
-                        <Ellipse x:Name="CurrentColorPreviewEllipse"
-                                 Fill="#FFFF0000"
-                                 Stroke="#AAFFFFFF"
-                                 StrokeThickness="1"/>
+                            <Ellipse x:Name="CurrentColorPreviewEllipse"
+                                     Fill="#FFFF0000"
+                                     Stroke="#AAFFFFFF"
+                                     StrokeThickness="1"/>
 
-                        <Ellipse Stroke="#55000000"
-                                 StrokeThickness="1"
-                                 IsHitTestVisible="False"/>
-                    </Grid>
-                </Button>
+                            <Ellipse Stroke="#55000000"
+                                     StrokeThickness="1"
+                                     IsHitTestVisible="False"/>
+                        </Grid>
+                    </Button>
 
-                <Popup x:Name="ColorPopup"
-                       PlacementTarget="{Binding ElementName=ColorButton}"
-                       Placement="Left"
-                       StaysOpen="False"
-                       AllowsTransparency="True">
-                    <Border Background="#EE1E1E1E"
-                            Padding="10"
-                            CornerRadius="10"
-                            BorderBrush="#FF555555"
-                            BorderThickness="1">
-                        <StackPanel>
-                            <TextBlock Text="Recent Colors"
-                                       Foreground="White"
-                                       Margin="0,0,0,8"
-                                       FontWeight="Bold"/>
+                    <Popup x:Name="ColorPopup"
+                           PlacementTarget="{Binding ElementName=ColorButton}"
+                           Placement="Left"
+                           StaysOpen="False"
+                           AllowsTransparency="True">
+                        <Border Background="#EE1E1E1E"
+                                Padding="10"
+                                CornerRadius="10"
+                                BorderBrush="#FF555555"
+                                BorderThickness="1">
+                            <StackPanel>
+                                <TextBlock Text="Recent Colors"
+                                           Foreground="White"
+                                           Margin="0,0,0,8"
+                                           FontWeight="Bold"/>
 
-                            <UniformGrid x:Name="RecentColorGrid"
-                                         Columns="4"
-                                         Margin="0,0,0,12"/>
+                                <UniformGrid x:Name="RecentColorGrid"
+                                             Columns="4"
+                                             Margin="0,0,0,12"/>
 
-                            <TextBlock Text="Preset Colors"
-                                       Foreground="White"
-                                       Margin="0,0,0,8"
-                                       FontWeight="Bold"/>
+                                <TextBlock Text="Preset Colors"
+                                           Foreground="White"
+                                           Margin="0,0,0,8"
+                                           FontWeight="Bold"/>
 
-                            <UniformGrid x:Name="PresetColorGrid"
-                                         Columns="4"/>
-                        </StackPanel>
-                    </Border>
-                </Popup>
+                                <UniformGrid x:Name="PresetColorGrid"
+                                             Columns="4"/>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
 
-                <Button x:Name="ClearButton"
-                        Style="{StaticResource ToolbarButtonStyle}"
-                        Content="🗑"
-                        ToolTip="Clear"
-                        Click="ClearButton_Click"/>
+                    <Button x:Name="ClearButton"
+                            Style="{StaticResource ToolbarButtonStyle}"
+                            Content="🗑"
+                            ToolTip="Clear"
+                            Click="ClearButton_Click"/>
 
-                <Button x:Name="ClickThroughButton"
-                        Style="{StaticResource ToolbarButtonStyle}"
-                        Content="CT"
-                        FontSize="12"
-                        ToolTip="Click Through"
-                        Click="ClickThroughButton_Click"/>
+                    <Button x:Name="ClickThroughButton"
+                            Style="{StaticResource ToolbarButtonStyle}"
+                            Content="CT"
+                            FontSize="12"
+                            ToolTip="Click Through"
+                            Click="ClickThroughButton_Click"/>
 
-                <Button x:Name="ExitButton"
-                        Style="{StaticResource ToolbarButtonStyle}"
-                        Content="×"
-                        ToolTip="Exit"
-                        Click="ExitButton_Click"/>
+                    <Button x:Name="ExitButton"
+                            Style="{StaticResource ToolbarButtonStyle}"
+                            Content="×"
+                            ToolTip="Exit"
+                            Click="ExitButton_Click"/>
 
-                <Border Height="8"
-                        Background="#01000000"/>
-            </StackPanel>
+                    <Border Height="8"
+                            Background="#01000000"/>
+                </StackPanel>
+
+                <StackPanel x:Name="CtMiniPanel"
+                            Orientation="Vertical"
+                            Visibility="Collapsed">
+                    <Border Height="8"
+                            Background="#01000000"/>
+
+                    <Button x:Name="CtReturnButton"
+                            Style="{StaticResource ToolbarButtonStyle}"
+                            Width="56"
+                            Content="戻る"
+                            FontSize="12"
+                            ToolTip="描画ONに戻す"
+                            Click="CtReturnButton_Click"/>
+
+                    <Border Height="8"
+                            Background="#01000000"/>
+                </StackPanel>
+            </Grid>
         </Border>
 
         <Border x:Name="ToastBorder"

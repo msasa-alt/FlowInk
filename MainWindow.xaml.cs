@@ -115,10 +115,12 @@ public partial class MainWindow : Window
     private const double TextPaddingY = 2.0;
 
     private const int GWL_EXSTYLE = -20;
-    private const int WS_EX_TRANSPARENT = 0x00000020;
     private const int WS_EX_LAYERED = 0x00080000;
 
     private const int WM_HOTKEY = 0x0312;
+    private const int WM_NCHITTEST = 0x0084;
+    private const int HTCLIENT = 1;
+    private const int HTTRANSPARENT = -1;
     private const int HOTKEY_ID_TOGGLE_CLICKTHROUGH = 1;
 
     private const uint MOD_ALT = 0x0001;
@@ -396,6 +398,7 @@ public partial class MainWindow : Window
         BuildPresetColorButtons();
         BuildRecentColorButtons();
         BuildPenWidthPresetButtons();
+        UpdateToolbarForCT();
 
         ApplyPenColor(_currentPenColor, addToRecent: true);
 
@@ -957,6 +960,39 @@ public partial class MainWindow : Window
         ClampToolbarPositionToViewport(saveSettings);
     }
 
+    private void UpdateToolbarForCT()
+    {
+        if (FullToolbarPanel == null || CtMiniPanel == null)
+        {
+            return;
+        }
+
+        FullToolbarPanel.Visibility = _isClickThroughEnabled
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+
+        CtMiniPanel.Visibility = _isClickThroughEnabled
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+    }
+
+    private bool IsPointInsideToolbarPanelScreenBounds(IntPtr lParam)
+    {
+        if (!_isClickThroughEnabled || ToolbarPanel == null || !ToolbarPanel.IsVisible)
+        {
+            return false;
+        }
+
+        int raw = lParam.ToInt32();
+        int screenX = unchecked((short)(raw & 0xFFFF));
+        int screenY = unchecked((short)((raw >> 16) & 0xFFFF));
+
+        Point topLeft = ToolbarPanel.PointToScreen(new Point(0, 0));
+        Rect bounds = new(topLeft.X, topLeft.Y, ToolbarPanel.ActualWidth, ToolbarPanel.ActualHeight);
+
+        return bounds.Contains(new Point(screenX, screenY));
+    }
+
     private static bool IsToolbarDragHandleHit(object originalSource)
     {
         DependencyObject? current = originalSource as DependencyObject;
@@ -1050,7 +1086,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        ShowToastMessage("描画OFF。タスクトレイから戻せます。");
+        ShowToastMessage("描画OFF。右の戻るかタスクトレイから戻せます。");
         _hasShownClickThroughTrayMessage = true;
     }
 
@@ -3849,6 +3885,11 @@ public partial class MainWindow : Window
         SetClickThrough(!_isClickThroughEnabled);
     }
 
+    private void CtReturnButton_Click(object sender, RoutedEventArgs e)
+    {
+        SetClickThrough(false);
+    }
+
     private void SetClickThrough(bool enabled)
     {
         FinalizeOrCancelCurrentOperation();
@@ -3860,50 +3901,43 @@ public partial class MainWindow : Window
 
         _isClickThroughEnabled = enabled;
 
-        ToolbarPanel.Visibility = enabled
-            ? Visibility.Collapsed
-            : Visibility.Visible;
-
         ColorPopup.IsOpen = false;
         PenWidthPopup.IsOpen = false;
+        RectangleSettingsPopup.IsOpen = false;
         _colorButtonClickTimer.Stop();
         _penButtonClickTimer.Stop();
         _penWidthPresetClickTimer.Stop();
         _pendingPenButtonSingleClick = false;
         _pendingPenWidthPresetIndex = null;
 
+        UpdateToolbarForCT();
+
         IntPtr hwnd = new WindowInteropHelper(this).Handle;
         if (hwnd != IntPtr.Zero)
         {
             long exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE).ToInt64();
-
-            if (enabled)
-            {
-                exStyle |= WS_EX_LAYERED;
-                exStyle |= WS_EX_TRANSPARENT;
-
-                DrawingCanvas.IsHitTestVisible = false;
-                DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
-                ClickThroughButton.Content = "CT: ON";
-            }
-            else
-            {
-                exStyle |= WS_EX_LAYERED;
-                exStyle &= ~WS_EX_TRANSPARENT;
-
-                DrawingCanvas.IsHitTestVisible = true;
-                DrawingCanvas.EditingMode = _currentTool switch
-                {
-                    ToolMode.Pen => InkCanvasEditingMode.Ink,
-                    ToolMode.Rectangle => InkCanvasEditingMode.None,
-                    ToolMode.Circle => InkCanvasEditingMode.None,
-                    ToolMode.Text => InkCanvasEditingMode.None,
-                    _ => InkCanvasEditingMode.EraseByPoint
-                };
-                ClickThroughButton.Content = "CT: OFF";
-            }
-
+            exStyle |= WS_EX_LAYERED;
             SetWindowLongPtr(hwnd, GWL_EXSTYLE, new IntPtr(exStyle));
+        }
+
+        if (enabled)
+        {
+            DrawingCanvas.IsHitTestVisible = false;
+            DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
+            ClickThroughButton.Content = "CT: ON";
+        }
+        else
+        {
+            DrawingCanvas.IsHitTestVisible = true;
+            DrawingCanvas.EditingMode = _currentTool switch
+            {
+                ToolMode.Pen => InkCanvasEditingMode.Ink,
+                ToolMode.Rectangle => InkCanvasEditingMode.None,
+                ToolMode.Circle => InkCanvasEditingMode.None,
+                ToolMode.Text => InkCanvasEditingMode.None,
+                _ => InkCanvasEditingMode.EraseByPoint
+            };
+            ClickThroughButton.Content = "CT: OFF";
         }
 
         UpdateNotifyIconMenu();
@@ -3927,6 +3961,18 @@ public partial class MainWindow : Window
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
+        if (msg == WM_NCHITTEST && _isClickThroughEnabled)
+        {
+            if (IsPointInsideToolbarPanelScreenBounds(lParam))
+            {
+                handled = true;
+                return new IntPtr(HTCLIENT);
+            }
+
+            handled = true;
+            return new IntPtr(HTTRANSPARENT);
+        }
+
         if (msg == WM_HOTKEY && wParam.ToInt32() == HOTKEY_ID_TOGGLE_CLICKTHROUGH)
         {
             SetClickThrough(!_isClickThroughEnabled);
