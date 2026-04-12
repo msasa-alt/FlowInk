@@ -10,6 +10,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using Forms = System.Windows.Forms;
@@ -31,6 +32,7 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _colorButtonClickTimer = new();
     private readonly DispatcherTimer _penButtonClickTimer = new();
     private readonly DispatcherTimer _penWidthPresetClickTimer = new();
+    private readonly DispatcherTimer _clickThroughHoverTimer = new();
     private Forms.ToolStripMenuItem? _trayEnableClickThroughMenuItem;
     private Forms.ToolStripMenuItem? _trayDisableClickThroughMenuItem;
     private ToolMode _currentTool = ToolMode.Pen;
@@ -115,6 +117,7 @@ public partial class MainWindow : Window
     private const double TextPaddingY = 2.0;
 
     private const int GWL_EXSTYLE = -20;
+    private const int WS_EX_TRANSPARENT = 0x00000020;
     private const int WS_EX_LAYERED = 0x00080000;
 
     private const int WM_HOTKEY = 0x0312;
@@ -128,6 +131,8 @@ public partial class MainWindow : Window
     private const uint VK_T = 0x54;
 
     private const string AppSettingsFileName = "app-settings.json";
+    private const string ClickThroughOffIconPath = "Assets/mouse-pointer-2.png";
+    private const string ClickThroughOnIconPath = "Assets/mouse-pointer-2-off.png";
 
     private const double ToolbarViewportMargin = 0.0;
 
@@ -399,6 +404,7 @@ public partial class MainWindow : Window
         BuildRecentColorButtons();
         BuildPenWidthPresetButtons();
         UpdateToolbarForCT();
+        UpdateClickThroughButtonIcons();
 
         ApplyPenColor(_currentPenColor, addToRecent: true);
 
@@ -422,6 +428,7 @@ public partial class MainWindow : Window
         InitializeColorButtonClickTimer();
         InitializePenButtonClickTimer();
         InitializePenWidthPresetClickTimer();
+        InitializeClickThroughHoverTimer();
 
         Loaded += MainWindow_Loaded;
         Closed += MainWindow_Closed;
@@ -472,6 +479,7 @@ public partial class MainWindow : Window
     {
         _toastTimer.Stop();
         _colorButtonClickTimer.Stop();
+        _clickThroughHoverTimer.Stop();
         EndToolbarDrag(saveSettings: false);
         _notifyIcon.Visible = false;
         _notifyIcon.Dispose();
@@ -960,6 +968,22 @@ public partial class MainWindow : Window
         ClampToolbarPositionToViewport(saveSettings);
     }
 
+    private void UpdateClickThroughButtonIcons()
+    {
+        SetImageSource(ClickThroughButtonIcon, _isClickThroughEnabled ? ClickThroughOnIconPath : ClickThroughOffIconPath);
+        SetImageSource(CtReturnButtonIcon, ClickThroughOnIconPath);
+    }
+
+    private static void SetImageSource(Image? image, string relativePath)
+    {
+        if (image == null)
+        {
+            return;
+        }
+
+        image.Source = new BitmapImage(new Uri(relativePath, UriKind.Relative));
+    }
+
     private void UpdateToolbarForCT()
     {
         if (FullToolbarPanel == null || CtMiniPanel == null)
@@ -1077,6 +1101,63 @@ public partial class MainWindow : Window
     {
         _penWidthPresetClickTimer.Interval = TimeSpan.FromMilliseconds(Forms.SystemInformation.DoubleClickTime + 50);
         _penWidthPresetClickTimer.Tick += PenWidthPresetClickTimer_Tick;
+    }
+
+    private void InitializeClickThroughHoverTimer()
+    {
+        _clickThroughHoverTimer.Interval = TimeSpan.FromMilliseconds(50);
+        _clickThroughHoverTimer.Tick += ClickThroughHoverTimer_Tick;
+    }
+
+    private void ClickThroughHoverTimer_Tick(object? sender, EventArgs e)
+    {
+        if (!_isClickThroughEnabled)
+        {
+            return;
+        }
+
+        UpdateClickThroughTransparentState();
+    }
+
+    private void UpdateClickThroughTransparentState()
+    {
+        IntPtr hwnd = new WindowInteropHelper(this).Handle;
+        if (hwnd == IntPtr.Zero)
+        {
+            return;
+        }
+
+        long exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE).ToInt64();
+        exStyle |= WS_EX_LAYERED;
+
+        bool shouldBeTransparent = _isClickThroughEnabled && !IsCursorInsideToolbarPanel();
+
+        if (shouldBeTransparent)
+        {
+            exStyle |= WS_EX_TRANSPARENT;
+        }
+        else
+        {
+            exStyle &= ~WS_EX_TRANSPARENT;
+        }
+
+        SetWindowLongPtr(hwnd, GWL_EXSTYLE, new IntPtr(exStyle));
+    }
+
+    private bool IsCursorInsideToolbarPanel()
+    {
+        if (ToolbarPanel == null || !ToolbarPanel.IsVisible || ToolbarPanel.ActualWidth <= 0 || ToolbarPanel.ActualHeight <= 0)
+        {
+            return false;
+        }
+
+        var cursorPosition = Forms.Cursor.Position;
+        Point localPoint = ToolbarPanel.PointFromScreen(new Point(cursorPosition.X, cursorPosition.Y));
+
+        return localPoint.X >= 0
+            && localPoint.Y >= 0
+            && localPoint.X <= ToolbarPanel.ActualWidth
+            && localPoint.Y <= ToolbarPanel.ActualHeight;
     }
 
     private void ShowClickThroughToastIfNeeded()
@@ -3911,20 +3992,13 @@ public partial class MainWindow : Window
         _pendingPenWidthPresetIndex = null;
 
         UpdateToolbarForCT();
-
-        IntPtr hwnd = new WindowInteropHelper(this).Handle;
-        if (hwnd != IntPtr.Zero)
-        {
-            long exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE).ToInt64();
-            exStyle |= WS_EX_LAYERED;
-            SetWindowLongPtr(hwnd, GWL_EXSTYLE, new IntPtr(exStyle));
-        }
+        UpdateClickThroughButtonIcons();
 
         if (enabled)
         {
             DrawingCanvas.IsHitTestVisible = false;
             DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
-            ClickThroughButton.Content = "CT: ON";
+            _clickThroughHoverTimer.Start();
         }
         else
         {
@@ -3937,9 +4011,10 @@ public partial class MainWindow : Window
                 ToolMode.Text => InkCanvasEditingMode.None,
                 _ => InkCanvasEditingMode.EraseByPoint
             };
-            ClickThroughButton.Content = "CT: OFF";
+            _clickThroughHoverTimer.Stop();
         }
 
+        UpdateClickThroughTransparentState();
         UpdateNotifyIconMenu();
 
         if (enabled)

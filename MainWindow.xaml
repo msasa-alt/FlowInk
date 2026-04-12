@@ -44,6 +44,22 @@
             <Setter Property="BorderThickness" Value="1"/>
         </Style>
 
+        <Style x:Key="ToolbarMiniButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="34"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="MinWidth" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Background" Value="#FF2D2D2D"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="DimGray"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
         <Style x:Key="ColorSwatchButtonStyle" TargetType="Button">
             <Setter Property="Width" Value="28"/>
             <Setter Property="Height" Value="28"/>
@@ -281,10 +297,14 @@
 
                     <Button x:Name="ClickThroughButton"
                             Style="{StaticResource ToolbarButtonStyle}"
-                            Content="CT"
-                            FontSize="12"
                             ToolTip="Click Through"
-                            Click="ClickThroughButton_Click"/>
+                            Click="ClickThroughButton_Click">
+                        <Image x:Name="ClickThroughButtonIcon"
+                               Width="18"
+                               Height="18"
+                               Stretch="Uniform"
+                               Source="Assets/mouse-pointer-2.png"/>
+                    </Button>
 
                     <Button x:Name="ExitButton"
                             Style="{StaticResource ToolbarButtonStyle}"
@@ -297,18 +317,23 @@
                 </StackPanel>
 
                 <StackPanel x:Name="CtMiniPanel"
+                            Width="34"
                             Orientation="Vertical"
+                            HorizontalAlignment="Center"
                             Visibility="Collapsed">
                     <Border Height="8"
                             Background="#01000000"/>
 
                     <Button x:Name="CtReturnButton"
-                            Style="{StaticResource ToolbarButtonStyle}"
-                            Width="56"
-                            Content="戻る"
-                            FontSize="12"
+                            Style="{StaticResource ToolbarMiniButtonStyle}"
                             ToolTip="描画ONに戻す"
-                            Click="CtReturnButton_Click"/>
+                            Click="CtReturnButton_Click">
+                        <Image x:Name="CtReturnButtonIcon"
+                               Width="18"
+                               Height="18"
+                               Stretch="Uniform"
+                               Source="Assets/mouse-pointer-2-off.png"/>
+                    </Button>
 
                     <Border Height="8"
                             Background="#01000000"/>

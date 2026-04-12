@@ -15,10 +15,20 @@
 	<ItemGroup>
 	  <None Remove=".gitattributes" />
 	  <None Remove="Assets\FlowInk.ico" />
+	  <None Remove="Assets\mouse-pointer-2-off.png" />
+	  <None Remove="Assets\mouse-pointer-2.png" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Include="Assets\FlowInk.ico" />
+	  <Content Include="Assets\FlowInk.ico">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\mouse-pointer-2-off.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\mouse-pointer-2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	</ItemGroup>
 
 	<ItemGroup>
