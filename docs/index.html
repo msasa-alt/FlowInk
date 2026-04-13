@@ -2,150 +2,386 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FlowInk</title>
+  <meta
+    name="description"
+    content="FlowInkは、画面に直接描ける軽量オーバーレイツールです。シンプルな操作で、説明・共有・メモ書きをすばやく行えます。"
+  />
 
   <style>
+    :root {
+      --bg: #ffffff;
+      --text: #111111;
+      --muted: #666666;
+      --line: #e9e9e9;
+      --soft: #f7f8fa;
+      --accent: #111111;
+      --accent-hover: #2a2a2a;
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #ffffff;
-      color: #111;
+      background: var(--bg);
+      color: var(--text);
       text-align: center;
+      line-height: 1.6;
     }
 
     .container {
-      max-width: 900px;
+      max-width: 980px;
       margin: 0 auto;
-      padding: 60px 20px;
+      padding: 72px 20px;
+    }
+
+    .hero {
+      padding-top: 16px;
+      padding-bottom: 24px;
+    }
+
+    .logo-wrap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 132px;
+      height: 132px;
+      border-radius: 28px;
+      background: #111;
+      box-shadow: var(--shadow);
+      margin-bottom: 26px;
     }
 
     img.logo {
-      width: 120px;
-      margin-bottom: 20px;
+      width: 84px;
+      height: 84px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
     }
 
     h1 {
-      font-size: 42px;
-      margin: 10px 0;
+      font-size: clamp(40px, 7vw, 64px);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin: 0 0 14px;
     }
 
     p.lead {
-      font-size: 18px;
-      color: #555;
-      margin-bottom: 30px;
+      max-width: 700px;
+      margin: 0 auto 30px;
+      font-size: 19px;
+      color: var(--muted);
+    }
+
+    .btn-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
     }
 
     .btn {
       display: inline-block;
-      padding: 14px 28px;
-      background: #111;
+      padding: 15px 30px;
+      background: var(--accent);
       color: #fff;
       text-decoration: none;
-      border-radius: 8px;
-      font-weight: bold;
-      margin: 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      transition: 0.18s ease;
+      box-shadow: var(--shadow);
     }
 
     .btn:hover {
-      background: #333;
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .subnote {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
     }
 
     .section {
-      margin-top: 60px;
+      margin-top: 72px;
+    }
+
+    h2 {
+      font-size: 32px;
+      letter-spacing: -0.02em;
+      margin: 0 0 12px;
+    }
+
+    .section-lead {
+      max-width: 700px;
+      margin: 0 auto 26px;
+      color: var(--muted);
+      font-size: 17px;
     }
 
     .features {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 20px;
       text-align: left;
       margin-top: 30px;
     }
 
     .card {
-      border: 1px solid #eee;
+      border: 1px solid var(--line);
+      padding: 22px;
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+    }
+
+    .card strong {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .use-cases {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 28px;
+    }
+
+    .use-case {
       padding: 20px;
-      border-radius: 10px;
+      border-radius: var(--radius);
+      background: var(--soft);
+      border: 1px solid var(--line);
+    }
+
+    .use-case strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 17px;
+    }
+
+    .use-case p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .steps {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 12px;
+      text-align: left;
+      margin-top: 8px;
+      max-width: 520px;
+      width: 100%;
+    }
+
+    .step {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      background: #fff;
+    }
+
+    .step strong {
+      display: inline-block;
+      margin-right: 6px;
+    }
+
+    .cta-box {
+      margin-top: 72px;
+      padding: 36px 24px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8f9fb 100%);
+      box-shadow: var(--shadow);
+    }
+
+    .cta-box h2 {
+      margin-bottom: 10px;
+    }
+
+    .cta-box p {
+      max-width: 620px;
+      margin: 0 auto 22px;
+      color: var(--muted);
     }
 
     footer {
-      margin-top: 80px;
+      margin-top: 84px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
       font-size: 14px;
       color: #888;
     }
 
-    @media (max-width: 600px) {
-      .features {
+    @media (max-width: 760px) {
+      .features,
+      .use-cases {
         grid-template-columns: 1fr;
+      }
+
+      .container {
+        padding: 56px 18px;
+      }
+
+      .section {
+        margin-top: 56px;
+      }
+
+      .cta-box {
+        margin-top: 56px;
       }
     }
   </style>
 </head>
 
 <body>
-
-<div class="container">
-
-  <!-- アイコン -->
-  <img src="images/FlowInk_icon.png" class="logo">
-
-  <!-- タイトル -->
-  <h1>FlowInk</h1>
-  <p class="lead">
-    画面に直接描ける、軽量オーバーレイツール
-  </p>
-
-  <!-- ボタン -->
-  <a class="btn" href="https://github.com/msasa-alt/FlowInk/releases" target="_blank">
-    ダウンロード
-  </a>
-
-  <a class="btn" href="https://github.com/msasa-alt/FlowInk" target="_blank">
-    GitHub
-  </a>
-
-  <!-- 特長 -->
-  <div class="section">
-    <h2>特長</h2>
-
-    <div class="features">
-      <div class="card">
-        <strong>オーバーレイ描画</strong><br>
-        画面の上に直接書き込める
+  <div class="container">
+    <section class="hero">
+      <div class="logo-wrap">
+        <img src="images/FlowInk_icon.png" class="logo" alt="FlowInk icon" />
       </div>
 
-      <div class="card">
-        <strong>シンプル操作</strong><br>
-        最小構成で直感的に使える
+      <div class="eyebrow">Desktop Overlay Tool</div>
+
+      <h1>FlowInk</h1>
+
+      <p class="lead">
+        FlowInkはWindows画面のアノテーション(落書き)ツールです<br>
+        説明、共有、検証、メモ書きを、すばやくシンプルに行えます。
+      </p>
+
+      <div class="btn-row">
+        <a
+          class="btn"
+          href="https://github.com/msasa-alt/FlowInk/releases"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          ダウンロード
+        </a>
       </div>
 
-      <div class="card">
-        <strong>テキスト入力</strong><br>
-        説明や補足も簡単に追加
-      </div>
+      <p class="subnote">
+        ZIPをダウンロードして、解凍して起動するだけ
+      </p>
+    </section>
 
-      <div class="card">
-        <strong>軽量設計</strong><br>
-        すぐ起動・すぐ使える
+    <section class="section">
+      <h2>特長</h2>
+      <p class="section-lead">
+        余計な操作を増やさず、必要な機能をすぐ使えることを重視した設計です。
+      </p>
+
+      <div class="features">
+        <div class="card">
+          <strong>オーバーレイ描画</strong>
+          <p>デスクトップ画面の上にそのまま書き込めるので、説明や確認が直感的です。</p>
+        </div>
+
+        <div class="card">
+          <strong>シンプル操作</strong>
+          <p>最小構成のUIで、迷いにくく、起動してすぐ使い始められます。</p>
+        </div>
+
+        <div class="card">
+          <strong>テキスト入力</strong>
+          <p>線や図形だけでなく、補足説明やラベルもその場で追加できます。</p>
+        </div>
+
+        <div class="card">
+          <strong>軽量設計</strong>
+          <p>重たいセットアップなしで、必要なときにすぐ立ち上げて使えます。</p>
+        </div>
       </div>
-    </div>
+    </section>
+
+    <section class="section">
+      <h2>こんな用途に</h2>
+      <p class="section-lead">
+        ちょっと書き込みたい場面に、手早く使えるツールです。
+      </p>
+
+      <div class="use-cases">
+        <div class="use-case">
+          <strong>画面説明</strong>
+          <p>会話しながら見せたい場所に線や文字をすばやく追加。</p>
+        </div>
+
+        <div class="use-case">
+          <strong>作業メモ</strong>
+          <p>一時的な書き込みや補足メモを画面上に残せます。</p>
+        </div>
+
+        <div class="use-case">
+          <strong>検証・確認</strong>
+          <p>比較やチェック時に、その場で印を付けながら整理できます。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>使い方</h2>
+      <p class="section-lead">
+        導入はシンプルです。
+      </p>
+
+      <div class="steps">
+        <div class="step"><strong>1.</strong> 配布ZIPをダウンロード</div>
+        <div class="step"><strong>2.</strong> 解凍して FlowInk を起動</div>
+        <div class="step"><strong>3.</strong> そのまま画面上に描画・入力</div>
+      </div>
+    </section>
+
+    <section class="cta-box">
+      <h2>FlowInkを試す</h2>
+      <p>
+        必要なときにすぐ起動して、画面上にすぐ書ける。<br>
+        まずはダウンロードして、使い心地を試してみてください。
+      </p>
+      <a
+        class="btn"
+        href="https://github.com/msasa-alt/FlowInk/releases"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        最新版をダウンロード
+      </a>
+    </section>
+
+    <footer>
+      © FlowInk
+    </footer>
   </div>
-
-  <!-- 使い方 -->
-  <div class="section">
-    <h2>使い方</h2>
-    <p>
-      ダウンロード → 解凍 → 起動するだけ
-    </p>
-  </div>
-
-  <!-- フッター -->
-  <footer>
-    © FlowInk
-  </footer>
-
-</div>
-
 </body>
 </html>
