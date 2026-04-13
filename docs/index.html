@@ -20,11 +20,14 @@
       --accent-hover: #2a2a2a;
       --radius: 14px;
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
-      --toolbar-w: 95px;
-      --callout-gap: 28px;
-      --line-len: 44px;
+
+      /* toolbar diagram tuning */
+      --toolbar-image-width: 78px;
+      --toolbar-col-width: 120px;
+      --line-len: 48px;
       --dot-size: 8px;
-      --row-h: 63px;
+      --callout-card-min-h: 58px;
+      --toolbar-stack-h: 720px;
     }
 
     * {
@@ -185,23 +188,22 @@
     }
 
     .toolbar-diagram {
-      width: 100%;
       min-width: 860px;
       display: grid;
-      grid-template-columns: var(--toolbar-w) 1fr;
-      gap: var(--callout-gap);
+      grid-template-columns: var(--toolbar-col-width) 1fr;
+      gap: 34px;
       align-items: start;
       text-align: left;
     }
 
     .toolbar-image-col {
       position: relative;
-      width: var(--toolbar-w);
-      padding-top: 4px;
+      width: var(--toolbar-col-width);
+      height: var(--toolbar-stack-h);
     }
 
     .toolbar-image-col img {
-      width: 78px;
+      width: var(--toolbar-image-width);
       height: auto;
       display: block;
       margin: 0 auto;
@@ -211,15 +213,19 @@
 
     .toolbar-callouts {
       position: relative;
-      padding-top: 2px;
+      height: var(--toolbar-stack-h);
+      padding-top: 0;
     }
 
     .callout {
-      position: relative;
-      min-height: var(--row-h);
+      position: absolute;
+      left: 0;
+      right: 0;
+      min-height: var(--callout-card-min-h);
       display: flex;
       align-items: center;
-      padding-left: calc(var(--line-len) + 18px);
+      padding-left: calc(var(--line-len) + 20px);
+      transform: translateY(-50%);
     }
 
     .callout::before {
@@ -267,12 +273,17 @@
       line-height: 1.55;
     }
 
-    .toolbar-note {
-      margin-top: 18px;
-      font-size: 13px;
-      color: var(--muted);
-      text-align: center;
-    }
+    /* Individual alignment per toolbar button center */
+    .callout.pen      { top:  40px; }
+    .callout.rect     { top: 121px; }
+    .callout.ellipse  { top: 202px; }
+    .callout.text     { top: 283px; }
+    .callout.eraser   { top: 364px; }
+    .callout.color    { top: 445px; }
+    .callout.clear    { top: 526px; }
+    .callout.ct       { top: 607px; }
+    .callout.settings { top: 688px; }
+    .callout.exit     { top: 769px; }
 
     .use-cases {
       display: grid;
@@ -450,70 +461,70 @@
           </div>
 
           <div class="toolbar-callouts">
-            <div class="callout">
+            <div class="callout pen">
               <div class="callout-card">
                 <strong>ペン</strong>
                 <p>自由に線を描画できます。注釈や手書きメモをすばやく入れたいときに使います。</p>
               </div>
             </div>
 
-            <div class="callout">
+            <div class="callout rect">
               <div class="callout-card">
                 <strong>四角形</strong>
                 <p>四角形を描画して、範囲や注目箇所を囲めます。</p>
               </div>
             </div>
 
-            <div class="callout">
+            <div class="callout ellipse">
               <div class="callout-card">
                 <strong>円</strong>
                 <p>円や楕円を描画して、ポイントを丸く強調できます。</p>
               </div>
             </div>
 
-            <div class="callout">
+            <div class="callout text">
               <div class="callout-card">
                 <strong>テキスト</strong>
                 <p>説明文や補足メモを画面上に直接入力できます。</p>
               </div>
             </div>
 
-            <div class="callout">
+            <div class="callout eraser">
               <div class="callout-card">
                 <strong>消しゴム</strong>
                 <p>描いた内容を部分的に消したいときに使います。</p>
               </div>
             </div>
 
-            <div class="callout">
+            <div class="callout color">
               <div class="callout-card">
                 <strong>カラー</strong>
                 <p>描画色を変更できます。用途に応じて色分けしたいときに便利です。</p>
               </div>
             </div>
 
-            <div class="callout">
+            <div class="callout clear">
               <div class="callout-card">
                 <strong>クリア</strong>
                 <p>画面上に描いた内容をまとめて消去します。</p>
               </div>
             </div>
 
-            <div class="callout">
+            <div class="callout ct">
               <div class="callout-card">
                 <strong>クリック透過 / CT</strong>
                 <p>描画を表示したまま、背後のウィンドウを操作できるようにします。</p>
               </div>
             </div>
 
-            <div class="callout">
+            <div class="callout settings">
               <div class="callout-card">
                 <strong>設定</strong>
                 <p>動作や表示に関する設定を開きます。</p>
               </div>
             </div>
 
-            <div class="callout">
+            <div class="callout exit">
               <div class="callout-card">
                 <strong>終了</strong>
                 <p>FlowInkを終了します。</p>
