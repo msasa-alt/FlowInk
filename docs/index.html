@@ -20,6 +20,11 @@
       --accent-hover: #2a2a2a;
       --radius: 14px;
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      --toolbar-w: 95px;
+      --callout-gap: 28px;
+      --line-len: 44px;
+      --dot-size: 8px;
+      --row-h: 63px;
     }
 
     * {
@@ -169,66 +174,104 @@
       font-size: 15px;
     }
 
-    .toolbar-layout {
+    .toolbar-diagram-wrap {
+      margin-top: 34px;
+      padding: 28px 20px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8f9fb 100%);
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+    }
+
+    .toolbar-diagram {
+      width: 100%;
+      min-width: 860px;
       display: grid;
-      grid-template-columns: 220px 1fr;
-      gap: 28px;
+      grid-template-columns: var(--toolbar-w) 1fr;
+      gap: var(--callout-gap);
       align-items: start;
-      margin-top: 30px;
       text-align: left;
     }
 
-    .toolbar-preview {
-      position: sticky;
-      top: 24px;
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      background: linear-gradient(180deg, #ffffff 0%, #f7f8fa 100%);
-      box-shadow: var(--shadow);
-      padding: 20px;
-      text-align: center;
+    .toolbar-image-col {
+      position: relative;
+      width: var(--toolbar-w);
+      padding-top: 4px;
     }
 
-    .toolbar-preview img {
-      width: 160px;
-      max-width: 100%;
+    .toolbar-image-col img {
+      width: 78px;
       height: auto;
       display: block;
       margin: 0 auto;
+      filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.08));
+      border-radius: 18px;
     }
 
-    .toolbar-note {
-      margin-top: 14px;
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.5;
+    .toolbar-callouts {
+      position: relative;
+      padding-top: 2px;
     }
 
-    .toolbar-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
+    .callout {
+      position: relative;
+      min-height: var(--row-h);
+      display: flex;
+      align-items: center;
+      padding-left: calc(var(--line-len) + 18px);
     }
 
-    .tool-card {
+    .callout::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: var(--line-len);
+      height: 2px;
+      background: #bfc5ce;
+      transform: translateY(-50%);
+    }
+
+    .callout::after {
+      content: "";
+      position: absolute;
+      left: calc(var(--line-len) - var(--dot-size) / 2);
+      top: 50%;
+      width: var(--dot-size);
+      height: var(--dot-size);
+      border-radius: 50%;
+      background: #9aa3af;
+      transform: translateY(-50%);
+    }
+
+    .callout-card {
+      width: 100%;
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      padding: 18px;
+      padding: 14px 16px;
       background: #fff;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
     }
 
-    .tool-card .tool-name {
+    .callout-card strong {
       display: block;
-      font-size: 17px;
-      font-weight: 700;
-      margin-bottom: 6px;
+      font-size: 16px;
+      margin-bottom: 4px;
     }
 
-    .tool-card p {
+    .callout-card p {
       margin: 0;
       color: var(--muted);
-      font-size: 15px;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .toolbar-note {
+      margin-top: 18px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
     }
 
     .use-cases {
@@ -307,19 +350,14 @@
     }
 
     @media (max-width: 900px) {
-      .toolbar-layout {
-        grid-template-columns: 1fr;
-      }
-
-      .toolbar-preview {
-        position: static;
+      .toolbar-diagram-wrap {
+        padding: 22px 14px;
       }
     }
 
     @media (max-width: 760px) {
       .features,
-      .use-cases,
-      .toolbar-grid {
+      .use-cases {
         grid-template-columns: 1fr;
       }
 
@@ -402,67 +440,90 @@
     <section class="section">
       <h2>ツールバー</h2>
       <p class="section-lead">
-        必要な機能だけを右側のツールバーにまとめています。
+        右側のツールバーから、描画・編集・表示切替をすばやく行えます。
       </p>
 
-      <div class="toolbar-layout">
-        <div class="toolbar-preview">
-          <img src="images/toolbar.png" alt="FlowInk toolbar" />
-          <div class="toolbar-note">
-            上から順に、描画・編集・表示切替・設定・終了の操作が並びます。
+      <div class="toolbar-diagram-wrap">
+        <div class="toolbar-diagram">
+          <div class="toolbar-image-col">
+            <img src="images/toolbar.png" alt="FlowInk toolbar" />
+          </div>
+
+          <div class="toolbar-callouts">
+            <div class="callout">
+              <div class="callout-card">
+                <strong>ペン</strong>
+                <p>自由に線を描画できます。注釈や手書きメモをすばやく入れたいときに使います。</p>
+              </div>
+            </div>
+
+            <div class="callout">
+              <div class="callout-card">
+                <strong>四角形</strong>
+                <p>四角形を描画して、範囲や注目箇所を囲めます。</p>
+              </div>
+            </div>
+
+            <div class="callout">
+              <div class="callout-card">
+                <strong>円</strong>
+                <p>円や楕円を描画して、ポイントを丸く強調できます。</p>
+              </div>
+            </div>
+
+            <div class="callout">
+              <div class="callout-card">
+                <strong>テキスト</strong>
+                <p>説明文や補足メモを画面上に直接入力できます。</p>
+              </div>
+            </div>
+
+            <div class="callout">
+              <div class="callout-card">
+                <strong>消しゴム</strong>
+                <p>描いた内容を部分的に消したいときに使います。</p>
+              </div>
+            </div>
+
+            <div class="callout">
+              <div class="callout-card">
+                <strong>カラー</strong>
+                <p>描画色を変更できます。用途に応じて色分けしたいときに便利です。</p>
+              </div>
+            </div>
+
+            <div class="callout">
+              <div class="callout-card">
+                <strong>クリア</strong>
+                <p>画面上に描いた内容をまとめて消去します。</p>
+              </div>
+            </div>
+
+            <div class="callout">
+              <div class="callout-card">
+                <strong>クリック透過 / CT</strong>
+                <p>描画を表示したまま、背後のウィンドウを操作できるようにします。</p>
+              </div>
+            </div>
+
+            <div class="callout">
+              <div class="callout-card">
+                <strong>設定</strong>
+                <p>動作や表示に関する設定を開きます。</p>
+              </div>
+            </div>
+
+            <div class="callout">
+              <div class="callout-card">
+                <strong>終了</strong>
+                <p>FlowInkを終了します。</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="toolbar-grid">
-          <div class="tool-card">
-            <span class="tool-name">ペン</span>
-            <p>自由に線を描画できます。注釈や手書きメモを素早く入れたいときに使います。</p>
-          </div>
-
-          <div class="tool-card">
-            <span class="tool-name">四角形</span>
-            <p>四角形を描画して、範囲や注目箇所を囲めます。</p>
-          </div>
-
-          <div class="tool-card">
-            <span class="tool-name">円</span>
-            <p>円や楕円を描画して、ポイントを丸く強調できます。</p>
-          </div>
-
-          <div class="tool-card">
-            <span class="tool-name">テキスト</span>
-            <p>説明文や補足メモを直接入力できます。</p>
-          </div>
-
-          <div class="tool-card">
-            <span class="tool-name">消しゴム</span>
-            <p>描いた内容を部分的に消したいときに使います。</p>
-          </div>
-
-          <div class="tool-card">
-            <span class="tool-name">カラー</span>
-            <p>描画色を変更できます。用途に応じて色分けしたいときに便利です。</p>
-          </div>
-
-          <div class="tool-card">
-            <span class="tool-name">クリア</span>
-            <p>画面上に描いた内容をまとめて消去します。</p>
-          </div>
-
-          <div class="tool-card">
-            <span class="tool-name">クリック透過 / CT</span>
-            <p>描画を表示したまま、背後のウィンドウを操作できるようにします。</p>
-          </div>
-
-          <div class="tool-card">
-            <span class="tool-name">設定</span>
-            <p>動作や表示に関する設定を開きます。</p>
-          </div>
-
-          <div class="tool-card">
-            <span class="tool-name">終了</span>
-            <p>FlowInkを終了します。</p>
-          </div>
+        <div class="toolbar-note">
+          ツールバー画像を小さめに表示し、各ボタンの位置に合わせて右側へ説明を並べています。
         </div>
       </div>
     </section>
