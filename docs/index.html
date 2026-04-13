@@ -40,7 +40,7 @@
     }
 
     .container {
-      max-width: 980px;
+      max-width: 1040px;
       margin: 0 auto;
       padding: 72px 20px;
     }
@@ -169,6 +169,68 @@
       font-size: 15px;
     }
 
+    .toolbar-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 28px;
+      align-items: start;
+      margin-top: 30px;
+      text-align: left;
+    }
+
+    .toolbar-preview {
+      position: sticky;
+      top: 24px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: linear-gradient(180deg, #ffffff 0%, #f7f8fa 100%);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .toolbar-preview img {
+      width: 160px;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .toolbar-note {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .toolbar-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .tool-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+    }
+
+    .tool-card .tool-name {
+      display: block;
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .tool-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
     .use-cases {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -244,9 +306,20 @@
       color: #888;
     }
 
+    @media (max-width: 900px) {
+      .toolbar-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar-preview {
+        position: static;
+      }
+    }
+
     @media (max-width: 760px) {
       .features,
-      .use-cases {
+      .use-cases,
+      .toolbar-grid {
         grid-template-columns: 1fr;
       }
 
@@ -322,6 +395,74 @@
         <div class="card">
           <strong>軽量設計</strong>
           <p>重たいセットアップなしで、必要なときにすぐ立ち上げて使えます。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>ツールバー</h2>
+      <p class="section-lead">
+        必要な機能だけを右側のツールバーにまとめています。
+      </p>
+
+      <div class="toolbar-layout">
+        <div class="toolbar-preview">
+          <img src="images/toolbar.png" alt="FlowInk toolbar" />
+          <div class="toolbar-note">
+            上から順に、描画・編集・表示切替・設定・終了の操作が並びます。
+          </div>
+        </div>
+
+        <div class="toolbar-grid">
+          <div class="tool-card">
+            <span class="tool-name">ペン</span>
+            <p>自由に線を描画できます。注釈や手書きメモを素早く入れたいときに使います。</p>
+          </div>
+
+          <div class="tool-card">
+            <span class="tool-name">四角形</span>
+            <p>四角形を描画して、範囲や注目箇所を囲めます。</p>
+          </div>
+
+          <div class="tool-card">
+            <span class="tool-name">円</span>
+            <p>円や楕円を描画して、ポイントを丸く強調できます。</p>
+          </div>
+
+          <div class="tool-card">
+            <span class="tool-name">テキスト</span>
+            <p>説明文や補足メモを直接入力できます。</p>
+          </div>
+
+          <div class="tool-card">
+            <span class="tool-name">消しゴム</span>
+            <p>描いた内容を部分的に消したいときに使います。</p>
+          </div>
+
+          <div class="tool-card">
+            <span class="tool-name">カラー</span>
+            <p>描画色を変更できます。用途に応じて色分けしたいときに便利です。</p>
+          </div>
+
+          <div class="tool-card">
+            <span class="tool-name">クリア</span>
+            <p>画面上に描いた内容をまとめて消去します。</p>
+          </div>
+
+          <div class="tool-card">
+            <span class="tool-name">クリック透過 / CT</span>
+            <p>描画を表示したまま、背後のウィンドウを操作できるようにします。</p>
+          </div>
+
+          <div class="tool-card">
+            <span class="tool-name">設定</span>
+            <p>動作や表示に関する設定を開きます。</p>
+          </div>
+
+          <div class="tool-card">
+            <span class="tool-name">終了</span>
+            <p>FlowInkを終了します。</p>
+          </div>
         </div>
       </div>
     </section>
