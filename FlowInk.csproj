@@ -36,10 +36,4 @@
 	  <Resource Include=".gitattributes" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<None Update="preset-colors.json">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
-
 </Project>
