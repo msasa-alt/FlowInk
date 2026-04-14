@@ -140,6 +140,7 @@ public partial class MainWindow : Window
     private const Forms.Keys DefaultHotkeyKey = Forms.Keys.T;
 
     private const string AppSettingsFileName = "app-settings.json";
+    private const string AppDataFolderName = "FlowInk";
     private const string ClickThroughOffIconPath = "Assets/mouse-pointer-2.png";
     private const string ClickThroughOnIconPath = "Assets/mouse-pointer-2-off.png";
 
@@ -1543,14 +1544,45 @@ public partial class MainWindow : Window
     }
 
 
-    private string GetColorFilePath(string fileName)
+    private static string GetAppDataDirectoryPath()
+    {
+        return Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            AppDataFolderName);
+    }
+
+    private static string GetInstalledFilePath(string fileName)
     {
         return Path.Combine(AppContext.BaseDirectory, fileName);
     }
 
+    private static string GetAppDataFilePath(string fileName)
+    {
+        return Path.Combine(GetAppDataDirectoryPath(), fileName);
+    }
+
+    private static void EnsureAppSettingsFileReady()
+    {
+        string appDataDirectoryPath = GetAppDataDirectoryPath();
+        Directory.CreateDirectory(appDataDirectoryPath);
+
+        string appDataFilePath = GetAppDataFilePath(AppSettingsFileName);
+        if (File.Exists(appDataFilePath))
+        {
+            return;
+        }
+
+        string installedFilePath = GetInstalledFilePath(AppSettingsFileName);
+        if (File.Exists(installedFilePath))
+        {
+            File.Copy(installedFilePath, appDataFilePath);
+        }
+    }
+
     private void LoadAppSettings()
     {
-        string filePath = GetColorFilePath(AppSettingsFileName);
+        EnsureAppSettingsFileReady();
+        string filePath = GetAppDataFilePath(AppSettingsFileName);
 
         try
         {
@@ -1660,7 +1692,8 @@ public partial class MainWindow : Window
 
     private void SaveAppSettings()
     {
-        string filePath = GetColorFilePath(AppSettingsFileName);
+        EnsureAppSettingsFileReady();
+        string filePath = GetAppDataFilePath(AppSettingsFileName);
 
         _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
 
