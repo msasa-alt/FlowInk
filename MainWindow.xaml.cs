@@ -3079,7 +3079,7 @@ public partial class MainWindow : Window
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled
         };
 
-        textBox.KeyDown += ActiveTextBox_KeyDown;
+        textBox.PreviewKeyDown += ActiveTextBox_KeyDown;
         textBox.LostKeyboardFocus += ActiveTextBox_LostKeyboardFocus;
         textBox.TextChanged += ActiveTextBox_TextChanged;
 
@@ -3222,7 +3222,7 @@ public partial class MainWindow : Window
         FontStyle commitFontStyle = textBox.FontStyle;
         FontWeight commitFontWeight = textBox.FontWeight;
 
-        textBox.KeyDown -= ActiveTextBox_KeyDown;
+        textBox.PreviewKeyDown -= ActiveTextBox_KeyDown;
         textBox.LostKeyboardFocus -= ActiveTextBox_LostKeyboardFocus;
         textBox.TextChanged -= ActiveTextBox_TextChanged;
 
@@ -3311,7 +3311,7 @@ public partial class MainWindow : Window
         TextBox textBox = _activeTextBox;
         _activeTextBox = null;
 
-        textBox.KeyDown -= ActiveTextBox_KeyDown;
+        textBox.PreviewKeyDown -= ActiveTextBox_KeyDown;
         textBox.LostKeyboardFocus -= ActiveTextBox_LostKeyboardFocus;
         textBox.TextChanged -= ActiveTextBox_TextChanged;
 
