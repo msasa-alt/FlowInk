@@ -22,12 +22,10 @@
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 
       /* toolbar diagram tuning */
-      --toolbar-image-width: 78px;
       --toolbar-col-width: 120px;
       --line-len: 44px;
       --dot-size: 8px;
       --callout-card-min-h: 58px;
-      --toolbar-stack-h: 810px;
     }
 
     * {
@@ -197,21 +195,13 @@
     }
 
     .toolbar-image-col {
-      position: relative;
-      width: var(--toolbar-col-width);
-      height: var(--toolbar-stack-h);
-      flex-shrink: 0;
-      display: flex;
-      justify-content: center;
+      height: auto;
     }
 
     .toolbar-image-col img {
-      width: var(--toolbar-image-width);
-      height: auto;
-      display: block;
-      margin: 0 auto;
-      filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.08));
-      border-radius: 18px;
+        width: auto;
+        height: auto;
+        max-width: none;
     }
 
     .tool-list {
@@ -377,8 +367,12 @@
       }
 
       .toolbar-image-col img {
-        width: 84px;
-        margin: 0;
+        .toolbar-image-col img {
+          width: auto;
+          height: auto;
+          max-width: none;
+          margin: 0;
+        }
       }
 
       .tool-item {
