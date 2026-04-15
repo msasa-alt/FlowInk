@@ -1,7 +1,7 @@
 {
   "PresetColors": [
     "#FFFF0000",
-    "#FF00BFFF",
+    "#FF0000FF",
     "#FFFFFF00",
     "#FF32CD32",
     "#FFFFA500",
@@ -21,10 +21,12 @@
     "#FFFF0000"
   ],
   "CustomColors": [],
-  "PenWidth": 4,
+  "PenWidth": 2,
   "PenWidthPresets": [
+    1,
     2,
-    5,
+    4,
+    6,
     10
   ],
   "CurrentColor": "#FFFF0000",

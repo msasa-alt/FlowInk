@@ -141,6 +141,17 @@
                     <Border Height="8"
                             Background="#01000000"/>
 
+                    <Button x:Name="ClickThroughButton"
+                            Style="{StaticResource ToolbarButtonStyle}"
+                            ToolTip="Click Through"
+                            Click="ClickThroughButton_Click">
+                        <Image x:Name="ClickThroughButtonIcon"
+                               Width="18"
+                               Height="18"
+                               Stretch="Uniform"
+                               Source="Assets/mouse-pointer-2.png"/>
+                    </Button>
+
                     <Button x:Name="PenButton"
                             Style="{StaticResource ToolbarButtonStyle}"
                             Content="✎"
@@ -294,17 +305,6 @@
                             Content="🗑"
                             ToolTip="Clear"
                             Click="ClearButton_Click"/>
-
-                    <Button x:Name="ClickThroughButton"
-                            Style="{StaticResource ToolbarButtonStyle}"
-                            ToolTip="Click Through"
-                            Click="ClickThroughButton_Click">
-                        <Image x:Name="ClickThroughButtonIcon"
-                               Width="18"
-                               Height="18"
-                               Stretch="Uniform"
-                               Source="Assets/mouse-pointer-2.png"/>
-                    </Button>
 
                     <Button x:Name="SettingsButton"
                             Style="{StaticResource ToolbarButtonStyle}"
