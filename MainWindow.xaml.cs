@@ -2117,6 +2117,7 @@ public partial class MainWindow : Window
         }
 
         ApplyPenColor(slot.Color, addToRecent: true);
+        ColorPopup.IsOpen = false;
     }
 
     private void EditPresetColor(int index)
