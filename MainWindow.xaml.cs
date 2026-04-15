@@ -30,6 +30,7 @@ public partial class MainWindow : Window
     private readonly Forms.NotifyIcon _notifyIcon = new();
     private readonly DispatcherTimer _toastTimer = new();
     private readonly DispatcherTimer _colorButtonClickTimer = new();
+    private readonly DispatcherTimer _presetColorClickTimer = new();
     private readonly DispatcherTimer _penButtonClickTimer = new();
     private readonly DispatcherTimer _penWidthPresetClickTimer = new();
     private readonly DispatcherTimer _clickThroughHoverTimer = new();
@@ -42,6 +43,7 @@ public partial class MainWindow : Window
     private uint _clickThroughHotkeyModifiers = DefaultHotkeyModifiers;
     private Forms.Keys _clickThroughHotkeyKey = DefaultHotkeyKey;
     private bool _isHotKeyRegistered;
+    private bool _isInitializing = true;
 
     private Color _currentPenColor = Color.FromArgb(255, 255, 0, 0);
     private double _currentPenWidth = 4;
@@ -56,6 +58,7 @@ public partial class MainWindow : Window
     private List<double> _penWidthPresets = new();
 
     private bool _pendingPenButtonSingleClick;
+    private int? _pendingPresetColorIndex;
     private int? _pendingPenWidthPresetIndex;
 
     private bool _isStraightLineDrawing;
@@ -110,7 +113,7 @@ public partial class MainWindow : Window
     private const int MaxRecentColors = 8;
     private const int MaxHistory = 200;
     private const int MaxCustomColors = 16;
-    private const int PenWidthPresetCount = 3;
+    private const int PenWidthPresetCount = 5;
 
     private const string DefaultTextFontFamilyName = "Segoe UI";
     private const double DefaultTextFontSize = 28.0;
@@ -422,7 +425,8 @@ public partial class MainWindow : Window
         UpdateToolbarForCT();
         UpdateClickThroughButtonIcons();
 
-        ApplyPenColor(_currentPenColor, addToRecent: true);
+        ApplyPenColor(_currentPenColor, addToRecent: false);
+        _isInitializing = false;
 
         DrawingCanvas.EditingMode = InkCanvasEditingMode.Ink;
         DrawingCanvas.UseCustomCursor = true;
@@ -443,6 +447,7 @@ public partial class MainWindow : Window
         InitializeNotifyIcon();
         InitializeToastTimer();
         InitializeColorButtonClickTimer();
+        InitializePresetColorClickTimer();
         InitializePenButtonClickTimer();
         InitializePenWidthPresetClickTimer();
         InitializeClickThroughHoverTimer();
@@ -485,6 +490,7 @@ public partial class MainWindow : Window
     {
         _toastTimer.Stop();
         _colorButtonClickTimer.Stop();
+        _presetColorClickTimer.Stop();
         _clickThroughHoverTimer.Stop();
         EndToolbarDrag(saveSettings: false);
         _notifyIcon.Visible = false;
@@ -728,6 +734,8 @@ public partial class MainWindow : Window
         }
 
         _colorButtonClickTimer.Stop();
+        _presetColorClickTimer.Stop();
+        _pendingPresetColorIndex = null;
         ColorPopup.IsOpen = false;
         _currentInteractionState = InteractionState.None;
     }
@@ -894,7 +902,7 @@ public partial class MainWindow : Window
 
     private void ToolbarPanel_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (_isClickThroughEnabled)
+        if (_isClickThroughEnabled && !IsCursorInsideToolbarPanel())
         {
             return;
         }
@@ -1093,6 +1101,12 @@ public partial class MainWindow : Window
         _colorButtonClickTimer.Tick += ColorButtonClickTimer_Tick;
     }
 
+    private void InitializePresetColorClickTimer()
+    {
+        _presetColorClickTimer.Interval = TimeSpan.FromMilliseconds(Forms.SystemInformation.DoubleClickTime + 50);
+        _presetColorClickTimer.Tick += PresetColorClickTimer_Tick;
+    }
+
     private void InitializePenButtonClickTimer()
     {
         _penButtonClickTimer.Interval = TimeSpan.FromMilliseconds(Forms.SystemInformation.DoubleClickTime + 50);
@@ -1203,6 +1217,27 @@ public partial class MainWindow : Window
         }
 
         ColorPopup.IsOpen = true;
+    }
+
+    private void PresetColorClickTimer_Tick(object? sender, EventArgs e)
+    {
+        _presetColorClickTimer.Stop();
+
+        if (_pendingPresetColorIndex == null)
+        {
+            return;
+        }
+
+        int index = _pendingPresetColorIndex.Value;
+        _pendingPresetColorIndex = null;
+
+        if (index < 0 || index >= _presetColors.Count)
+        {
+            return;
+        }
+
+        ApplyPenColor(_presetColors[index], addToRecent: true);
+        ColorPopup.IsOpen = false;
     }
 
     private void PenButtonClickTimer_Tick(object? sender, EventArgs e)
@@ -1692,6 +1727,11 @@ public partial class MainWindow : Window
 
     private void SaveAppSettings()
     {
+        if (_isInitializing)
+        {
+            return;
+        }
+
         EnsureAppSettingsFileReady();
         string filePath = GetAppDataFilePath(AppSettingsFileName);
 
@@ -1704,7 +1744,7 @@ public partial class MainWindow : Window
             CustomColors = new List<int>(_customColorValues),
             PenWidth = NormalizePenWidth(_currentPenWidth),
             PenWidthPresets = new List<double>(_penWidthPresets),
-            CurrentColor = _currentPenColor.ToString(),
+            CurrentColor = ToColorHexString(_currentPenColor),
             TextFontFamily = _currentTextFontFamilyName,
             TextFontSize = NormalizeTextFontSize(_currentTextFontSize),
             TextBold = _currentTextFontWeight == FontWeights.Bold,
@@ -1781,7 +1821,7 @@ public partial class MainWindow : Window
 
     private static List<double> GetDefaultPenWidthPresets()
     {
-        return new List<double> { 2.0, 5.0, 10.0 };
+        return new List<double> { 1.0, 2.0, 4.0, 6.0, 10.0 };
     }
 
     private static List<double> NormalizePenWidthPresets(List<double>? presets)
@@ -1882,10 +1922,15 @@ public partial class MainWindow : Window
 
         foreach (Color color in colors)
         {
-            hexColors.Add(color.ToString());
+            hexColors.Add(ToColorHexString(color));
         }
 
         return hexColors;
+    }
+
+    private static string ToColorHexString(Color color)
+    {
+        return $"#{color.A:X2}{color.R:X2}{color.G:X2}{color.B:X2}";
     }
 
     private static double NormalizePenWidth(double width)
@@ -2111,12 +2156,17 @@ public partial class MainWindow : Window
 
         if (e.ClickCount >= 2)
         {
+            _presetColorClickTimer.Stop();
+            _pendingPresetColorIndex = null;
             e.Handled = true;
             EditPresetColor(slot.Index);
             return;
         }
 
-        ApplyPenColor(slot.Color, addToRecent: true);
+        _presetColorClickTimer.Stop();
+        _pendingPresetColorIndex = slot.Index;
+        e.Handled = true;
+        _presetColorClickTimer.Start();
     }
 
     private void EditPresetColor(int index)
@@ -4202,6 +4252,8 @@ public partial class MainWindow : Window
         if (e.ClickCount >= 2)
         {
             _colorButtonClickTimer.Stop();
+            _presetColorClickTimer.Stop();
+            _pendingPresetColorIndex = null;
             PenWidthPopup.IsOpen = false;
             e.Handled = true;
             OpenCurrentColorEditor();
@@ -4216,6 +4268,9 @@ public partial class MainWindow : Window
 
     private void OpenCurrentColorEditor()
     {
+        _presetColorClickTimer.Stop();
+        _pendingPresetColorIndex = null;
+
         var dialog = new ColorPickerDialog(_currentPenColor, BuildCustomColors())
         {
             Owner = this
@@ -4341,6 +4396,8 @@ public partial class MainWindow : Window
         PenWidthPopup.IsOpen = false;
         RectangleSettingsPopup.IsOpen = false;
         _colorButtonClickTimer.Stop();
+        _presetColorClickTimer.Stop();
+        _pendingPresetColorIndex = null;
         _penButtonClickTimer.Stop();
         _penWidthPresetClickTimer.Stop();
         _pendingPenButtonSingleClick = false;

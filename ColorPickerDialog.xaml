@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Color"
         Width="360"
-        Height="300"
+        Height="320"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="#FF1E1E1E"
@@ -13,7 +13,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -77,12 +77,20 @@
                     TickFrequency="1"
                     IsSnapToTickEnabled="True"
                     ValueChanged="AlphaSlider_ValueChanged"/>
-            <DockPanel Margin="0,6,0,0">
-                <TextBlock Text="0%"
-                           HorizontalAlignment="Left"/>
-                <TextBlock Text="100%"
-                           HorizontalAlignment="Right"/>
-            </DockPanel>
+            <Grid Margin="0,6,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0"
+                           Text="0%"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top"/>
+                <TextBlock Grid.Column="1"
+                           Text="100%"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Top"/>
+            </Grid>
         </StackPanel>
 
         <StackPanel Grid.Row="4"
