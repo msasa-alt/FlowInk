@@ -113,7 +113,7 @@ public partial class MainWindow : Window
     private const int MaxRecentColors = 8;
     private const int MaxHistory = 200;
     private const int MaxCustomColors = 16;
-    private const int PenWidthPresetCount = 3;
+    private const int PenWidthPresetCount = 5;
 
     private const string DefaultTextFontFamilyName = "Segoe UI";
     private const double DefaultTextFontSize = 28.0;
@@ -1821,7 +1821,7 @@ public partial class MainWindow : Window
 
     private static List<double> GetDefaultPenWidthPresets()
     {
-        return new List<double> { 2.0, 5.0, 10.0 };
+        return new List<double> { 1.0, 2.0, 4.0, 6.0, 10.0 };
     }
 
     private static List<double> NormalizePenWidthPresets(List<double>? presets)
