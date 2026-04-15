@@ -902,7 +902,7 @@ public partial class MainWindow : Window
 
     private void ToolbarPanel_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (_isClickThroughEnabled)
+        if (_isClickThroughEnabled && !IsCursorInsideToolbarPanel())
         {
             return;
         }
