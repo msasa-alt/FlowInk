@@ -43,6 +43,7 @@ public partial class MainWindow : Window
     private uint _clickThroughHotkeyModifiers = DefaultHotkeyModifiers;
     private Forms.Keys _clickThroughHotkeyKey = DefaultHotkeyKey;
     private bool _isHotKeyRegistered;
+    private bool _isInitializing = true;
 
     private Color _currentPenColor = Color.FromArgb(255, 255, 0, 0);
     private double _currentPenWidth = 4;
@@ -424,7 +425,8 @@ public partial class MainWindow : Window
         UpdateToolbarForCT();
         UpdateClickThroughButtonIcons();
 
-        ApplyPenColor(_currentPenColor, addToRecent: true);
+        ApplyPenColor(_currentPenColor, addToRecent: false);
+        _isInitializing = false;
 
         DrawingCanvas.EditingMode = InkCanvasEditingMode.Ink;
         DrawingCanvas.UseCustomCursor = true;
@@ -1725,6 +1727,11 @@ public partial class MainWindow : Window
 
     private void SaveAppSettings()
     {
+        if (_isInitializing)
+        {
+            return;
+        }
+
         EnsureAppSettingsFileReady();
         string filePath = GetAppDataFilePath(AppSettingsFileName);
 
