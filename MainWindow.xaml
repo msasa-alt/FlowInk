@@ -145,11 +145,12 @@
                             Style="{StaticResource ToolbarButtonStyle}"
                             ToolTip="Click Through"
                             Click="ClickThroughButton_Click">
-                        <Image x:Name="ClickThroughButtonIcon"
-                               Width="18"
-                               Height="18"
-                               Stretch="Uniform"
-                               Source="Assets/mouse-pointer-2.png"/>
+                        <TextBlock x:Name="ClickThroughButtonLabel"
+                                   Text="ON"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
                     </Button>
 
                     <Button x:Name="PenButton"
@@ -403,11 +404,12 @@
                             Style="{StaticResource ToolbarMiniButtonStyle}"
                             ToolTip="描画ONに戻す"
                             Click="CtReturnButton_Click">
-                        <Image x:Name="CtReturnButtonIcon"
-                               Width="18"
-                               Height="18"
-                               Stretch="Uniform"
-                               Source="Assets/mouse-pointer-2-off.png"/>
+                        <TextBlock x:Name="CtReturnButtonLabel"
+                                   Text="ON"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
                     </Button>
 
                     <Border Height="8"
