@@ -144,8 +144,6 @@ public partial class MainWindow : Window
 
     private const string AppSettingsFileName = "app-settings.json";
     private const string AppDataFolderName = "FlowInk";
-    private const string ClickThroughOffIconPath = "Assets/mouse-pointer-2.png";
-    private const string ClickThroughOnIconPath = "Assets/mouse-pointer-2-off.png";
 
     private const double ToolbarViewportMargin = 0.0;
 
@@ -423,7 +421,7 @@ public partial class MainWindow : Window
         BuildRecentColorButtons();
         BuildPenWidthPresetButtons();
         UpdateToolbarForCT();
-        UpdateClickThroughButtonIcons();
+        UpdateClickThroughButtonLabel();
 
         ApplyPenColor(_currentPenColor, addToRecent: false);
         _isInitializing = false;
@@ -978,20 +976,17 @@ public partial class MainWindow : Window
         ClampToolbarPositionToViewport(saveSettings);
     }
 
-    private void UpdateClickThroughButtonIcons()
+    private void UpdateClickThroughButtonLabel()
     {
-        SetImageSource(ClickThroughButtonIcon, _isClickThroughEnabled ? ClickThroughOnIconPath : ClickThroughOffIconPath);
-        SetImageSource(CtReturnButtonIcon, ClickThroughOnIconPath);
-    }
-
-    private static void SetImageSource(Image? image, string relativePath)
-    {
-        if (image == null)
+        if (ClickThroughButtonLabel != null)
         {
-            return;
+            ClickThroughButtonLabel.Text = _isClickThroughEnabled ? "OFF" : "ON";
         }
 
-        image.Source = new BitmapImage(new Uri(relativePath, UriKind.Relative));
+        if (CtReturnButtonLabel != null)
+        {
+            CtReturnButtonLabel.Text = _isClickThroughEnabled ? "OFF" : "ON";
+        }
     }
 
     private void UpdateToolbarForCT()
@@ -4420,7 +4415,7 @@ public partial class MainWindow : Window
         _pendingPenWidthPresetIndex = null;
 
         UpdateToolbarForCT();
-        UpdateClickThroughButtonIcons();
+        UpdateClickThroughButtonLabel();
 
         if (enabled)
         {
