@@ -1062,7 +1062,7 @@ public partial class MainWindow : Window
         trayExitMenuItem.Click += TrayExitMenuItem_Click;
 
         _notifyIcon.Text = "FlowInk";
-        _notifyIcon.Icon = Drawing.SystemIcons.Application;
+        _notifyIcon.Icon = new Drawing.Icon(Path.Combine(AppContext.BaseDirectory, "Assets", "FlowInk.ico"));
         _notifyIcon.Visible = true;
         _notifyIcon.ContextMenuStrip = new Forms.ContextMenuStrip();
         _notifyIcon.ContextMenuStrip.Items.Add(_trayEnableClickThroughMenuItem);
