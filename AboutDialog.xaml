@@ -1,0 +1,46 @@
+<Window x:Class="FlowInk.AboutDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About FlowInk"
+        Width="380"
+        Height="220"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#FFF3EEE7">
+    <Border Padding="18">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel>
+                <TextBlock Text="FlowInk"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Foreground="#FF222222" />
+
+                <TextBlock x:Name="VersionTextBlock"
+                           Margin="0,8,0,0"
+                           FontSize="14"
+                           Foreground="#FF444444" />
+
+                <TextBlock Margin="0,14,0,0"
+                           Text="Lightweight overlay drawing tool"
+                           FontSize="14"
+                           Foreground="#FF444444" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="1"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="0,16,0,0">
+                <Button Width="96"
+                        Height="34"
+                        IsDefault="True"
+                        IsCancel="True"
+                        Content="OK" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

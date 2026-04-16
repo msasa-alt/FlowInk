@@ -1053,10 +1053,12 @@ public partial class MainWindow : Window
     {
         _trayEnableClickThroughMenuItem = new Forms.ToolStripMenuItem("描画OFFにする");
         _trayDisableClickThroughMenuItem = new Forms.ToolStripMenuItem("描画ONに戻す");
+        var trayAboutMenuItem = new Forms.ToolStripMenuItem("About");
         var trayExitMenuItem = new Forms.ToolStripMenuItem("Exit");
 
         _trayEnableClickThroughMenuItem.Click += TrayEnableClickThroughMenuItem_Click;
         _trayDisableClickThroughMenuItem.Click += TrayDisableClickThroughMenuItem_Click;
+        trayAboutMenuItem.Click += TrayAboutMenuItem_Click;
         trayExitMenuItem.Click += TrayExitMenuItem_Click;
 
         _notifyIcon.Text = "FlowInk";
@@ -1066,6 +1068,7 @@ public partial class MainWindow : Window
         _notifyIcon.ContextMenuStrip.Items.Add(_trayEnableClickThroughMenuItem);
         _notifyIcon.ContextMenuStrip.Items.Add(_trayDisableClickThroughMenuItem);
         _notifyIcon.ContextMenuStrip.Items.Add(new Forms.ToolStripSeparator());
+        _notifyIcon.ContextMenuStrip.Items.Add(trayAboutMenuItem);
         _notifyIcon.ContextMenuStrip.Items.Add(trayExitMenuItem);
         _notifyIcon.DoubleClick += NotifyIcon_DoubleClick;
 
@@ -1286,6 +1289,19 @@ public partial class MainWindow : Window
             CommitActiveTextInput();
             EndTextElementDrag();
             Close();
+        });
+    }
+
+    private void TrayAboutMenuItem_Click(object? sender, EventArgs e)
+    {
+        Dispatcher.Invoke(() =>
+        {
+            var dialog = new AboutDialog
+            {
+                Owner = this
+            };
+
+            dialog.ShowDialog();
         });
     }
 
