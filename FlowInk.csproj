@@ -36,4 +36,10 @@
 	  <Resource Include=".gitattributes" />
 	</ItemGroup>
 
+    <ItemGroup>
+      <None Include="Assets\FlowInk.ico">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>
