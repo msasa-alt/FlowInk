@@ -13,6 +13,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
+using WpfShape = System.Windows.Shapes.Shape;
+using WpfEllipse = System.Windows.Shapes.Ellipse;
+using WpfRectangle = System.Windows.Shapes.Rectangle;
 using Forms = System.Windows.Forms;
 using Drawing = System.Drawing;
 
@@ -69,11 +72,11 @@ public partial class MainWindow : Window
     private bool _isRectangleDrawing;
     private Point _rectangleStartPoint;
     private Stroke? _rectanglePreviewStroke;
-    private List<Stroke>? _rectanglePreviewFillStrokes;
+    private WpfShape? _rectanglePreviewFillShape;
     private bool _isCircleDrawing;
     private Point _circleStartPoint;
     private Stroke? _circlePreviewStroke;
-    private List<Stroke>? _circlePreviewFillStrokes;
+    private WpfShape? _circlePreviewFillShape;
     private bool _isRectangleFilled;
     private int _rectangleFillOpacityPercent = 35;
 
@@ -327,14 +330,79 @@ public partial class MainWindow : Window
         public int Index { get; }
     }
 
+    private sealed class ClearCanvasElementEntry
+    {
+        public ClearCanvasElementEntry(UIElement element, int index)
+        {
+            Element = element;
+            Index = index;
+        }
+
+        public UIElement Element { get; }
+        public int Index { get; }
+    }
+
+    private sealed class CanvasElementAddAction : IUndoableAction
+    {
+        private readonly UIElement _element;
+        private readonly int _index;
+
+        public CanvasElementAddAction(UIElement element, int index)
+        {
+            _element = element;
+            _index = index;
+        }
+
+        public void Undo(MainWindow window)
+        {
+            window.RemoveCanvasElementIfPresent(_element);
+        }
+
+        public void Redo(MainWindow window)
+        {
+            window.AddCanvasElement(_element, _index);
+        }
+    }
+
+    private sealed class CompositeAction : IUndoableAction
+    {
+        private readonly List<IUndoableAction> _actions;
+
+        public CompositeAction(IEnumerable<IUndoableAction> actions)
+        {
+            _actions = new List<IUndoableAction>(actions);
+        }
+
+        public void Undo(MainWindow window)
+        {
+            for (int i = _actions.Count - 1; i >= 0; i--)
+            {
+                _actions[i].Undo(window);
+            }
+        }
+
+        public void Redo(MainWindow window)
+        {
+            foreach (IUndoableAction action in _actions)
+            {
+                action.Redo(window);
+            }
+        }
+    }
+
     private sealed class ClearAction : IUndoableAction
     {
         private readonly List<Stroke> _removedStrokes;
+        private readonly List<ClearCanvasElementEntry> _removedCanvasElements;
         private readonly List<ClearTextEntry> _removedTextEntries;
 
-        public ClearAction(IEnumerable<Stroke> removedStrokes, IEnumerable<ClearTextEntry> removedTextEntries)
+        public ClearAction(
+            IEnumerable<Stroke> removedStrokes,
+            IEnumerable<ClearCanvasElementEntry> removedCanvasElements,
+            IEnumerable<ClearTextEntry> removedTextEntries)
         {
             _removedStrokes = new List<Stroke>(removedStrokes);
+            _removedCanvasElements = new List<ClearCanvasElementEntry>(removedCanvasElements);
             _removedTextEntries = new List<ClearTextEntry>(removedTextEntries);
         }
 
@@ -347,6 +415,11 @@ public partial class MainWindow : Window
                     window.AddStrokeIfMissing(stroke);
                 }
             });
+
+            foreach (ClearCanvasElementEntry entry in _removedCanvasElements)
+            {
+                window.AddCanvasElement(entry.Element, entry.Index);
+            }
 
             foreach (ClearTextEntry entry in _removedTextEntries)
             {
@@ -363,6 +436,11 @@ public partial class MainWindow : Window
                     window.RemoveStrokeIfPresent(stroke);
                 }
             });
+
+            foreach (ClearCanvasElementEntry entry in _removedCanvasElements)
+            {
+                window.RemoveCanvasElementIfPresent(entry.Element);
+            }
 
             foreach (ClearTextEntry entry in _removedTextEntries)
             {
@@ -2820,16 +2898,9 @@ public partial class MainWindow : Window
 
         if (_isRectangleFilled)
         {
-            List<Stroke> fillStrokes = CreateFilledRectangleStrokes(startPoint, endPoint);
-            _rectanglePreviewFillStrokes = fillStrokes;
-
-            ExecuteWithoutStrokeHistory(() =>
-            {
-                foreach (Stroke fillStroke in fillStrokes)
-                {
-                    DrawingCanvas.Strokes.Add(fillStroke);
-                }
-            });
+            WpfShape fillShape = CreateFilledRectangleShape(startPoint, endPoint);
+            _rectanglePreviewFillShape = fillShape;
+            AddCanvasElement(fillShape);
         }
     }
 
@@ -2850,26 +2921,20 @@ public partial class MainWindow : Window
             return;
         }
 
-        List<Stroke> fillStrokes = CreateFilledRectangleStrokes(startPoint, endPoint);
+        WpfShape fillShape = CreateFilledRectangleShape(startPoint, endPoint);
+        int fillShapeIndex = GetCanvasElementInsertIndex();
 
         ExecuteWithoutStrokeHistory(() =>
         {
-            foreach (Stroke fillStroke in fillStrokes)
-            {
-                DrawingCanvas.Strokes.Add(fillStroke);
-            }
-
+            AddCanvasElement(fillShape, fillShapeIndex);
             DrawingCanvas.Strokes.Add(outlineStroke);
         });
 
-        var addedStrokes = new List<Stroke>(fillStrokes)
+        PushHistory(new CompositeAction(new IUndoableAction[]
         {
-            outlineStroke
-        };
-
-        PushHistory(new StrokeCollectionAction(
-            addedStrokes,
-            Array.Empty<Stroke>()));
+            new CanvasElementAddAction(fillShape, fillShapeIndex),
+            new StrokeCollectionAction(new[] { outlineStroke }, Array.Empty<Stroke>())
+        }));
     }
 
     private void CancelRectanglePreview()
@@ -2881,18 +2946,11 @@ public partial class MainWindow : Window
             _rectanglePreviewStroke = null;
         }
 
-        if (_rectanglePreviewFillStrokes != null)
+        if (_rectanglePreviewFillShape != null)
         {
-            List<Stroke> previewFillStrokes = _rectanglePreviewFillStrokes;
-            ExecuteWithoutStrokeHistory(() =>
-            {
-                foreach (Stroke previewFillStroke in previewFillStrokes)
-                {
-                    DrawingCanvas.Strokes.Remove(previewFillStroke);
-                }
-            });
-
-            _rectanglePreviewFillStrokes = null;
+            WpfShape previewFillShape = _rectanglePreviewFillShape;
+            RemoveCanvasElementIfPresent(previewFillShape);
+            _rectanglePreviewFillShape = null;
         }
     }
 
@@ -2907,16 +2965,9 @@ public partial class MainWindow : Window
 
         if (_isRectangleFilled)
         {
-            List<Stroke> fillStrokes = CreateFilledEllipseStrokes(startPoint, endPoint);
-            _circlePreviewFillStrokes = fillStrokes;
-
-            ExecuteWithoutStrokeHistory(() =>
-            {
-                foreach (Stroke fillStroke in fillStrokes)
-                {
-                    DrawingCanvas.Strokes.Add(fillStroke);
-                }
-            });
+            WpfShape fillShape = CreateFilledEllipseShape(startPoint, endPoint);
+            _circlePreviewFillShape = fillShape;
+            AddCanvasElement(fillShape);
         }
     }
 
@@ -2937,26 +2988,20 @@ public partial class MainWindow : Window
             return;
         }
 
-        List<Stroke> fillStrokes = CreateFilledEllipseStrokes(startPoint, endPoint);
+        WpfShape fillShape = CreateFilledEllipseShape(startPoint, endPoint);
+        int fillShapeIndex = GetCanvasElementInsertIndex();
 
         ExecuteWithoutStrokeHistory(() =>
         {
-            foreach (Stroke fillStroke in fillStrokes)
-            {
-                DrawingCanvas.Strokes.Add(fillStroke);
-            }
-
+            AddCanvasElement(fillShape, fillShapeIndex);
             DrawingCanvas.Strokes.Add(outlineStroke);
         });
 
-        var addedStrokes = new List<Stroke>(fillStrokes)
+        PushHistory(new CompositeAction(new IUndoableAction[]
         {
-            outlineStroke
-        };
-
-        PushHistory(new StrokeCollectionAction(
-            addedStrokes,
-            Array.Empty<Stroke>()));
+            new CanvasElementAddAction(fillShape, fillShapeIndex),
+            new StrokeCollectionAction(new[] { outlineStroke }, Array.Empty<Stroke>())
+        }));
     }
 
     private void CancelCirclePreview()
@@ -2968,72 +3013,34 @@ public partial class MainWindow : Window
             _circlePreviewStroke = null;
         }
 
-        if (_circlePreviewFillStrokes != null)
+        if (_circlePreviewFillShape != null)
         {
-            List<Stroke> previewFillStrokes = _circlePreviewFillStrokes;
-            ExecuteWithoutStrokeHistory(() =>
-            {
-                foreach (Stroke previewFillStroke in previewFillStrokes)
-                {
-                    DrawingCanvas.Strokes.Remove(previewFillStroke);
-                }
-            });
-
-            _circlePreviewFillStrokes = null;
+            WpfShape previewFillShape = _circlePreviewFillShape;
+            RemoveCanvasElementIfPresent(previewFillShape);
+            _circlePreviewFillShape = null;
         }
     }
 
-    private List<Stroke> CreateFilledRectangleStrokes(Point startPoint, Point endPoint)
+    private WpfShape CreateFilledRectangleShape(Point startPoint, Point endPoint)
     {
         double left = Math.Min(startPoint.X, endPoint.X);
         double top = Math.Min(startPoint.Y, endPoint.Y);
-        double right = Math.Max(startPoint.X, endPoint.X);
-        double bottom = Math.Max(startPoint.Y, endPoint.Y);
+        double width = Math.Abs(endPoint.X - startPoint.X);
+        double height = Math.Abs(endPoint.Y - startPoint.Y);
 
-        double width = right - left;
-        double height = bottom - top;
-
-        if (width < 1.0 || height < 1.0)
+        var shape = new WpfRectangle
         {
-            return new List<Stroke>();
-        }
+            Width = width,
+            Height = height,
+            Fill = CreateShapeFillBrush(),
+            StrokeThickness = 0,
+            IsHitTestVisible = false
+        };
 
-        double step = Math.Max(1.0, _currentPenWidth * 0.6);
-        var strokes = new List<Stroke>();
+        InkCanvas.SetLeft(shape, left);
+        InkCanvas.SetTop(shape, top);
 
-        for (double y = top; y <= bottom; y += step)
-        {
-            var stylusPoints = new StylusPointCollection
-            {
-                new StylusPoint(left, y),
-                new StylusPoint(right, y)
-            };
-
-            strokes.Add(new Stroke(stylusPoints)
-            {
-                DrawingAttributes = CreateRectangleFillAttributes()
-            });
-        }
-
-        double lastY = strokes.Count > 0
-            ? strokes[^1].StylusPoints[0].Y
-            : top;
-
-        if (bottom - lastY > 0.1)
-        {
-            var stylusPoints = new StylusPointCollection
-            {
-                new StylusPoint(left, bottom),
-                new StylusPoint(right, bottom)
-            };
-
-            strokes.Add(new Stroke(stylusPoints)
-            {
-                DrawingAttributes = CreateRectangleFillAttributes()
-            });
-        }
-
-        return strokes;
+        return shape;
     }
 
     private Stroke CreateRectangleOutlineStroke(Point startPoint, Point endPoint)
@@ -3095,53 +3102,43 @@ public partial class MainWindow : Window
         };
     }
 
-    private List<Stroke> CreateFilledEllipseStrokes(Point startPoint, Point endPoint)
+    private WpfShape CreateFilledEllipseShape(Point startPoint, Point endPoint)
     {
         double left = Math.Min(startPoint.X, endPoint.X);
         double top = Math.Min(startPoint.Y, endPoint.Y);
-        double right = Math.Max(startPoint.X, endPoint.X);
-        double bottom = Math.Max(startPoint.Y, endPoint.Y);
+        double width = Math.Abs(endPoint.X - startPoint.X);
+        double height = Math.Abs(endPoint.Y - startPoint.Y);
 
-        double width = right - left;
-        double height = bottom - top;
-        if (width < 1.0 || height < 1.0)
+        var shape = new WpfEllipse
         {
-            return new List<Stroke>();
+            Width = width,
+            Height = height,
+            Fill = CreateShapeFillBrush(),
+            StrokeThickness = 0,
+            IsHitTestVisible = false
+        };
+
+        InkCanvas.SetLeft(shape, left);
+        InkCanvas.SetTop(shape, top);
+
+        return shape;
+    }
+
+    private SolidColorBrush CreateShapeFillBrush()
+    {
+        Color fillColor = Color.FromArgb(
+            (byte)Math.Round(255.0 * NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent) / 100.0),
+            _currentPenColor.R,
+            _currentPenColor.G,
+            _currentPenColor.B);
+
+        var brush = new SolidColorBrush(fillColor);
+        if (brush.CanFreeze)
+        {
+            brush.Freeze();
         }
 
-        double centerX = left + (width / 2.0);
-        double centerY = top + (height / 2.0);
-        double radiusX = width / 2.0;
-        double radiusY = height / 2.0;
-        double step = Math.Max(1.0, _currentPenWidth * 0.6);
-        var strokes = new List<Stroke>();
-
-        for (double y = top; y <= bottom; y += step)
-        {
-            double normalizedY = (y - centerY) / radiusY;
-            double inside = 1.0 - (normalizedY * normalizedY);
-            if (inside <= 0.0)
-            {
-                continue;
-            }
-
-            double horizontalRadius = radiusX * Math.Sqrt(inside);
-            double x1 = centerX - horizontalRadius;
-            double x2 = centerX + horizontalRadius;
-
-            var stylusPoints = new StylusPointCollection
-            {
-                new StylusPoint(x1, y),
-                new StylusPoint(x2, y)
-            };
-
-            strokes.Add(new Stroke(stylusPoints)
-            {
-                DrawingAttributes = CreateRectangleFillAttributes()
-            });
-        }
-
-        return strokes;
+        return brush;
     }
 
     private void BeginTextInput(Point startPoint)
@@ -3933,6 +3930,92 @@ public partial class MainWindow : Window
         _textElements.Remove(host);
     }
 
+    private int GetCanvasElementInsertIndex()
+    {
+        for (int i = 0; i < DrawingCanvas.Children.Count; i++)
+        {
+            UIElement child = DrawingCanvas.Children[i];
+
+            if (child is TextBox)
+            {
+                return i;
+            }
+
+            if (child is Border border && _textElements.Contains(border))
+            {
+                return i;
+            }
+        }
+
+        return DrawingCanvas.Children.Count;
+    }
+
+    private void AddCanvasElement(UIElement element)
+    {
+        AddCanvasElement(element, GetCanvasElementInsertIndex());
+    }
+
+    private void AddCanvasElement(UIElement element, int index)
+    {
+        if (DrawingCanvas.Children.Contains(element))
+        {
+            return;
+        }
+
+        int normalizedIndex = index;
+        if (normalizedIndex < 0)
+        {
+            normalizedIndex = 0;
+        }
+
+        if (normalizedIndex > DrawingCanvas.Children.Count)
+        {
+            normalizedIndex = DrawingCanvas.Children.Count;
+        }
+
+        DrawingCanvas.Children.Insert(normalizedIndex, element);
+    }
+
+    private void RemoveCanvasElementIfPresent(UIElement element)
+    {
+        if (DrawingCanvas.Children.Contains(element))
+        {
+            DrawingCanvas.Children.Remove(element);
+        }
+    }
+
+    private List<ClearCanvasElementEntry> GetCommittedCanvasElementEntriesSnapshot()
+    {
+        var result = new List<ClearCanvasElementEntry>();
+
+        for (int i = 0; i < DrawingCanvas.Children.Count; i++)
+        {
+            UIElement child = DrawingCanvas.Children[i];
+
+            if (child is TextBox)
+            {
+                continue;
+            }
+
+            if (child is Border border && _textElements.Contains(border))
+            {
+                continue;
+            }
+
+            result.Add(new ClearCanvasElementEntry(child, i));
+        }
+
+        return result;
+    }
+
+    private void RemoveCommittedCanvasElements()
+    {
+        foreach (ClearCanvasElementEntry entry in GetCommittedCanvasElementEntriesSnapshot())
+        {
+            RemoveCanvasElementIfPresent(entry.Element);
+        }
+    }
+
     private List<ClearTextEntry> GetCommittedTextEntriesSnapshot()
     {
         var result = new List<ClearTextEntry>(_textElements.Count);
@@ -4369,17 +4452,19 @@ public partial class MainWindow : Window
         ClearSelectedTextElement();
 
         List<Stroke> removedStrokes = ToStrokeList(DrawingCanvas.Strokes);
+        List<ClearCanvasElementEntry> removedCanvasElements = GetCommittedCanvasElementEntriesSnapshot();
         List<ClearTextEntry> removedTextEntries = GetCommittedTextEntriesSnapshot();
 
-        if (removedStrokes.Count == 0 && removedTextEntries.Count == 0)
+        if (removedStrokes.Count == 0 && removedCanvasElements.Count == 0 && removedTextEntries.Count == 0)
         {
             return;
         }
 
         ExecuteWithoutStrokeHistory(() => DrawingCanvas.Strokes.Clear());
+        RemoveCommittedCanvasElements();
         RemoveCommittedTextElements();
 
-        PushHistory(new ClearAction(removedStrokes, removedTextEntries));
+        PushHistory(new ClearAction(removedStrokes, removedCanvasElements, removedTextEntries));
     }
 
     private void ClickThroughButton_Click(object sender, RoutedEventArgs e)
