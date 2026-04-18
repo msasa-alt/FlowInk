@@ -191,7 +191,7 @@
     .toolbar-diagram {
       width: 100%;
       display: grid;
-      grid-template-columns: var(--toolbar-col-width) minmax(0, 1fr);
+      grid-template-columns: auto minmax(0, 1fr);
       gap: 34px;
       align-items: start;
       text-align: left;
@@ -407,8 +407,10 @@
       }
 
       .toolbar-image-col img {
-        width: 84px;
-        margin: 0;
+        width: auto;
+        height: auto;
+        max-width: none;
+        margin: 0 auto;
       }
 
       .tool-item {
