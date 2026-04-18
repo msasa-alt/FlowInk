@@ -258,6 +258,38 @@
       margin-top: 28px;
     }
 
+
+    .usage-gallery {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      margin-top: 28px;
+      max-width: 980px;
+      margin-left: auto;
+      margin-right: auto;
+      align-items: start;
+    }
+
+    .usage-shot {
+      margin: 0;
+    }
+
+    .usage-shot img {
+      width: 100%;
+      max-width: 460px;
+      display: block;
+      margin: 0 auto;
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .usage-shot figcaption {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--muted);
+      text-align: center;
+    }
+
     .use-case {
       padding: 20px;
       border-radius: var(--radius);
@@ -333,6 +365,11 @@
 
       .toolbar-diagram {
         gap: 24px;
+      }
+
+      .usage-gallery {
+        grid-template-columns: 1fr;
+        max-width: 560px;
       }
     }
 
@@ -420,7 +457,7 @@
 
     <section class="section">
       <p class="section-lead">
-        実際の使い方はこんな感じです。
+        プレゼンやチャートなど、さまざまな画面にその場で書き込めます。
       </p>
 
       <div class="usage-gallery">
