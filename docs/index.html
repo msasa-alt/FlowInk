@@ -685,6 +685,48 @@
       </div>
     </section>
 
+    <section class="section">
+      <h2>FlowInkを開発した経緯</h2>
+
+      <div style="max-width: 760px; margin: 0 auto; text-align: left; color: var(--muted); line-height: 1.9;">
+        <p>
+          FXやCFDのテクニカルデイトレーダーにとってMT4やMT5のチャートソフトの画面に線や文字を書き込む落書きツールは必須です。
+          Epic Penはデファクトスタンダードとして多くのトレーダーに使われていますが、少し前にサブスクになりました。
+          必須なツールとはいえ、たかだが落書きソフトにサブスクって？(OfficeやAcrobatならともかく)、
+          安いとは言え、使わなくなっても契約解除しない限り(忘れたら)一生お金を払い続けるの？
+          となにか釈然としない。
+          と言うことで代替ソフトを探したところginkと言うフリーのソフトを見つけました。
+          ginkこれはこれで多機能だが、なーんか挙動がおかしく不安定。
+          さらに最近は起動時に例外を吐いて起動できないバージョンもありでストレスが溜まっていました。
+          幸いgink はソースが公開されており、チャッピー(ChatGPT)を相手に中身を調べていたんですが、
+          チャッピー曰く設計が古い、WPFで書き直して云々ってなことを言ってくるので、
+          WPFで書き直すチャレンジをしたけどコンパイルエラーを吐きまくるわ、
+          チャッピーは自分の言ったことを忘れて聞くたびに違うコードを吐くわで、ginkを改良することはあきらめました。
+        </p>
+
+        <p>
+          その後しばらくして(あらためて)チャッピーに相談したところ、WPFで新たに書き直すのが早いとかいうので、
+          試しにコードを書いてもらったところ、こちらはサクッと簡単な落書きできるソフトを仕上げてきました。
+          そうなるとこっちも盛り上がって機能を追加していきました。
+        </p>
+
+        <p>
+          こうして出来上がったのが、FlowInkです。
+        </p>
+
+        <figure style="margin: 32px 0 0;">
+          <img
+            src="images/FlowInk1stVer.png"
+            alt="FlowInkの最初バージョン"
+            style="width: 100%; max-width: 900px; display: block; margin: 0 auto; border-radius: 16px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);"
+          />
+          <figcaption style="margin-top: 10px; font-size: 14px; color: var(--muted); text-align: center;">
+            FlowInkの最初バージョン
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
     <section class="cta-box">
       <h2>FlowInkを試す</h2>
       <p>
