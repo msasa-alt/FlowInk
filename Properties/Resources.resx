@@ -120,11 +120,23 @@
   <data name="About" xml:space="preserve">
     <value>バージョン情報</value>
   </data>
+  <data name="AboutWindowTitle" xml:space="preserve">
+    <value>FlowInkについて</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="ChooseColor" xml:space="preserve">
+    <value>色を選ぶ</value>
+  </data>
   <data name="Clear" xml:space="preserve">
     <value>クリア</value>
   </data>
   <data name="ClickThrough" xml:space="preserve">
     <value>クリック透過</value>
+  </data>
+  <data name="ClickThroughOffToast" xml:space="preserve">
+    <value>描画OFF。描画ONにするには、ツールバーのOFFボタンかホットキーを押してください。</value>
   </data>
   <data name="Color" xml:space="preserve">
     <value>色</value>
@@ -132,11 +144,20 @@
   <data name="ColorPicker" xml:space="preserve">
     <value>カラーピッカー</value>
   </data>
+  <data name="CurrentSettings" xml:space="preserve">
+    <value>現在の設定</value>
+  </data>
+  <data name="CurrentValueFormat" xml:space="preserve">
+    <value>現在: {0}</value>
+  </data>
   <data name="Eraser" xml:space="preserve">
     <value>消しゴム</value>
   </data>
   <data name="Exit" xml:space="preserve">
     <value>終了</value>
+  </data>
+  <data name="Fill" xml:space="preserve">
+    <value>塗りつぶし</value>
   </data>
   <data name="Font" xml:space="preserve">
     <value>フォント</value>
@@ -147,11 +168,20 @@
   <data name="Hide" xml:space="preserve">
     <value>非表示</value>
   </data>
+  <data name="Hotkey" xml:space="preserve">
+    <value>ホットキー</value>
+  </data>
+  <data name="LightweightOverlayDrawingTool" xml:space="preserve">
+    <value>Lightweight overlay drawing tool</value>
+  </data>
   <data name="OK" xml:space="preserve">
     <value>OK</value>
   </data>
   <data name="Opacity" xml:space="preserve">
     <value>不透明度</value>
+  </data>
+  <data name="OpenBrowserFailed" xml:space="preserve">
+    <value>ブラウザを開けませんでした。</value>
   </data>
   <data name="Pen" xml:space="preserve">
     <value>ペン</value>
@@ -168,6 +198,12 @@
   <data name="Rectangle" xml:space="preserve">
     <value>四角</value>
   </data>
+  <data name="Save" xml:space="preserve">
+    <value>セーブ</value>
+  </data>
+  <data name="SelectLineThickness" xml:space="preserve">
+    <value>線の太さを選択</value>
+  </data>
   <data name="Shape" xml:space="preserve">
     <value>図形</value>
   </data>
@@ -177,7 +213,13 @@
   <data name="Transparency" xml:space="preserve">
     <value>透明度</value>
   </data>
+  <data name="TransparencyFormat" xml:space="preserve">
+    <value>透明度: {0}%</value>
+  </data>
   <data name="Version" xml:space="preserve">
     <value>バージョン</value>
+  </data>
+  <data name="VersionFormat" xml:space="preserve">
+    <value>Version: {0}</value>
   </data>
 </root>

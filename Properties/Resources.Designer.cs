@@ -70,6 +70,33 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   FlowInkについて に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string AboutWindowTitle {
+            get {
+                return ResourceManager.GetString("AboutWindowTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   キャンセル に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Cancel {
+            get {
+                return ResourceManager.GetString("Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   色を選ぶ に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ChooseColor {
+            get {
+                return ResourceManager.GetString("ChooseColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   クリア に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Clear {
@@ -84,6 +111,15 @@ namespace FlowInk.Properties {
         public static string ClickThrough {
             get {
                 return ResourceManager.GetString("ClickThrough", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   描画OFF。描画ONにするには、ツールバーのOFFボタンかホットキーを押してください。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ClickThroughOffToast {
+            get {
+                return ResourceManager.GetString("ClickThroughOffToast", resourceCulture);
             }
         }
         
@@ -106,6 +142,24 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   現在の設定 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string CurrentSettings {
+            get {
+                return ResourceManager.GetString("CurrentSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   現在: {0} に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string CurrentValueFormat {
+            get {
+                return ResourceManager.GetString("CurrentValueFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   消しゴム に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Eraser {
@@ -120,6 +174,15 @@ namespace FlowInk.Properties {
         public static string Exit {
             get {
                 return ResourceManager.GetString("Exit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   塗りつぶし に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Fill {
+            get {
+                return ResourceManager.GetString("Fill", resourceCulture);
             }
         }
         
@@ -151,6 +214,24 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   ホットキー に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Hotkey {
+            get {
+                return ResourceManager.GetString("Hotkey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Lightweight overlay drawing tool に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string LightweightOverlayDrawingTool {
+            get {
+                return ResourceManager.GetString("LightweightOverlayDrawingTool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   OK に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string OK {
@@ -165,6 +246,15 @@ namespace FlowInk.Properties {
         public static string Opacity {
             get {
                 return ResourceManager.GetString("Opacity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ブラウザを開けませんでした。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string OpenBrowserFailed {
+            get {
+                return ResourceManager.GetString("OpenBrowserFailed", resourceCulture);
             }
         }
         
@@ -214,6 +304,24 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   セーブ に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Save {
+            get {
+                return ResourceManager.GetString("Save", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   線の太さを選択 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string SelectLineThickness {
+            get {
+                return ResourceManager.GetString("SelectLineThickness", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   図形 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Shape {
@@ -241,11 +349,29 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   透明度: {0}% に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string TransparencyFormat {
+            get {
+                return ResourceManager.GetString("TransparencyFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   バージョン に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Version {
             get {
                 return ResourceManager.GetString("Version", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Version: {0} に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string VersionFormat {
+            get {
+                return ResourceManager.GetString("VersionFormat", resourceCulture);
             }
         }
     }
