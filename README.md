@@ -26,3 +26,6 @@ Coming soon
 ## License
 
 TBD
+
+## Web site
+https://msasa-alt.github.io/FlowInk/

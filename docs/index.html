@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FlowInk</title>
+  <title>FlowInk | Windows画面に直接描ける描画・落書きツール</title>
   <meta
     name="description"
-    content="FlowInkはWindows画面に直接落書きできるツールです。"
+    content="FlowInkはWindows画面に直接描ける軽量なオーバーレイ描画・落書きツールです。プレゼンやオンライン会議の画面説明・チャートへの書き込み等をすばやく行えます。"
   />
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://msasa-alt.github.io/FlowInk/">
 
   <style>
     :root {
@@ -22,9 +24,8 @@
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 
       /* toolbar diagram tuning */
-      --toolbar-image-width: 78px;
-      --toolbar-col-width: 120px;
-      --line-len: 44px;
+      --toolbar-image-width: 63px;
+            --line-len: 44px;
       --dot-size: 8px;
       --callout-card-min-h: 58px;
     }
@@ -189,7 +190,7 @@
     .toolbar-diagram {
       width: 100%;
       display: grid;
-      grid-template-columns: var(--toolbar-col-width) minmax(0, 1fr);
+      grid-template-columns: auto minmax(0, 1fr);
       gap: 34px;
       align-items: start;
       text-align: left;
@@ -197,12 +198,15 @@
 
     .toolbar-image-col {
       height: auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
     }
 
     .toolbar-image-col img {
-        width: auto;
-        height: auto;
-        max-width: none;
+      width: var(--toolbar-image-width);
+      height: auto;
+      display: block;
     }
 
     .tool-list {
@@ -254,6 +258,43 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 16px;
       margin-top: 28px;
+    }
+
+
+    .usage-gallery {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      margin-top: 28px;
+      max-width: 980px;
+      margin-left: auto;
+      margin-right: auto;
+      align-items: start;
+    }
+
+    .usage-shot {
+      margin: 0;
+    }
+
+    .usage-shot a {
+      display: block;
+      cursor: zoom-in;
+    }
+
+    .usage-shot img {
+      width: 100%;
+      max-width: 460px;
+      display: block;
+      margin: 0 auto;
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .usage-shot figcaption {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--muted);
+      text-align: center;
     }
 
     .use-case {
@@ -325,12 +366,10 @@
     }
 
     @media (max-width: 900px) {
-      :root {
-        --toolbar-col-width: 108px;
-      }
 
-      .toolbar-diagram {
-        gap: 24px;
+      .usage-gallery {
+        grid-template-columns: 1fr;
+        max-width: 560px;
       }
     }
 
@@ -364,12 +403,13 @@
 
       .toolbar-image-col {
         width: 100%;
-        height: auto;
       }
 
       .toolbar-image-col img {
-        width: 84px;
-        margin: 0;
+        width: 40px;      /* ←これ追加（本質） */
+        height: auto;
+        margin: 0 auto;
+        display: block;
       }
 
       .tool-item {
@@ -396,14 +436,14 @@
       <h1>FlowInk</h1>
 
       <p class="lead">
-        FlowInkはWindows画面の落書きツールです。<br>
-        Windows画面へ線を引いたりメモを書いたりすることができます。
+        Windows画面に直接描ける<br>
+        軽量なオーバーレイ描画・落書きツール
       </p>
 
       <div class="btn-row">
         <a
           class="btn"
-          href="https://github.com/msasa-alt/FlowInk/releases/download/v1.0.0/FlowInk-Setup.exe"
+          href="https://github.com/msasa-alt/FlowInk/releases/download/v1.1.0/FlowInk-Setup.exe"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -414,6 +454,34 @@
       <p class="subnote">
         インストーラーをダウンロードして実行するとインストールできます。実行時にPC保護の警告が出る場合は「詳細情報」ボタンを押して実行してください。※無名なソフトなのでマイクロソフトから警告されてしまいます。
       </p>
+    </section>
+
+    <section class="section">
+      <p class="section-lead">
+        実際の使い方はこんな感じです。
+      </p>
+
+      <div class="usage-gallery">
+        <figure class="usage-shot">
+          <a href="images/PresoWithFlowInk.png" target="_blank" rel="noopener noreferrer">
+            <img
+              src="images/PresoWithFlowInk.png"
+              alt="FlowInkを使ったプレゼン時の書き込み例"
+            />
+          </a>
+          <figcaption>プレゼン中の画面説明に</figcaption>
+        </figure>
+
+        <figure class="usage-shot">
+          <a href="images/ChartWithFlowInk.png" target="_blank" rel="noopener noreferrer">
+            <img
+              src="images/ChartWithFlowInk.png"
+              alt="FlowInkを使ったチャートへの書き込み例"
+            />
+          </a>
+          <figcaption>チャート分析に</figcaption>
+        </figure>
+      </div>
     </section>
 
     <section class="section">
@@ -570,11 +638,11 @@
       </p>
       <div style="max-width:700px;margin:0 auto;text-align:left;color:var(--muted);line-height:1.8;">
         <ul>
-          <li>Ctrl + Shift + T で描画ON/OFFを切り替えられます。設定ボタンでキーの組み合わせを変更できます。</li>
-          <li>Ctrl-Z / Ctrl-yでUndo / Redoができます。履歴は200です。</li>
-          <li>テキスト入力時にEnterで文字列確定。Shifet+Enterで改行できます。</li>
-          <li>テキスト入力時に Ctrl + マウスホイールの上下で文字サイズを拡大・縮小できます。</li>
-          <li>ペンボタン選択時、Shiftキーで直線、Shift + Altキーで矢印を描画できます。</li>
+          <li>Ctrl + Alt + T で描画ON/OFFを切り替えられます。設定ボタンでキーの組み合わせを変更できます</li>
+          <li>Ctrl-Z / Ctrl-yでUndo / Redoができます。履歴は200です</li>
+          <li>テキスト入力時にEnterで文字列確定。Shifet+Enterで改行できます</li>
+          <li>テキスト入力時に Ctrl + マウスホイールの上下で文字サイズを拡大・縮小できます</li>
+          <li>ペンボタン選択時、Shiftキーで直線、Shift + Altキーで矢印を描画できます</li>
           <li>ツールバーの余白をつかむと移動できます。(余白にカーソルを合わせて左ボタンクリックでドラッグ)</li>
         </ul>
       </div>
@@ -617,6 +685,62 @@
       </div>
     </section>
 
+    <section class="section">
+      <h2>FlowInkを開発した経緯</h2>
+
+      <div style="max-width: 760px; margin: 0 auto; text-align: left; color: var(--muted); line-height: 1.9;">
+        <p>
+          FXやCFDのテクニカルデイトレーダーにとってMT4やMT5のチャートソフトの画面に線や文字を書き込む落書きツールは必須です。
+          Epic Penはデファクトスタンダードとして多くのトレーダーに使われていますが、少し前にサブスクになりました。
+          必須なツールとはいえ、たかだが落書きソフトにサブスクって？(OfficeやAcrobatならともかく)、
+          安いとは言え、使わなくなっても契約解除しない限り(忘れたら)一生お金を払い続けるの？
+          となにか釈然としない。
+          と言うことで代替ソフトを探したところginkと言うフリーのソフトを見つけました。
+          ginkこれはこれで多機能だが、なーんか挙動がおかしく不安定。
+          さらに最近は起動時に例外を吐いて起動できないバージョンもありでストレスが溜まっていました。
+          幸いgink はソースが公開されており、チャッピー(ChatGPT)を相手に中身を調べていたんですが、
+          チャッピー曰く設計が古い、WPFで書き直して云々ってなことを言ってくるので、
+          WPFで書き直すチャレンジをしたけどコンパイルエラーを吐きまくるわ、
+          チャッピーは自分の言ったことを忘れて聞くたびに違うコードを吐くわで、ginkを改良することはあきらめました。
+        </p>
+
+        <p>
+          その後しばらくして(あらためて)チャッピーに相談したところ、WPFで新たに書き直すのが早いとかいうので、
+          試しにコードを書いてもらったところ、こちらはサクッと簡単な落書きできるソフトを仕上げてきました。
+          そうなるとこっちも盛り上がって機能を追加していきました。
+        </p>
+
+        <p>
+          こうして出来上がったのが、FlowInkです。
+        </p>
+
+        <figure style="margin: 32px 0 0;">
+          <img
+            src="images/FlowInk1stVer.png"
+            alt="FlowInkの最初バージョン"
+            style="width: 100%; max-width: 900px; display: block; margin: 0 auto; border-radius: 16px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);"
+          />
+          <figcaption style="margin-top: 10px; font-size: 14px; color: var(--muted); text-align: center;">
+            FlowInkの最初バージョン
+          </figcaption>
+        </figure>
+        <p>
+          このような経緯なので、FlowInkはデイトレーダーがginkやEpic Penの代替ソフトウェアとして使える最低限の機能を持たせています。
+        <ul>
+          <li>直線や矢印が簡単に引ける</li>
+          <li>サポート／レジスタンス帯の長方形(塗りつぶし)</li>
+          <li>色の透明度の設定(下のチャートが見えるように)</li>
+          <li>テキスト入力</li>
+          <li>線幅、色をプリセットしておける</li>
+          <li>ツールバーの余白をつかむと移動できます。(余白にカーソルを合わせて左ボタンクリックでドラッグ)</li>
+        </ul>
+          最低限といっても、チャートへの書き込みならこれぐらいの機能で十分と考えています。<br>
+          同じく、プレゼンやオンラインミーティングの画面説明にもシンプルで使いやすいかと。<br>
+          ぜひ使ってみてください。
+        </p>
+      </div>
+    </section>
+
     <section class="cta-box">
       <h2>FlowInkを試す</h2>
       <p>
@@ -625,7 +749,7 @@
       </p>
       <a
         class="btn"
-        href="https://github.com/msasa-alt/FlowInk/releases/download/v1.0.0/FlowInk-Setup.exe"
+        href="https://github.com/msasa-alt/FlowInk/releases/download/v1.1.0/FlowInk-Setup.exe"
         target="_blank"
         rel="noopener noreferrer"
       >
