@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using WpfShape = System.Windows.Shapes.Shape;
+using SR = FlowInk.Properties.Resources;
 using WpfEllipse = System.Windows.Shapes.Ellipse;
 using WpfRectangle = System.Windows.Shapes.Rectangle;
 using Forms = System.Windows.Forms;
@@ -1124,8 +1125,8 @@ public partial class MainWindow : Window
 
     private void InitializeNotifyIcon()
     {
-        _trayEnableClickThroughMenuItem = new Forms.ToolStripMenuItem("描画OFFにする");
-        _trayDisableClickThroughMenuItem = new Forms.ToolStripMenuItem("描画ONに戻す");
+        _trayEnableClickThroughMenuItem = new Forms.ToolStripMenuItem(SR.TrayMenuTurnDrawingOff);
+        _trayDisableClickThroughMenuItem = new Forms.ToolStripMenuItem(SR.TrayMenuTurnDrawingOn);
         var trayAboutMenuItem = new Forms.ToolStripMenuItem("About");
         var trayExitMenuItem = new Forms.ToolStripMenuItem("Exit");
 
@@ -1151,8 +1152,8 @@ public partial class MainWindow : Window
     private void UpdateNotifyIconMenu()
     {
         _notifyIcon.Text = _isClickThroughEnabled
-            ? "FlowInk - 描画OFF"
-            : "FlowInk - 描画ON";
+            ? SR.NotifyIconStatusOff
+            : SR.NotifyIconStatusOn;
 
         if (_trayEnableClickThroughMenuItem != null)
         {
@@ -1259,7 +1260,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        ShowToastMessage("描画OFF。右の戻るかタスクトレイから戻せます。");
+        ShowToastMessage(SR.ClickThroughOffToast);
         _hasShownClickThroughTrayMessage = true;
     }
 
@@ -1632,7 +1633,7 @@ public partial class MainWindow : Window
         if (newModifiers == 0)
         {
             MessageBox.Show(
-                "修飾キーを1つ以上選択してください。",
+                SR.SelectAtLeastOneModifier,
                 "FlowInk",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
@@ -2490,7 +2491,7 @@ public partial class MainWindow : Window
 
         if (RectangleOpacityLabel != null)
         {
-            RectangleOpacityLabel.Text = $"透明度: {NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent)}%";
+            RectangleOpacityLabel.Text = string.Format(SR.TransparencyFormat, NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent));
             RectangleOpacityLabel.Opacity = _isRectangleFilled ? 1.0 : 0.55;
         }
     }
@@ -3561,7 +3562,7 @@ public partial class MainWindow : Window
 
         var editItem = new MenuItem
         {
-            Header = "編集"
+            Header = SR.Edit
         };
         editItem.Click += (_, _) =>
         {
@@ -3570,7 +3571,7 @@ public partial class MainWindow : Window
 
         var deleteItem = new MenuItem
         {
-            Header = "削除"
+            Header = SR.Delete
         };
         deleteItem.Click += (_, _) =>
         {

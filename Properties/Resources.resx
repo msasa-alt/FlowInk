@@ -135,6 +135,9 @@
   <data name="ClickThrough" xml:space="preserve">
     <value>クリック透過</value>
   </data>
+  <data name="GlobalHotkeyChangedFormat" xml:space="preserve">
+    <value>グローバルホットキーを {0} に変更しました。</value>
+  </data>
   <data name="ClickThroughOffToast" xml:space="preserve">
     <value>描画OFF。描画ONにするには、ツールバーのOFFボタンかホットキーを押してください。</value>
   </data>
@@ -165,6 +168,9 @@
   <data name="FontSize" xml:space="preserve">
     <value>フォントサイズ</value>
   </data>
+  <data name="GlobalHotkeyRegisterFailedFormat" xml:space="preserve">
+    <value>グローバルホットキー {0} の登録に失敗しました。\n他のアプリで使われている可能性があります。</value>
+  </data>
   <data name="Hide" xml:space="preserve">
     <value>非表示</value>
   </data>
@@ -173,6 +179,12 @@
   </data>
   <data name="LightweightOverlayDrawingTool" xml:space="preserve">
     <value>Lightweight overlay drawing tool</value>
+  </data>
+  <data name="NotifyIconStatusOff" xml:space="preserve">
+    <value>描画OFF</value>
+  </data>
+  <data name="NotifyIconStatusOn" xml:space="preserve">
+    <value>描画ON</value>
   </data>
   <data name="OK" xml:space="preserve">
     <value>OK</value>
@@ -201,6 +213,9 @@
   <data name="Save" xml:space="preserve">
     <value>セーブ</value>
   </data>
+  <data name="SelectAtLeastOneModifier" xml:space="preserve">
+    <value>修飾キーを1つ以上選択してください。</value>
+  </data>
   <data name="SelectLineThickness" xml:space="preserve">
     <value>線の太さを選択</value>
   </data>
@@ -216,10 +231,22 @@
   <data name="TransparencyFormat" xml:space="preserve">
     <value>透明度: {0}%</value>
   </data>
+  <data name="TrayMenuTurnDrawingOff" xml:space="preserve">
+    <value>描画OFFにする</value>
+  </data>
+  <data name="TrayMenuTurnDrawingOn" xml:space="preserve">
+    <value>描画ONにする</value>
+  </data>
   <data name="Version" xml:space="preserve">
     <value>バージョン</value>
   </data>
   <data name="VersionFormat" xml:space="preserve">
     <value>Version: {0}</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>編集</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>削除</value>
   </data>
 </root>

@@ -216,7 +216,7 @@
                                            FontWeight="Bold"/>
 
                                 <CheckBox x:Name="RectangleFillCheckBox"
-                                          Content="塗りつぶし"
+                                          Content="{x:Static res:Resources.Fill}"
                                           Foreground="White"
                                           Margin="0,0,0,10"
                                           Checked="RectangleFillCheckBox_Changed"
@@ -282,7 +282,7 @@
                                 BorderBrush="#FF555555"
                                 BorderThickness="1">
                             <StackPanel>
-                                <TextBlock Text="Recent Colors"
+                                <TextBlock Text="{x:Static res:Resources.RecentColors}"
                                            Foreground="White"
                                            Margin="0,0,0,8"
                                            FontWeight="Bold"/>
@@ -291,7 +291,7 @@
                                              Columns="4"
                                              Margin="0,0,0,12"/>
 
-                                <TextBlock Text="Preset Colors"
+                                <TextBlock Text="{x:Static res:Resources.PresetColors}"
                                            Foreground="White"
                                            Margin="0,0,0,8"
                                            FontWeight="Bold"/>
@@ -325,7 +325,7 @@
                                 BorderBrush="#FF555555"
                                 BorderThickness="1">
                             <StackPanel Width="190">
-                                <TextBlock Text="Hotkey"
+                                <TextBlock Text="{x:Static res:Resources.Hotkey}"
                                            Foreground="White"
                                            Margin="0,0,0,8"
                                            FontWeight="Bold"/>
@@ -361,7 +361,7 @@
                                           Margin="0,0,0,8"
                                           SelectionChanged="HotkeyKeyComboBox_SelectionChanged"/>
 
-                                <TextBlock Text="現在の設定"
+                                <TextBlock Text="{x:Static res:Resources.CurrentSettings}"
                                            Foreground="#FFBFBFBF"
                                            FontSize="11"/>
                                 <TextBlock x:Name="HotkeyPreviewTextBlock"
@@ -371,11 +371,11 @@
 
                                 <StackPanel Orientation="Horizontal"
                                             HorizontalAlignment="Right">
-                                    <Button Content="Cancel"
+                                    <Button Content="{x:Static res:Resources.Cancel}"
                                             Width="64"
                                             Margin="0,0,6,0"
                                             Click="HotkeyCancelButton_Click"/>
-                                    <Button Content="Save"
+                                    <Button Content="{x:Static res:Resources.Save}"
                                             Width="64"
                                             Click="HotkeySaveButton_Click"/>
                                 </StackPanel>

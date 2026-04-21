@@ -135,6 +135,9 @@
   <data name="ClickThrough" xml:space="preserve">
     <value>ClickThrough</value>
   </data>
+  <data name="GlobalHotkeyChangedFormat" xml:space="preserve">
+    <value>The global hotkey has been changed to {0}.</value>
+  </data>
   <data name="ClickThroughOffToast" xml:space="preserve">
     <value>Drawing is OFF. Turn it ON using the toolbar button or the hotkey.</value>
   </data>
@@ -165,6 +168,9 @@
   <data name="FontSize" xml:space="preserve">
     <value>Font Size</value>
   </data>
+  <data name="GlobalHotkeyRegisterFailedFormat" xml:space="preserve">
+    <value>Failed to register the global hotkey {0}.\nIt may already be in use by another application.</value>
+  </data>
   <data name="Hide" xml:space="preserve">
     <value>Hide</value>
   </data>
@@ -173,6 +179,12 @@
   </data>
   <data name="LightweightOverlayDrawingTool" xml:space="preserve">
     <value>Lightweight overlay drawing tool</value>
+  </data>
+  <data name="NotifyIconStatusOff" xml:space="preserve">
+    <value>Drawing OFF</value>
+  </data>
+  <data name="NotifyIconStatusOn" xml:space="preserve">
+    <value>Drawing ON</value>
   </data>
   <data name="OK" xml:space="preserve">
     <value>OK</value>
@@ -201,6 +213,9 @@
   <data name="Save" xml:space="preserve">
     <value>Save</value>
   </data>
+  <data name="SelectAtLeastOneModifier" xml:space="preserve">
+    <value>Please select at least one modifier key.</value>
+  </data>
   <data name="SelectLineThickness" xml:space="preserve">
     <value>Select Line Thickness</value>
   </data>
@@ -216,10 +231,22 @@
   <data name="TransparencyFormat" xml:space="preserve">
     <value>Transparency: {0}%</value>
   </data>
+  <data name="TrayMenuTurnDrawingOff" xml:space="preserve">
+    <value>Turn Drawing OFF</value>
+  </data>
+  <data name="TrayMenuTurnDrawingOn" xml:space="preserve">
+    <value>Turn Drawing ON</value>
+  </data>
   <data name="Version" xml:space="preserve">
     <value>Version</value>
   </data>
   <data name="VersionFormat" xml:space="preserve">
     <value>Version: {0}</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
   </data>
 </root>

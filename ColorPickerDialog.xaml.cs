@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using System.Windows.Media;
+using SR = FlowInk.Properties.Resources;
 using Forms = System.Windows.Forms;
 using Drawing = System.Drawing;
 
@@ -90,6 +91,6 @@ public partial class ColorPickerDialog : Window
         ColorValueTextBlock.Text = $"#{_selectedColor.A:X2}{_selectedColor.R:X2}{_selectedColor.G:X2}{_selectedColor.B:X2}";
 
         int alphaPercent = (int)Math.Round(_selectedColor.A * 100.0 / 255.0);
-        AlphaValueTextBlock.Text = $"透明度: {alphaPercent}%";
+        AlphaValueTextBlock.Text = string.Format(SR.TransparencyFormat, alphaPercent);
     }
 }

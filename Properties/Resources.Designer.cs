@@ -160,6 +160,24 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   削除 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Delete {
+            get {
+                return ResourceManager.GetString("Delete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   編集 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Edit {
+            get {
+                return ResourceManager.GetString("Edit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   消しゴム に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Eraser {
@@ -205,6 +223,24 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   グローバルホットキーを {0} に変更しました。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string GlobalHotkeyChangedFormat {
+            get {
+                return ResourceManager.GetString("GlobalHotkeyChangedFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   グローバルホットキー {0} の登録に失敗しました。\n他のアプリで使われている可能性があります。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string GlobalHotkeyRegisterFailedFormat {
+            get {
+                return ResourceManager.GetString("GlobalHotkeyRegisterFailedFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   非表示 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Hide {
@@ -228,6 +264,24 @@ namespace FlowInk.Properties {
         public static string LightweightOverlayDrawingTool {
             get {
                 return ResourceManager.GetString("LightweightOverlayDrawingTool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   描画OFF に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string NotifyIconStatusOff {
+            get {
+                return ResourceManager.GetString("NotifyIconStatusOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   描画ON に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string NotifyIconStatusOn {
+            get {
+                return ResourceManager.GetString("NotifyIconStatusOn", resourceCulture);
             }
         }
         
@@ -313,6 +367,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   修飾キーを1つ以上選択してください。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string SelectAtLeastOneModifier {
+            get {
+                return ResourceManager.GetString("SelectAtLeastOneModifier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   線の太さを選択 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string SelectLineThickness {
@@ -354,6 +417,24 @@ namespace FlowInk.Properties {
         public static string TransparencyFormat {
             get {
                 return ResourceManager.GetString("TransparencyFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   描画OFFにする に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string TrayMenuTurnDrawingOff {
+            get {
+                return ResourceManager.GetString("TrayMenuTurnDrawingOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   描画ONにする に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string TrayMenuTurnDrawingOn {
+            get {
+                return ResourceManager.GetString("TrayMenuTurnDrawingOn", resourceCulture);
             }
         }
         

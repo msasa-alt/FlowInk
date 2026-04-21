@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Windows;
 using System.Windows.Navigation;
+using SR = FlowInk.Properties.Resources;
 
 namespace FlowInk;
 
@@ -22,7 +23,7 @@ public partial class AboutDialog : Window
             }
         }
 
-        VersionTextBlock.Text = $"Version: {versionText}";
+        VersionTextBlock.Text = string.Format(SR.VersionFormat, versionText);
     }
 
     private void GitHubHyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
@@ -40,7 +41,7 @@ public partial class AboutDialog : Window
         catch
         {
             MessageBox.Show(
-                "ブラウザを開けませんでした。",
+                SR.OpenBrowserFailed,
                 "FlowInk",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
