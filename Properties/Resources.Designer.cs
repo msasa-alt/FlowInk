@@ -133,15 +133,6 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   描画OFF。描画ONにするには、ツールバーのOFFボタンかホットキーを押してください。 に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        public static string ClickThroughOffToast {
-            get {
-                return ResourceManager.GetString("ClickThroughOffToast", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   色 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Color {
@@ -178,6 +169,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   色（クリックでプリセット色、ダブルクリックで現在色を編集） に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ColorToolTip {
+            get {
+                return ResourceManager.GetString("ColorToolTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   現在の設定 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string CurrentSettings {
@@ -201,6 +201,51 @@ namespace FlowInk.Properties {
         public static string Delete {
             get {
                 return ResourceManager.GetString("Delete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   描画OFF。OFFボタンかホットキー({0})でONにできます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string DrawingDisabledToast {
+            get {
+                return ResourceManager.GetString("DrawingDisabledToast", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   描画ON に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string DrawingEnabledToast {
+            get {
+                return ResourceManager.GetString("DrawingEnabledToast", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   OFF に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string DrawingOff {
+            get {
+                return ResourceManager.GetString("DrawingOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ON に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string DrawingOn {
+            get {
+                return ResourceManager.GetString("DrawingOn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   描画ON/OFF切替 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string DrawingToolTip {
+            get {
+                return ResourceManager.GetString("DrawingToolTip", resourceCulture);
             }
         }
         
@@ -412,6 +457,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   ペン（右クリック: 線幅設定） に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string PenToolTip {
+            get {
+                return ResourceManager.GetString("PenToolTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   線幅 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string PenWidth {
@@ -511,6 +565,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   設定 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string SettingsToolTip {
+            get {
+                return ResourceManager.GetString("SettingsToolTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   図形 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Shape {
@@ -525,6 +588,15 @@ namespace FlowInk.Properties {
         public static string Text {
             get {
                 return ResourceManager.GetString("Text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   テキスト（ダブルクリックでフォント設定） に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string TextToolTip {
+            get {
+                return ResourceManager.GetString("TextToolTip", resourceCulture);
             }
         }
         

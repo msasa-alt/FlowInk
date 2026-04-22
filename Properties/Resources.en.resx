@@ -138,9 +138,6 @@
   <data name="GlobalHotkeyChangedFormat" xml:space="preserve">
     <value>The global hotkey has been changed to {0}.</value>
   </data>
-  <data name="ClickThroughOffToast" xml:space="preserve">
-    <value>Drawing is OFF. Turn it ON using the toolbar button or the hotkey.</value>
-  </data>
   <data name="Color" xml:space="preserve">
     <value>Color</value>
   </data>
@@ -290,5 +287,32 @@
   </data>
   <data name="ColorDisplayOpaqueFormat" xml:space="preserve">
     <value>#{0}{1}{2}{3}</value>
+  </data>
+  <data name="DrawingOn" xml:space="preserve">
+    <value>ON</value>
+  </data>
+  <data name="DrawingOff" xml:space="preserve">
+    <value>OFF</value>
+  </data>
+  <data name="DrawingToolTip" xml:space="preserve">
+    <value>Toggle drawing ON/OFF</value>
+  </data>
+  <data name="DrawingDisabledToast" xml:space="preserve">
+    <value>Drawing is OFF. Press the OFF button or use the hotkey ({0}) to turn it ON.</value>
+  </data>
+  <data name="DrawingEnabledToast" xml:space="preserve">
+    <value>Drawing is ON</value>
+  </data>
+  <data name="PenToolTip" xml:space="preserve">
+    <value>Pen (Right-click: Pen width settings)</value>
+  </data>
+  <data name="TextToolTip" xml:space="preserve">
+    <value>Text (Double-click for font settings)</value>
+  </data>
+  <data name="ColorToolTip" xml:space="preserve">
+    <value>Color (Click to PresetColors, Double-click to edit current color)</value>
+  </data>
+  <data name="SettingsToolTip" xml:space="preserve">
+    <value>Settings</value>
   </data>
 </root>

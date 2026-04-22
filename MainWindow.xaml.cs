@@ -1260,7 +1260,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        ShowToastMessage(SR.ClickThroughOffToast);
+        ShowToastMessage(string.Format(SR.DrawingDisabledToast, GetCurrentHotkeyDisplayText()));
         _hasShownClickThroughTrayMessage = true;
     }
 
@@ -1659,7 +1659,7 @@ public partial class MainWindow : Window
 
         SaveAppSettings();
         HotkeySettingsPopup.IsOpen = false;
-        ShowToastMessage($"CTホットキーを {GetCurrentHotkeyDisplayText()} に変更しました。");
+        ShowToastMessage(string.Format(SR.GlobalHotkeyChangedFormat, GetCurrentHotkeyDisplayText()));
     }
 
     private void HotkeyCancelButton_Click(object sender, RoutedEventArgs e)

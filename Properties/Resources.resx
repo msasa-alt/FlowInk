@@ -138,9 +138,6 @@
   <data name="GlobalHotkeyChangedFormat" xml:space="preserve">
     <value>グローバルホットキーを {0} に変更しました。</value>
   </data>
-  <data name="ClickThroughOffToast" xml:space="preserve">
-    <value>描画OFF。描画ONにするには、ツールバーのOFFボタンかホットキーを押してください。</value>
-  </data>
   <data name="Color" xml:space="preserve">
     <value>色</value>
   </data>
@@ -290,5 +287,32 @@
   </data>
   <data name="ColorDisplayOpaqueFormat" xml:space="preserve">
     <value>#{0}{1}{2}{3}</value>
+  </data>
+  <data name="DrawingOn" xml:space="preserve">
+    <value>ON</value>
+  </data>
+  <data name="DrawingOff" xml:space="preserve">
+    <value>OFF</value>
+  </data>
+  <data name="DrawingToolTip" xml:space="preserve">
+    <value>描画ON/OFF切替</value>
+  </data>
+  <data name="DrawingDisabledToast" xml:space="preserve">
+    <value>描画OFF。OFFボタンかホットキー({0})でONにできます。</value>
+  </data>
+  <data name="DrawingEnabledToast" xml:space="preserve">
+    <value>描画ON</value>
+  </data>
+  <data name="PenToolTip" xml:space="preserve">
+    <value>ペン（右クリック: 線幅設定）</value>
+  </data>
+  <data name="TextToolTip" xml:space="preserve">
+    <value>テキスト（ダブルクリックでフォント設定）</value>
+  </data>
+  <data name="ColorToolTip" xml:space="preserve">
+    <value>色（クリックでプリセット色、ダブルクリックで現在色を編集）</value>
+  </data>
+  <data name="SettingsToolTip" xml:space="preserve">
+    <value>設定</value>
   </data>
 </root>
