@@ -76,14 +76,14 @@
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Right">
                 <Button x:Name="OkButton"
-                        Content="{x:Static res:Resources.OkButton}"
+                        Content="{x:Static res:Resources.OK}"
                         Width="72"
                         Height="32"
                         Margin="4"
                         Click="OkButton_Click"/>
 
                 <Button x:Name="CancelButton"
-                        Content="{x:Static res:Resources.CancelButton}"
+                        Content="{x:Static res:Resources.Cancel}"
                         Width="72"
                         Height="32"
                         Margin="4"
