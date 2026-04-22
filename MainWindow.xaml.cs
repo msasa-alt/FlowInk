@@ -1059,12 +1059,12 @@ public partial class MainWindow : Window
     {
         if (ClickThroughButtonLabel != null)
         {
-            ClickThroughButtonLabel.Text = _isClickThroughEnabled ? "OFF" : "ON";
+            ClickThroughButtonLabel.Text = _isClickThroughEnabled ? SR.Off : SR.On;
         }
 
         if (CtReturnButtonLabel != null)
         {
-            CtReturnButtonLabel.Text = _isClickThroughEnabled ? "OFF" : "ON";
+            CtReturnButtonLabel.Text = _isClickThroughEnabled ? SR.Off : SR.On;
         }
     }
 
@@ -1492,22 +1492,22 @@ public partial class MainWindow : Window
 
         if ((modifiers & MOD_CONTROL) != 0)
         {
-            parts.Add("Ctrl");
+            parts.Add(SR.HotkeyModifierCtrl);
         }
 
         if ((modifiers & MOD_ALT) != 0)
         {
-            parts.Add("Alt");
+            parts.Add(SR.HotkeyModifierAlt);
         }
 
         if ((modifiers & MOD_SHIFT) != 0)
         {
-            parts.Add("Shift");
+            parts.Add(SR.HotkeyModifierShift);
         }
 
         if ((modifiers & MOD_WIN) != 0)
         {
-            parts.Add("Win");
+            parts.Add(SR.HotkeyModifierWin);
         }
 
         parts.Add(key.ToString());
@@ -1659,7 +1659,7 @@ public partial class MainWindow : Window
 
         SaveAppSettings();
         HotkeySettingsPopup.IsOpen = false;
-        ShowToastMessage(string.Format(SR.GlobalHotkeyChangedFormat, GetCurrentHotkeyDisplayText()));
+        ShowToastMessage($"CTホットキーを {GetCurrentHotkeyDisplayText()} に変更しました。");
     }
 
     private void HotkeyCancelButton_Click(object sender, RoutedEventArgs e)
@@ -2122,7 +2122,7 @@ public partial class MainWindow : Window
                 Color = color
             };
 
-            button.ToolTip = $"{GetColorDisplayText(color)}  (クリック: 選択 / ダブルクリック: 編集)";
+            button.ToolTip = $"{GetColorDisplayText(color)}  {SR.PresetColorItemToolTipSuffix}";
             button.PreviewMouseLeftButtonDown += PresetColorButton_PreviewMouseLeftButtonDown;
 
             PresetColorGrid.Children.Add(button);
@@ -2197,7 +2197,7 @@ public partial class MainWindow : Window
             Style = (Style)FindResource("PenWidthPresetButtonStyle"),
             Content = contentGrid,
             Tag = index,
-            ToolTip = $"{FormatPenWidthText(width)}  (クリック: 選択 / ダブルクリック: 編集)"
+            ToolTip = $"{FormatPenWidthText(width)}  {SR.PenWidthPresetItemToolTipSuffix}"
         };
 
         button.PreviewMouseLeftButtonDown += PenWidthPresetButton_PreviewMouseLeftButtonDown;
@@ -2234,7 +2234,7 @@ public partial class MainWindow : Window
     private static string GetColorDisplayText(Color color)
     {
         int alphaPercent = (int)Math.Round(color.A * 100.0 / 255.0);
-        return $"#{color.A:X2}{color.R:X2}{color.G:X2}{color.B:X2} ({alphaPercent}%)";
+        return string.Format(SR.ColorDisplayWithAlphaFormat, color.A.ToString("X2"), color.R.ToString("X2"), color.G.ToString("X2"), color.B.ToString("X2"), alphaPercent);
     }
 
     private void PresetColorButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -2465,12 +2465,12 @@ public partial class MainWindow : Window
     private void UpdateShapeButtonToolTips()
     {
         string rectangleText = _isRectangleFilled
-            ? $"Rectangle（塗りつぶしON {NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent)}% / 右クリックで設定）"
-            : "Rectangle（塗りつぶしOFF / 右クリックで設定）";
+            ? string.Format(SR.RectangleFilledToolTipFormat, NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent))
+            : SR.RectangleNotFilledToolTip;
 
         string circleText = _isRectangleFilled
-            ? $"Circle（塗りつぶしON {NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent)}% / 右クリックで設定）"
-            : "Circle（塗りつぶしOFF / 右クリックで設定）";
+            ? string.Format(SR.CircleFilledToolTipFormat, NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent))
+            : SR.CircleNotFilledToolTip;
 
         RectangleButton.ToolTip = rectangleText;
         CircleButton.ToolTip = circleText;

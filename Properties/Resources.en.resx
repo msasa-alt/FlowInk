@@ -249,4 +249,46 @@
   <data name="Delete" xml:space="preserve">
     <value>Delete</value>
   </data>
+  <data name="On" xml:space="preserve">
+    <value>ON</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>OFF</value>
+  </data>
+  <data name="HotkeyModifierCtrl" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="HotkeyModifierAlt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="HotkeyModifierShift" xml:space="preserve">
+    <value>Shift</value>
+  </data>
+  <data name="HotkeyModifierWin" xml:space="preserve">
+    <value>Win</value>
+  </data>
+  <data name="PresetColorItemToolTipSuffix" xml:space="preserve">
+    <value>Click: Select / Double-click: Edit</value>
+  </data>
+  <data name="PenWidthPresetItemToolTipSuffix" xml:space="preserve">
+    <value>Click: Select / Double-click: Edit</value>
+  </data>
+  <data name="RectangleFilledToolTipFormat" xml:space="preserve">
+    <value>Rectangle (Fill ON {0}% / Right-click for settings)</value>
+  </data>
+  <data name="RectangleNotFilledToolTip" xml:space="preserve">
+    <value>Rectangle (Fill OFF / Right-click for settings)</value>
+  </data>
+  <data name="CircleFilledToolTipFormat" xml:space="preserve">
+    <value>Circle (Fill ON {0}% / Right-click for settings)</value>
+  </data>
+  <data name="CircleNotFilledToolTip" xml:space="preserve">
+    <value>Circle (Fill OFF / Right-click for settings)</value>
+  </data>
+  <data name="ColorDisplayWithAlphaFormat" xml:space="preserve">
+    <value>#{0}{1}{2}{3} ({4}%)</value>
+  </data>
+  <data name="ColorDisplayOpaqueFormat" xml:space="preserve">
+    <value>#{0}{1}{2}{3}</value>
+  </data>
 </root>

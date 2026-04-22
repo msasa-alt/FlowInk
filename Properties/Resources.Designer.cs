@@ -97,6 +97,24 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   円（塗りつぶしON {0}% / 右クリックで設定） に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string CircleFilledToolTipFormat {
+            get {
+                return ResourceManager.GetString("CircleFilledToolTipFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   円（塗りつぶしOFF / 右クリックで設定） に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string CircleNotFilledToolTip {
+            get {
+                return ResourceManager.GetString("CircleNotFilledToolTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   クリア に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Clear {
@@ -129,6 +147,24 @@ namespace FlowInk.Properties {
         public static string Color {
             get {
                 return ResourceManager.GetString("Color", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   #{0}{1}{2}{3} に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ColorDisplayOpaqueFormat {
+            get {
+                return ResourceManager.GetString("ColorDisplayOpaqueFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   #{0}{1}{2}{3} ({4}%) に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ColorDisplayWithAlphaFormat {
+            get {
+                return ResourceManager.GetString("ColorDisplayWithAlphaFormat", resourceCulture);
             }
         }
         
@@ -259,6 +295,42 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   Alt に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string HotkeyModifierAlt {
+            get {
+                return ResourceManager.GetString("HotkeyModifierAlt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ctrl に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string HotkeyModifierCtrl {
+            get {
+                return ResourceManager.GetString("HotkeyModifierCtrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Shift に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string HotkeyModifierShift {
+            get {
+                return ResourceManager.GetString("HotkeyModifierShift", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Win に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string HotkeyModifierWin {
+            get {
+                return ResourceManager.GetString("HotkeyModifierWin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Lightweight overlay drawing tool に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string LightweightOverlayDrawingTool {
@@ -286,11 +358,29 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   OFF に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Off {
+            get {
+                return ResourceManager.GetString("Off", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   OK に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string OK {
             get {
                 return ResourceManager.GetString("OK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ON に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string On {
+            get {
+                return ResourceManager.GetString("On", resourceCulture);
             }
         }
         
@@ -331,6 +421,24 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   クリック: 選択 / ダブルクリック: 編集 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string PenWidthPresetItemToolTipSuffix {
+            get {
+                return ResourceManager.GetString("PenWidthPresetItemToolTipSuffix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   クリック: 選択 / ダブルクリック: 編集 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string PresetColorItemToolTipSuffix {
+            get {
+                return ResourceManager.GetString("PresetColorItemToolTipSuffix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   プリセットカラー に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string PresetColors {
@@ -354,6 +462,24 @@ namespace FlowInk.Properties {
         public static string Rectangle {
             get {
                 return ResourceManager.GetString("Rectangle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   四角形（塗りつぶしON {0}% / 右クリックで設定） に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string RectangleFilledToolTipFormat {
+            get {
+                return ResourceManager.GetString("RectangleFilledToolTipFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   四角形（塗りつぶしOFF / 右クリックで設定） に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string RectangleNotFilledToolTip {
+            get {
+                return ResourceManager.GetString("RectangleNotFilledToolTip", resourceCulture);
             }
         }
         
