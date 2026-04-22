@@ -330,16 +330,22 @@
   <data name="PenWidthMaxLabel" xml:space="preserve">
     <value>30</value>
   </data>
-  <data name="OkButton" xml:space="preserve">
-    <value>OK</value>
-  </data>
-  <data name="CancelButton" xml:space="preserve">
-    <value>Cancel</value>
-  </data>
   <data name="TransparencyMinLabel" xml:space="preserve">
     <value>0%</value>
   </data>
   <data name="TransparencyMaxLabel" xml:space="preserve">
     <value>100%</value>
+  </data>
+  <data name="AboutDialogTitle" xml:space="preserve">
+    <value>About FlowInk</value>
+  </data>
+  <data name="AppName" xml:space="preserve">
+    <value>FlowInk</value>
+  </data>
+  <data name="AboutDescription" xml:space="preserve">
+    <value>Lightweight overlay drawing tool</value>
+  </data>
+  <data name="MessageBoxTitle" xml:space="preserve">
+    <value>FlowInk</value>
   </data>
 </root>

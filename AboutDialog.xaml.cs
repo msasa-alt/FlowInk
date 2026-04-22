@@ -42,7 +42,7 @@ public partial class AboutDialog : Window
         {
             MessageBox.Show(
                 SR.OpenBrowserFailed,
-                "FlowInk",
+                SR.MessageBoxTitle,
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
         }

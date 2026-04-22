@@ -61,11 +61,29 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   バージョン情報 に類似しているローカライズされた文字列を検索します。
+        ///   アバウト に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string About {
             get {
                 return ResourceManager.GetString("About", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   軽量なオーバーレイ描画ツール に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string AboutDescription {
+            get {
+                return ResourceManager.GetString("AboutDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   FlowInk について に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string AboutDialogTitle {
+            get {
+                return ResourceManager.GetString("AboutDialogTitle", resourceCulture);
             }
         }
         
@@ -79,20 +97,20 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   キャンセル に類似しているローカライズされた文字列を検索します。
+        ///   FlowInk に類似しているローカライズされた文字列を検索します。
         /// </summary>
-        public static string Cancel {
+        public static string AppName {
             get {
-                return ResourceManager.GetString("Cancel", resourceCulture);
+                return ResourceManager.GetString("AppName", resourceCulture);
             }
         }
         
         /// <summary>
         ///   キャンセル に類似しているローカライズされた文字列を検索します。
         /// </summary>
-        public static string CancelButton {
+        public static string Cancel {
             get {
-                return ResourceManager.GetString("CancelButton", resourceCulture);
+                return ResourceManager.GetString("Cancel", resourceCulture);
             }
         }
         
@@ -403,6 +421,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   FlowInk に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string MessageBoxTitle {
+            get {
+                return ResourceManager.GetString("MessageBoxTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   描画OFF に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string NotifyIconStatusOff {
@@ -435,15 +462,6 @@ namespace FlowInk.Properties {
         public static string OK {
             get {
                 return ResourceManager.GetString("OK", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   OK に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        public static string OkButton {
-            get {
-                return ResourceManager.GetString("OkButton", resourceCulture);
             }
         }
         
