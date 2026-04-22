@@ -1,6 +1,5 @@
 using System.Reflection;
 using System.Windows;
-using System.Windows.Navigation;
 using SR = FlowInk.Properties.Resources;
 
 namespace FlowInk;
@@ -24,34 +23,5 @@ public partial class AboutDialog : Window
         }
 
         VersionTextBlock.Text = string.Format(SR.VersionFormat, versionText);
-    }
-
-    private void GitHubHyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
-    {
-        try
-        {
-            var psi = new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = e.Uri.AbsoluteUri,
-                UseShellExecute = true
-            };
-
-            System.Diagnostics.Process.Start(psi);
-        }
-        catch
-        {
-            MessageBox.Show(
-                SR.OpenBrowserFailed,
-                SR.MessageBoxTitle,
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
-        }
-
-        e.Handled = true;
-    }
-
-    private void OkButton_Click(object sender, RoutedEventArgs e)
-    {
-        DialogResult = true;
     }
 }
