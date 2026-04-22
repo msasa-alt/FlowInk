@@ -315,4 +315,25 @@
   <data name="SettingsToolTip" xml:space="preserve">
     <value>Settings</value>
   </data>
+  <data name="ClickThroughOffToast" xml:space="preserve">
+    <value>Drawing is OFF. Turn it ON using the toolbar button or the hotkey.</value>
+  </data>
+  <data name="PenWidthDialogTitle" xml:space="preserve">
+    <value>Pen Width</value>
+  </data>
+  <data name="PenWidthSelectLabel" xml:space="preserve">
+    <value>Select pen width</value>
+  </data>
+  <data name="PenWidthMinLabel" xml:space="preserve">
+    <value>0.5</value>
+  </data>
+  <data name="PenWidthMaxLabel" xml:space="preserve">
+    <value>30</value>
+  </data>
+  <data name="OkButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="CancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
 </root>

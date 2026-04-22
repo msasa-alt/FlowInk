@@ -88,6 +88,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   キャンセル に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string CancelButton {
+            get {
+                return ResourceManager.GetString("CancelButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   色を選ぶ に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string ChooseColor {
@@ -129,6 +138,15 @@ namespace FlowInk.Properties {
         public static string ClickThrough {
             get {
                 return ResourceManager.GetString("ClickThrough", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   描画OFF。描画ONにするには、ツールバーのOFFボタンかホットキーを押してください。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ClickThroughOffToast {
+            get {
+                return ResourceManager.GetString("ClickThroughOffToast", resourceCulture);
             }
         }
         
@@ -421,6 +439,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   OK に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string OkButton {
+            get {
+                return ResourceManager.GetString("OkButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   ON に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string On {
@@ -475,11 +502,47 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   ペンの太さ に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string PenWidthDialogTitle {
+            get {
+                return ResourceManager.GetString("PenWidthDialogTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   30 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string PenWidthMaxLabel {
+            get {
+                return ResourceManager.GetString("PenWidthMaxLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   0.5 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string PenWidthMinLabel {
+            get {
+                return ResourceManager.GetString("PenWidthMinLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   クリック: 選択 / ダブルクリック: 編集 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string PenWidthPresetItemToolTipSuffix {
             get {
                 return ResourceManager.GetString("PenWidthPresetItemToolTipSuffix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   線の太さを選択 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string PenWidthSelectLabel {
+            get {
+                return ResourceManager.GetString("PenWidthSelectLabel", resourceCulture);
             }
         }
         

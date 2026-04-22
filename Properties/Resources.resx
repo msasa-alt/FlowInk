@@ -315,4 +315,25 @@
   <data name="SettingsToolTip" xml:space="preserve">
     <value>設定</value>
   </data>
+  <data name="ClickThroughOffToast" xml:space="preserve">
+    <value>描画OFF。描画ONにするには、ツールバーのOFFボタンかホットキーを押してください。</value>
+  </data>
+  <data name="PenWidthDialogTitle" xml:space="preserve">
+    <value>ペンの太さ</value>
+  </data>
+  <data name="PenWidthSelectLabel" xml:space="preserve">
+    <value>線の太さを選択</value>
+  </data>
+  <data name="PenWidthMinLabel" xml:space="preserve">
+    <value>0.5</value>
+  </data>
+  <data name="PenWidthMaxLabel" xml:space="preserve">
+    <value>30</value>
+  </data>
+  <data name="OkButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="CancelButton" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
 </root>
