@@ -336,4 +336,10 @@
   <data name="CancelButton" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <data name="TransparencyMinLabel" xml:space="preserve">
+    <value>0%</value>
+  </data>
+  <data name="TransparencyMaxLabel" xml:space="preserve">
+    <value>100%</value>
+  </data>
 </root>

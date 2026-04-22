@@ -1,7 +1,8 @@
 <Window x:Class="FlowInk.ColorPickerDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Color"
+        xmlns:res="clr-namespace:FlowInk.Properties"
+        Title="{x:Static res:Resources.ColorPicker}"
         Width="360"
         Height="320"
         WindowStartupLocation="CenterOwner"
@@ -18,7 +19,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0"
-                   Text="色"
+                   Text="{x:Static res:Resources.Color}"
                    FontWeight="SemiBold"
                    Margin="0,0,0,6"/>
 
@@ -61,14 +62,14 @@
 
         <Button Grid.Row="2"
                 x:Name="ChooseBaseColorButton"
-                Content="色を選ぶ..."
+                Content="{x:Static res:Resources.ChooseColor}"
                 Width="120"
                 Height="32"
                 HorizontalAlignment="Left"
                 Click="ChooseBaseColorButton_Click"/>
 
         <StackPanel Grid.Row="3" Margin="0,16,0,0">
-            <TextBlock Text="透明度"
+            <TextBlock Text="{x:Static res:Resources.Transparency}"
                        FontWeight="SemiBold"
                        Margin="0,0,0,6"/>
             <Slider x:Name="AlphaSlider"
@@ -83,11 +84,11 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0"
-                           Text="0%"
+                           Text="{x:Static res:Resources.TransparencyMinLabel}"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Top"/>
                 <TextBlock Grid.Column="1"
-                           Text="100%"
+                           Text="{x:Static res:Resources.TransparencyMaxLabel}"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Top"/>
             </Grid>
@@ -97,13 +98,13 @@
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     Margin="0,14,0,0">
-            <Button Content="OK"
+            <Button Content="{x:Static res:Resources.OK}"
                     Width="84"
                     Height="32"
                     Margin="0,0,8,0"
                     IsDefault="True"
                     Click="OkButton_Click"/>
-            <Button Content="Cancel"
+            <Button Content="{x:Static res:Resources.Cancel}"
                     Width="84"
                     Height="32"
                     IsCancel="True"/>

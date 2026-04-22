@@ -682,6 +682,24 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   100% に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string TransparencyMaxLabel {
+            get {
+                return ResourceManager.GetString("TransparencyMaxLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   0% に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string TransparencyMinLabel {
+            get {
+                return ResourceManager.GetString("TransparencyMinLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   描画OFFにする に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string TrayMenuTurnDrawingOff {
