@@ -1127,8 +1127,8 @@ public partial class MainWindow : Window
     {
         _trayEnableClickThroughMenuItem = new Forms.ToolStripMenuItem(SR.TrayMenuTurnDrawingOff);
         _trayDisableClickThroughMenuItem = new Forms.ToolStripMenuItem(SR.TrayMenuTurnDrawingOn);
-        var trayAboutMenuItem = new Forms.ToolStripMenuItem("About");
-        var trayExitMenuItem = new Forms.ToolStripMenuItem("Exit");
+        var trayAboutMenuItem = new Forms.ToolStripMenuItem(SR.About);
+        var trayExitMenuItem = new Forms.ToolStripMenuItem(SR.Exit);
 
         _trayEnableClickThroughMenuItem.Click += TrayEnableClickThroughMenuItem_Click;
         _trayDisableClickThroughMenuItem.Click += TrayDisableClickThroughMenuItem_Click;
@@ -1568,7 +1568,7 @@ public partial class MainWindow : Window
         if (!registered && showFailureMessage)
         {
             MessageBox.Show(
-                $"グローバルホットキー {GetCurrentHotkeyDisplayText()} の登録に失敗しました。\n他のアプリで使われている可能性があります。",
+                string.Format(SR.GlobalHotkeyRegisterFailedFormat, GetCurrentHotkeyDisplayText()),
                 "FlowInk",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
@@ -1659,7 +1659,7 @@ public partial class MainWindow : Window
 
         SaveAppSettings();
         HotkeySettingsPopup.IsOpen = false;
-        ShowToastMessage($"CTホットキーを {GetCurrentHotkeyDisplayText()} に変更しました。");
+        ShowToastMessage(string.Format(SR.GlobalHotkeyChangedFormat, GetCurrentHotkeyDisplayText()));
     }
 
     private void HotkeyCancelButton_Click(object sender, RoutedEventArgs e)
