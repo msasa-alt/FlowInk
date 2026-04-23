@@ -348,4 +348,7 @@
   <data name="MessageBoxTitle" xml:space="preserve">
     <value>FlowInk</value>
   </data>
+  <data name="CurrentValueDefault" xml:space="preserve">
+    <value>現在: 4</value>
+  </data>
 </root>

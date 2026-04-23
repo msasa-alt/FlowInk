@@ -223,6 +223,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   現在: 4 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string CurrentValueDefault {
+            get {
+                return ResourceManager.GetString("CurrentValueDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   現在: {0} に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string CurrentValueFormat {

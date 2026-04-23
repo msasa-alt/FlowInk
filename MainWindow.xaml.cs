@@ -1135,7 +1135,7 @@ public partial class MainWindow : Window
         trayAboutMenuItem.Click += TrayAboutMenuItem_Click;
         trayExitMenuItem.Click += TrayExitMenuItem_Click;
 
-        _notifyIcon.Text = "FlowInk";
+        _notifyIcon.Text = SR.AppName;
         _notifyIcon.Icon = new Drawing.Icon(Path.Combine(AppContext.BaseDirectory, "Assets", "FlowInk.ico"));
         _notifyIcon.Visible = true;
         _notifyIcon.ContextMenuStrip = new Forms.ContextMenuStrip();
@@ -1569,7 +1569,7 @@ public partial class MainWindow : Window
         {
             MessageBox.Show(
                 string.Format(SR.GlobalHotkeyRegisterFailedFormat, GetCurrentHotkeyDisplayText()),
-                "FlowInk",
+                SR.MessageBoxTitle,
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
         }
@@ -1634,7 +1634,7 @@ public partial class MainWindow : Window
         {
             MessageBox.Show(
                 SR.SelectAtLeastOneModifier,
-                "FlowInk",
+                SR.MessageBoxTitle,
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
             return;
