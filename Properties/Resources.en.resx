@@ -351,4 +351,7 @@
   <data name="CurrentValueDefault" xml:space="preserve">
     <value>Current: 4</value>
   </data>
+  <data name="UndoRedoToolTip" xml:space="preserve">
+    <value>Left click: Undo / Right click: Redo</value>
+  </data>
 </root>

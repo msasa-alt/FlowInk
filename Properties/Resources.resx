@@ -351,4 +351,7 @@
   <data name="CurrentValueDefault" xml:space="preserve">
     <value>現在: 4</value>
   </data>
+  <data name="UndoRedoToolTip" xml:space="preserve">
+    <value>左クリック: Undo / 右クリック: Redo</value>
+  </data>
 </root>
