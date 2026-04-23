@@ -10,18 +10,34 @@ public partial class AboutDialog : Window
     {
         InitializeComponent();
 
-        string versionText = "1.0.0";
-
         Assembly? assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
-        if (assembly != null)
-        {
-            System.Version? version = assembly.GetName().Version;
-            if (version != null)
-            {
-                versionText = $"{version.Major}.{version.Minor}.{version.Build}";
-            }
-        }
+        string versionText = GetDisplayVersion(assembly);
 
         VersionTextBlock.Text = string.Format(SR.VersionFormat, versionText);
+    }
+
+    private static string GetDisplayVersion(Assembly? assembly)
+    {
+        if (assembly == null)
+        {
+            return "Unknown";
+        }
+
+        string? informationalVersion = assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion;
+
+        if (!string.IsNullOrWhiteSpace(informationalVersion))
+        {
+            return informationalVersion;
+        }
+
+        System.Version? version = assembly.GetName().Version;
+        if (version != null)
+        {
+            return $"{version.Major}.{version.Minor}.{version.Build}";
+        }
+
+        return "Unknown";
     }
 }
