@@ -1,7 +1,8 @@
 <Window x:Class="FlowInk.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="FlowInk"
+        xmlns:res="clr-namespace:FlowInk.Properties"
+        Title="{x:Static res:Resources.AppName}"
         WindowStyle="None"
         ResizeMode="NoResize"
         AllowsTransparency="True"
@@ -143,10 +144,10 @@
 
                     <Button x:Name="ClickThroughButton"
                             Style="{StaticResource ToolbarButtonStyle}"
-                            ToolTip="Click Through"
+                            ToolTip="{x:Static res:Resources.DrawingToolTip}"
                             Click="ClickThroughButton_Click">
                         <TextBlock x:Name="ClickThroughButtonLabel"
-                                   Text="ON"
+                                   Text="{x:Static res:Resources.DrawingOn}"
                                    FontSize="11"
                                    FontWeight="SemiBold"
                                    HorizontalAlignment="Center"
@@ -156,7 +157,7 @@
                     <Button x:Name="PenButton"
                             Style="{StaticResource ToolbarButtonStyle}"
                             Content="✎"
-                            ToolTip="Pen（右クリック: 線幅設定）"
+                            ToolTip="{x:Static res:Resources.PenToolTip}"
                             PreviewMouseLeftButtonDown="PenButton_PreviewMouseLeftButtonDown"
                             PreviewMouseRightButtonUp="PenButton_PreviewMouseRightButtonUp"/>
 
@@ -171,7 +172,7 @@
                                 BorderBrush="#FF555555"
                                 BorderThickness="1">
                             <StackPanel>
-                                <TextBlock Text="Pen Width"
+                                <TextBlock Text="{x:Static res:Resources.PenWidth}"
                                            Foreground="White"
                                            Margin="0,0,0,8"
                                            FontWeight="Bold"/>
@@ -185,7 +186,7 @@
                     <Button x:Name="RectangleButton"
                             Style="{StaticResource ToolbarButtonStyle}"
                             Content="▭"
-                            ToolTip="Rectangle（右クリック: 設定）"
+                            ToolTip="{x:Static res:Resources.RectangleNotFilledToolTip}"
                             PreviewMouseLeftButtonDown="RectangleButton_PreviewMouseLeftButtonDown"
                             PreviewMouseRightButtonUp="RectangleButton_PreviewMouseRightButtonUp"
                             Click="RectangleButton_Click"/>
@@ -193,7 +194,7 @@
                     <Button x:Name="CircleButton"
                             Style="{StaticResource ToolbarButtonStyle}"
                             Content="◯"
-                            ToolTip="Circle（右クリック: 設定）"
+                            ToolTip="{x:Static res:Resources.CircleNotFilledToolTip}"
                             PreviewMouseLeftButtonDown="CircleButton_PreviewMouseLeftButtonDown"
                             PreviewMouseRightButtonUp="CircleButton_PreviewMouseRightButtonUp"
                             Click="CircleButton_Click"/>
@@ -209,20 +210,20 @@
                                 BorderBrush="#FF555555"
                                 BorderThickness="1">
                             <StackPanel Width="180">
-                                <TextBlock Text="Shape"
+                                <TextBlock Text="{x:Static res:Resources.Shape}"
                                            Foreground="White"
                                            Margin="0,0,0,8"
                                            FontWeight="Bold"/>
 
                                 <CheckBox x:Name="RectangleFillCheckBox"
-                                          Content="塗りつぶし"
+                                          Content="{x:Static res:Resources.Fill}"
                                           Foreground="White"
                                           Margin="0,0,0,10"
                                           Checked="RectangleFillCheckBox_Changed"
                                           Unchecked="RectangleFillCheckBox_Changed"/>
 
                                 <TextBlock x:Name="RectangleOpacityLabel"
-                                           Text="透明度: 35%"
+                                           Text="{x:Static res:Resources.Transparency}"
                                            Foreground="White"
                                            Margin="0,0,0,4"/>
 
@@ -240,19 +241,19 @@
                     <Button x:Name="TextButton"
                             Style="{StaticResource ToolbarButtonStyle}"
                             Content="T"
-                            ToolTip="Text（ダブルクリックでフォント設定）"
+                            ToolTip="{x:Static res:Resources.TextToolTip}"
                             PreviewMouseLeftButtonDown="TextButton_PreviewMouseLeftButtonDown"
                             Click="TextButton_Click"/>
 
                     <Button x:Name="EraserButton"
                             Style="{StaticResource ToolbarButtonStyle}"
                             Content="⌫"
-                            ToolTip="Erase"
+                            ToolTip="{x:Static res:Resources.Eraser}"
                             Click="EraserButton_Click"/>
 
                     <Button x:Name="ColorButton"
                             Style="{StaticResource ToolbarButtonStyle}"
-                            ToolTip="Color（ダブルクリックで現在色を編集）"
+                            ToolTip="{x:Static res:Resources.ColorToolTip}"
                             PreviewMouseLeftButtonDown="ColorButton_PreviewMouseLeftButtonDown">
                         <Grid Width="18" Height="18">
                             <Ellipse Fill="{StaticResource CheckerBrush}"
@@ -281,7 +282,7 @@
                                 BorderBrush="#FF555555"
                                 BorderThickness="1">
                             <StackPanel>
-                                <TextBlock Text="Recent Colors"
+                                <TextBlock Text="{x:Static res:Resources.RecentColors}"
                                            Foreground="White"
                                            Margin="0,0,0,8"
                                            FontWeight="Bold"/>
@@ -290,7 +291,7 @@
                                              Columns="4"
                                              Margin="0,0,0,12"/>
 
-                                <TextBlock Text="Preset Colors"
+                                <TextBlock Text="{x:Static res:Resources.PresetColors}"
                                            Foreground="White"
                                            Margin="0,0,0,8"
                                            FontWeight="Bold"/>
@@ -304,13 +305,13 @@
                     <Button x:Name="ClearButton"
                             Style="{StaticResource ToolbarButtonStyle}"
                             Content="🗑"
-                            ToolTip="Clear"
+                            ToolTip="{x:Static res:Resources.Clear}"
                             Click="ClearButton_Click"/>
 
                     <Button x:Name="SettingsButton"
                             Style="{StaticResource ToolbarButtonStyle}"
                             Content="⚙"
-                            ToolTip="Settings"
+                            ToolTip="{x:Static res:Resources.SettingsToolTip}"
                             Click="SettingsButton_Click"/>
 
                     <Popup x:Name="HotkeySettingsPopup"
@@ -324,32 +325,32 @@
                                 BorderBrush="#FF555555"
                                 BorderThickness="1">
                             <StackPanel Width="190">
-                                <TextBlock Text="Hotkey"
+                                <TextBlock Text="{x:Static res:Resources.Hotkey}"
                                            Foreground="White"
                                            Margin="0,0,0,8"
                                            FontWeight="Bold"/>
 
                                 <WrapPanel Margin="0,0,0,8">
                                     <CheckBox x:Name="HotkeyCtrlCheckBox"
-                                              Content="Ctrl"
+                                              Content="{x:Static res:Resources.HotkeyModifierCtrl}"
                                               Foreground="White"
                                               Margin="0,0,10,4"
                                               Checked="HotkeySettingControl_Changed"
                                               Unchecked="HotkeySettingControl_Changed"/>
                                     <CheckBox x:Name="HotkeyAltCheckBox"
-                                              Content="Alt"
+                                              Content="{x:Static res:Resources.HotkeyModifierAlt}"
                                               Foreground="White"
                                               Margin="0,0,10,4"
                                               Checked="HotkeySettingControl_Changed"
                                               Unchecked="HotkeySettingControl_Changed"/>
                                     <CheckBox x:Name="HotkeyShiftCheckBox"
-                                              Content="Shift"
+                                              Content="{x:Static res:Resources.HotkeyModifierShift}"
                                               Foreground="White"
                                               Margin="0,0,10,4"
                                               Checked="HotkeySettingControl_Changed"
                                               Unchecked="HotkeySettingControl_Changed"/>
                                     <CheckBox x:Name="HotkeyWinCheckBox"
-                                              Content="Win"
+                                              Content="{x:Static res:Resources.HotkeyModifierWin}"
                                               Foreground="White"
                                               Margin="0,0,10,4"
                                               Checked="HotkeySettingControl_Changed"
@@ -360,7 +361,7 @@
                                           Margin="0,0,0,8"
                                           SelectionChanged="HotkeyKeyComboBox_SelectionChanged"/>
 
-                                <TextBlock Text="現在の設定"
+                                <TextBlock Text="{x:Static res:Resources.CurrentSettings}"
                                            Foreground="#FFBFBFBF"
                                            FontSize="11"/>
                                 <TextBlock x:Name="HotkeyPreviewTextBlock"
@@ -370,11 +371,11 @@
 
                                 <StackPanel Orientation="Horizontal"
                                             HorizontalAlignment="Right">
-                                    <Button Content="Cancel"
+                                    <Button Content="{x:Static res:Resources.Cancel}"
                                             Width="64"
                                             Margin="0,0,6,0"
                                             Click="HotkeyCancelButton_Click"/>
-                                    <Button Content="Save"
+                                    <Button Content="{x:Static res:Resources.Save}"
                                             Width="64"
                                             Click="HotkeySaveButton_Click"/>
                                 </StackPanel>
@@ -385,7 +386,7 @@
                     <Button x:Name="ExitButton"
                             Style="{StaticResource ToolbarButtonStyle}"
                             Content="×"
-                            ToolTip="Exit"
+                            ToolTip="{x:Static res:Resources.Exit}"
                             Click="ExitButton_Click"/>
 
                     <Border Height="8"
@@ -402,10 +403,10 @@
 
                     <Button x:Name="CtReturnButton"
                             Style="{StaticResource ToolbarMiniButtonStyle}"
-                            ToolTip="描画ONに戻す"
+                            ToolTip="{x:Static res:Resources.TrayMenuTurnDrawingOn}"
                             Click="CtReturnButton_Click">
                         <TextBlock x:Name="CtReturnButtonLabel"
-                                   Text="ON"
+                                   Text="{x:Static res:Resources.DrawingOn}"
                                    FontSize="11"
                                    FontWeight="SemiBold"
                                    HorizontalAlignment="Center"
@@ -433,7 +434,7 @@
                        Foreground="White"
                        FontSize="14"
                        FontWeight="SemiBold"
-                       Text="描画OFF。タスクトレイから戻せます。"/>
+                       Text="{x:Static res:Resources.DrawingDisabledToast}"/>
         </Border>
     </Grid>
 </Window>

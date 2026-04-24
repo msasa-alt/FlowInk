@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Media;
+using SR = FlowInk.Properties.Resources;
 
 namespace FlowInk;
 
@@ -50,7 +51,7 @@ public partial class PenWidthDialog : Window
 
     private void UpdatePreviewText()
     {
-        PreviewTextBlock.Text = $"現在: {SelectedWidth:0.#}";
+        PreviewTextBlock.Text = string.Format(SR.CurrentValueFormat, SelectedWidth.ToString("0.#"));
     }
 
     private void UpdatePreviewLine()

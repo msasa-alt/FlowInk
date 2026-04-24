@@ -1,7 +1,8 @@
 <Window x:Class="FlowInk.AboutDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="About FlowInk"
+        xmlns:res="clr-namespace:FlowInk.Properties"
+        Title="{x:Static res:Resources.AboutDialogTitle}"
         Width="380"
         Height="220"
         WindowStartupLocation="CenterOwner"
@@ -15,7 +16,7 @@
             </Grid.RowDefinitions>
 
             <StackPanel>
-                <TextBlock Text="FlowInk"
+                <TextBlock Text="{x:Static res:Resources.AppName}"
                            FontSize="24"
                            FontWeight="Bold"
                            Foreground="#FF222222" />
@@ -26,7 +27,7 @@
                            Foreground="#FF444444" />
 
                 <TextBlock Margin="0,14,0,0"
-                           Text="Lightweight overlay drawing tool"
+                           Text="{x:Static res:Resources.AboutDescription}"
                            FontSize="14"
                            Foreground="#FF444444" />
             </StackPanel>
@@ -39,7 +40,7 @@
                         Height="34"
                         IsDefault="True"
                         IsCancel="True"
-                        Content="OK" />
+                        Content="{x:Static res:Resources.OK}" />
             </StackPanel>
         </Grid>
     </Border>

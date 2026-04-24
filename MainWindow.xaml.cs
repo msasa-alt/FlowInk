@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using WpfShape = System.Windows.Shapes.Shape;
+using SR = FlowInk.Properties.Resources;
 using WpfEllipse = System.Windows.Shapes.Ellipse;
 using WpfRectangle = System.Windows.Shapes.Rectangle;
 using Forms = System.Windows.Forms;
@@ -1058,12 +1059,12 @@ public partial class MainWindow : Window
     {
         if (ClickThroughButtonLabel != null)
         {
-            ClickThroughButtonLabel.Text = _isClickThroughEnabled ? "OFF" : "ON";
+            ClickThroughButtonLabel.Text = _isClickThroughEnabled ? SR.Off : SR.On;
         }
 
         if (CtReturnButtonLabel != null)
         {
-            CtReturnButtonLabel.Text = _isClickThroughEnabled ? "OFF" : "ON";
+            CtReturnButtonLabel.Text = _isClickThroughEnabled ? SR.Off : SR.On;
         }
     }
 
@@ -1124,17 +1125,17 @@ public partial class MainWindow : Window
 
     private void InitializeNotifyIcon()
     {
-        _trayEnableClickThroughMenuItem = new Forms.ToolStripMenuItem("描画OFFにする");
-        _trayDisableClickThroughMenuItem = new Forms.ToolStripMenuItem("描画ONに戻す");
-        var trayAboutMenuItem = new Forms.ToolStripMenuItem("About");
-        var trayExitMenuItem = new Forms.ToolStripMenuItem("Exit");
+        _trayEnableClickThroughMenuItem = new Forms.ToolStripMenuItem(SR.TrayMenuTurnDrawingOff);
+        _trayDisableClickThroughMenuItem = new Forms.ToolStripMenuItem(SR.TrayMenuTurnDrawingOn);
+        var trayAboutMenuItem = new Forms.ToolStripMenuItem(SR.About);
+        var trayExitMenuItem = new Forms.ToolStripMenuItem(SR.Exit);
 
         _trayEnableClickThroughMenuItem.Click += TrayEnableClickThroughMenuItem_Click;
         _trayDisableClickThroughMenuItem.Click += TrayDisableClickThroughMenuItem_Click;
         trayAboutMenuItem.Click += TrayAboutMenuItem_Click;
         trayExitMenuItem.Click += TrayExitMenuItem_Click;
 
-        _notifyIcon.Text = "FlowInk";
+        _notifyIcon.Text = SR.AppName;
         _notifyIcon.Icon = new Drawing.Icon(Path.Combine(AppContext.BaseDirectory, "Assets", "FlowInk.ico"));
         _notifyIcon.Visible = true;
         _notifyIcon.ContextMenuStrip = new Forms.ContextMenuStrip();
@@ -1151,8 +1152,8 @@ public partial class MainWindow : Window
     private void UpdateNotifyIconMenu()
     {
         _notifyIcon.Text = _isClickThroughEnabled
-            ? "FlowInk - 描画OFF"
-            : "FlowInk - 描画ON";
+            ? SR.NotifyIconStatusOff
+            : SR.NotifyIconStatusOn;
 
         if (_trayEnableClickThroughMenuItem != null)
         {
@@ -1259,7 +1260,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        ShowToastMessage("描画OFF。右の戻るかタスクトレイから戻せます。");
+        ShowToastMessage(string.Format(SR.DrawingDisabledToast, GetCurrentHotkeyDisplayText()));
         _hasShownClickThroughTrayMessage = true;
     }
 
@@ -1491,22 +1492,22 @@ public partial class MainWindow : Window
 
         if ((modifiers & MOD_CONTROL) != 0)
         {
-            parts.Add("Ctrl");
+            parts.Add(SR.HotkeyModifierCtrl);
         }
 
         if ((modifiers & MOD_ALT) != 0)
         {
-            parts.Add("Alt");
+            parts.Add(SR.HotkeyModifierAlt);
         }
 
         if ((modifiers & MOD_SHIFT) != 0)
         {
-            parts.Add("Shift");
+            parts.Add(SR.HotkeyModifierShift);
         }
 
         if ((modifiers & MOD_WIN) != 0)
         {
-            parts.Add("Win");
+            parts.Add(SR.HotkeyModifierWin);
         }
 
         parts.Add(key.ToString());
@@ -1567,8 +1568,8 @@ public partial class MainWindow : Window
         if (!registered && showFailureMessage)
         {
             MessageBox.Show(
-                $"グローバルホットキー {GetCurrentHotkeyDisplayText()} の登録に失敗しました。\n他のアプリで使われている可能性があります。",
-                "FlowInk",
+                string.Format(SR.GlobalHotkeyRegisterFailedFormat, GetCurrentHotkeyDisplayText()),
+                SR.MessageBoxTitle,
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
         }
@@ -1632,8 +1633,8 @@ public partial class MainWindow : Window
         if (newModifiers == 0)
         {
             MessageBox.Show(
-                "修飾キーを1つ以上選択してください。",
-                "FlowInk",
+                SR.SelectAtLeastOneModifier,
+                SR.MessageBoxTitle,
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
             return;
@@ -1658,7 +1659,7 @@ public partial class MainWindow : Window
 
         SaveAppSettings();
         HotkeySettingsPopup.IsOpen = false;
-        ShowToastMessage($"CTホットキーを {GetCurrentHotkeyDisplayText()} に変更しました。");
+        ShowToastMessage(string.Format(SR.GlobalHotkeyChangedFormat, GetCurrentHotkeyDisplayText()));
     }
 
     private void HotkeyCancelButton_Click(object sender, RoutedEventArgs e)
@@ -2121,7 +2122,7 @@ public partial class MainWindow : Window
                 Color = color
             };
 
-            button.ToolTip = $"{GetColorDisplayText(color)}  (クリック: 選択 / ダブルクリック: 編集)";
+            button.ToolTip = $"{GetColorDisplayText(color)}  {SR.PresetColorItemToolTipSuffix}";
             button.PreviewMouseLeftButtonDown += PresetColorButton_PreviewMouseLeftButtonDown;
 
             PresetColorGrid.Children.Add(button);
@@ -2196,7 +2197,7 @@ public partial class MainWindow : Window
             Style = (Style)FindResource("PenWidthPresetButtonStyle"),
             Content = contentGrid,
             Tag = index,
-            ToolTip = $"{FormatPenWidthText(width)}  (クリック: 選択 / ダブルクリック: 編集)"
+            ToolTip = $"{FormatPenWidthText(width)}  {SR.PenWidthPresetItemToolTipSuffix}"
         };
 
         button.PreviewMouseLeftButtonDown += PenWidthPresetButton_PreviewMouseLeftButtonDown;
@@ -2233,7 +2234,7 @@ public partial class MainWindow : Window
     private static string GetColorDisplayText(Color color)
     {
         int alphaPercent = (int)Math.Round(color.A * 100.0 / 255.0);
-        return $"#{color.A:X2}{color.R:X2}{color.G:X2}{color.B:X2} ({alphaPercent}%)";
+        return string.Format(SR.ColorDisplayWithAlphaFormat, color.A.ToString("X2"), color.R.ToString("X2"), color.G.ToString("X2"), color.B.ToString("X2"), alphaPercent);
     }
 
     private void PresetColorButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -2464,12 +2465,12 @@ public partial class MainWindow : Window
     private void UpdateShapeButtonToolTips()
     {
         string rectangleText = _isRectangleFilled
-            ? $"Rectangle（塗りつぶしON {NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent)}% / 右クリックで設定）"
-            : "Rectangle（塗りつぶしOFF / 右クリックで設定）";
+            ? string.Format(SR.RectangleFilledToolTipFormat, NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent))
+            : SR.RectangleNotFilledToolTip;
 
         string circleText = _isRectangleFilled
-            ? $"Circle（塗りつぶしON {NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent)}% / 右クリックで設定）"
-            : "Circle（塗りつぶしOFF / 右クリックで設定）";
+            ? string.Format(SR.CircleFilledToolTipFormat, NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent))
+            : SR.CircleNotFilledToolTip;
 
         RectangleButton.ToolTip = rectangleText;
         CircleButton.ToolTip = circleText;
@@ -2490,7 +2491,7 @@ public partial class MainWindow : Window
 
         if (RectangleOpacityLabel != null)
         {
-            RectangleOpacityLabel.Text = $"透明度: {NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent)}%";
+            RectangleOpacityLabel.Text = string.Format(SR.TransparencyFormat, NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent));
             RectangleOpacityLabel.Opacity = _isRectangleFilled ? 1.0 : 0.55;
         }
     }
@@ -3561,7 +3562,7 @@ public partial class MainWindow : Window
 
         var editItem = new MenuItem
         {
-            Header = "編集"
+            Header = SR.Edit
         };
         editItem.Click += (_, _) =>
         {
@@ -3570,7 +3571,7 @@ public partial class MainWindow : Window
 
         var deleteItem = new MenuItem
         {
-            Header = "削除"
+            Header = SR.Delete
         };
         deleteItem.Click += (_, _) =>
         {
