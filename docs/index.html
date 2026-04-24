@@ -132,6 +132,24 @@
       margin: 0;
     }
 
+    .guide {
+      max-width: 600px;
+      margin: 0 auto 22px;
+      padding: 0 30px;
+      text-align: left;
+      line-height: 1.8;
+    }
+
+    .guide ol,
+    .guide ul {
+      margin: 0 0 18px 1.4em;
+      padding: 0;
+    }
+
+    .guide p {
+      margin: 0;
+    }
+
     .section {
       margin-top: 72px;
     }
@@ -443,17 +461,42 @@
       <div class="btn-row">
         <a
           class="btn"
-          href="https://github.com/msasa-alt/FlowInk/releases/download/v1.1.0/FlowInk-Setup.exe"
+          href="https://github.com/msasa-alt/FlowInk/releases"
           target="_blank"
           rel="noopener noreferrer"
         >
           ダウンロード
         </a>
       </div>
-
-      <p class="subnote">
-        インストーラーをダウンロードして実行するとインストールできます。実行時にPC保護の警告が出る場合は「詳細情報」ボタンを押して実行してください。※無名なソフトなのでマイクロソフトから警告されてしまいます。
-      </p>
+      <h2>ダウンロード方法</h2>
+      <div class="guide">
+        <ol>
+          <li>ダウンロードボタンをクリックしてGitHub Releasesを開きます</li>
+          <li>「Assets」内の以下のファイルをダウンロードしてください</li>
+            <ul>
+              <li>FlowInk-Setup.exe（インストーラー版）</li>
+              <li>FlowInk.zip（インストーラー版がダウンロードできない場合）</li>
+            </ul>
+        </ol>
+        <p>
+        ※ EXEファイルはブラウザによりダウンロードがブロックされる時があります、その場合はZIP版をダウンロードしてください。<br>
+        ※ 「Source code」と書かれたZIPではありません。
+        </p>
+      </div>
+      <h2>インストール方法</h2>
+      <h3>FlowInk-Setup.exe（インストーラー版）</h3>
+      <div class="guide">
+        <ol>
+          <li>(無事に)FlowInk-Setup.exeがダウンロードできた方は、ダブルクリックで実行してください。</li>
+          <li>無名なソフトなので実行時にWindowsのPC保護画面が表示される場合があります。その場合は詳細リンクをリンクをクリックし実行してください。</li>
+        </ol>
+      </div>
+      <h3>FlowInk.zip</h3>
+      <div class="guide">
+        <ol>
+          <li>zipファイルを右クリックし「すべて展開」より、展開されたファイル内のFlowInk.exeを実行してください。</li>
+        </ol>
+      </div>
     </section>
 
     <section class="section">
@@ -675,13 +718,14 @@
     <section class="section">
       <h2>インストール方法</h2>
       <p class="section-lead">
-        インストーラーを実行します。
+        GitHub ReleasesのAssetsからインストーラーをダウンロードして実行します。
       </p>
 
       <div class="steps">
-        <div class="step"><strong>1.</strong> FlowInk-Setup.exeをダウンロード</div>
-        <div class="step"><strong>2.</strong> FlowInk-Setup.exeを実行 「Windows によってPCが保護されました」の警告が出る場合は「詳細情報」ボタンを押して実行してください。※無名なソフトなのでマイクロソフトから警告されてしまいます。</div>
-        <div class="step"><strong>3.</strong> 画面に従ってインストール</div>
+        <div class="step"><strong>1.</strong> ダウンロードボタンからGitHub Releasesを開く</div>
+        <div class="step"><strong>2.</strong> Assets内のFlowInk-Setup.exeをダウンロード。EXEがブロックされる場合はFlowInk-Setup.zipをダウンロードしてください。</div>
+        <div class="step"><strong>3.</strong> FlowInk-Setup.exeを実行。「Windows によってPCが保護されました」の警告が出る場合は「詳細情報」ボタンを押して実行してください。</div>
+        <div class="step"><strong>4.</strong> 画面に従ってインストール</div>
       </div>
     </section>
 
@@ -749,12 +793,25 @@
       </p>
       <a
         class="btn"
-        href="https://github.com/msasa-alt/FlowInk/releases/download/v1.1.0/FlowInk-Setup.exe"
+        href="https://github.com/msasa-alt/FlowInk/releases"
         target="_blank"
         rel="noopener noreferrer"
       >
-        最新版をダウンロード
+        FlowInkをダウンロード
       </a>
+      <br><br>
+      <h2>ダウンロード方法：</h2>
+      <p class="guide">
+        1. ボタンをクリックしてGitHub Releasesを開きます<br>
+        2. 「Assets」内の以下を選択してください<br><br>
+
+        ・FlowInk_Setup.exe（通常）<br>
+        ・FlowInk_Setup.zip（ダウンロードできない場合）<br><br>
+
+        ※ EXEファイルはブラウザによりブロックされる場合があります。<br>
+        その場合はZIP版をご利用ください。<br>
+        ※ 「Source code」と書かれたZIPではありません
+        </p>
     </section>
 
     <section class="section">
