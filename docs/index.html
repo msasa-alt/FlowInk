@@ -160,6 +160,30 @@
       margin: 0 0 12px;
     }
 
+    .install-shot {
+      margin: 24px auto;
+      text-align: center;
+    }
+
+    .install-shot a {
+      display: inline-block;
+      cursor: zoom-in;
+    }
+
+    .install-shot img {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      border-radius: 14px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .install-shot figcaption {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
     .section-lead {
       max-width: 700px;
       margin: 0 auto 26px;
@@ -471,15 +495,15 @@
       <h2>ダウンロード方法</h2>
       <div class="guide">
         <ol>
-          <li>ダウンロードボタンをクリックしてGitHub Releasesを開きます</li>
-          <li>「Assets」内の以下のファイルをダウンロードしてください</li>
+          <li>ダウンロードボタンをクリックします</li>
+          <li>「表示されたページの「Assets」（ダウンロード一覧）から以下のファイルをダウンロードしてください</li>
             <ul>
-              <li>FlowInk-Setup.exe（インストーラー版）</li>
+              <li>FlowInk-Setup.exe（通常はこちら／インストーラー版）</li>
               <li>FlowInk.zip（インストーラー版がダウンロードできない場合）</li>
             </ul>
         </ol>
         <p>
-        ※ EXEファイルはブラウザによりダウンロードがブロックされる時があります、その場合はZIP版をダウンロードしてください。<br>
+        ※ EXEファイルはブラウザによりダウンロードがブロックされる場合があります、その時はZIP版をダウンロードしてください。<br>
         ※ 「Source code」と書かれたZIPではありません。
         </p>
       </div>
@@ -487,14 +511,23 @@
       <h3>FlowInk-Setup.exe（インストーラー版）</h3>
       <div class="guide">
         <ol>
-          <li>(無事に)FlowInk-Setup.exeがダウンロードできた方は、ダブルクリックで実行してください。</li>
-          <li>無名なソフトなので実行時にWindowsのPC保護画面が表示される場合があります。その場合は詳細リンクをリンクをクリックし実行してください。</li>
+          <li>(無事に)FlowInk-Setup.exeがダウンロードできた方は、ダブルクリックで実行してください</li>
+          <li>無名なソフトなので実行時にWindowsのPC保護画面が表示される場合があります。その場合は詳細リンクをリンクをクリックし実行ボタンを押してください</li>
         </ol>
+        <figure class="install-shot">
+          <a href="images/PC保護画面_説明追記.png" target="_blank" rel="noopener noreferrer">
+            <img
+              src="images/PC保護画面_説明追記.png"
+              alt="WindowsによってPCが保護されました画面の操作説明"
+            />
+          </a>
+          <figcaption>PC保護画面が表示された場合の操作</figcaption>
+        </figure>
       </div>
       <h3>FlowInk.zip</h3>
       <div class="guide">
         <ol>
-          <li>zipファイルを右クリックし「すべて展開」より、展開されたファイル内のFlowInk.exeを実行してください。</li>
+          <li>zipファイルを右クリックし「すべて展開」より、展開されたファイル内のFlowInk.exeを実行してください</li>
         </ol>
       </div>
     </section>
@@ -512,7 +545,7 @@
               alt="FlowInkを使ったプレゼン時の書き込み例"
             />
           </a>
-          <figcaption>プレゼン中の画面説明に</figcaption>
+          <figcaption>プレゼン中の画面説明</figcaption>
         </figure>
 
         <figure class="usage-shot">
@@ -522,7 +555,7 @@
               alt="FlowInkを使ったチャートへの書き込み例"
             />
           </a>
-          <figcaption>チャート分析に</figcaption>
+          <figcaption>チャート分析</figcaption>
         </figure>
       </div>
     </section>
@@ -799,19 +832,44 @@
       >
         FlowInkをダウンロード
       </a>
-      <br><br>
-      <h2>ダウンロード方法：</h2>
-      <p class="guide">
-        1. ボタンをクリックしてGitHub Releasesを開きます<br>
-        2. 「Assets」内の以下を選択してください<br><br>
-
-        ・FlowInk_Setup.exe（通常）<br>
-        ・FlowInk_Setup.zip（ダウンロードできない場合）<br><br>
-
-        ※ EXEファイルはブラウザによりブロックされる場合があります。<br>
-        その場合はZIP版をご利用ください。<br>
-        ※ 「Source code」と書かれたZIPではありません
+      <h2>ダウンロード方法</h2>
+      <div class="guide">
+        <ol>
+          <li>ダウンロードボタンをクリックします</li>
+          <li>「表示されたページの「Assets」（ダウンロード一覧）から以下のファイルをダウンロードしてください</li>
+            <ul>
+              <li>FlowInk-Setup.exe（通常はこちら／インストーラー版）</li>
+              <li>FlowInk.zip（インストーラー版がダウンロードできない場合）</li>
+            </ul>
+        </ol>
+        <p>
+        ※ EXEファイルはブラウザによりダウンロードがブロックされる場合があります、その時はZIP版をダウンロードしてください。<br>
+        ※ 「Source code」と書かれたZIPではありません。
         </p>
+      </div>
+      <h2>インストール方法</h2>
+      <h3>FlowInk-Setup.exe（インストーラー版）</h3>
+      <div class="guide">
+        <ol>
+          <li>(無事に)FlowInk-Setup.exeがダウンロードできた方は、ダブルクリックで実行してください</li>
+          <li>無名なソフトなので実行時にWindowsのPC保護画面が表示される場合があります。その場合は詳細リンクをリンクをクリックし実行ボタンを押してください</li>
+        </ol>
+        <figure class="install-shot">
+          <a href="images/PC保護画面_説明追記.png" target="_blank" rel="noopener noreferrer">
+            <img
+              src="images/PC保護画面_説明追記.png"
+              alt="WindowsによってPCが保護されました画面の操作説明"
+            />
+          </a>
+          <figcaption>PC保護画面が表示された場合の操作</figcaption>
+        </figure>
+      </div>
+      <h3>FlowInk.zip</h3>
+      <div class="guide">
+        <ol>
+          <li>zipファイルを右クリックし「すべて展開」より、展開されたファイル内のFlowInk.exeを実行してください</li>
+        </ol>
+      </div>
     </section>
 
     <section class="section">
