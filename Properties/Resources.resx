@@ -118,133 +118,133 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="About" xml:space="preserve">
-    <value>アバウト</value>
+    <value>About</value>
   </data>
   <data name="AboutWindowTitle" xml:space="preserve">
-    <value>FlowInkについて</value>
+    <value>About FlowInk</value>
   </data>
   <data name="Cancel" xml:space="preserve">
-    <value>キャンセル</value>
+    <value>Cancel</value>
   </data>
   <data name="ChooseColor" xml:space="preserve">
-    <value>色を選ぶ</value>
+    <value>Choose Color...</value>
   </data>
   <data name="Clear" xml:space="preserve">
-    <value>クリア</value>
+    <value>Clear</value>
   </data>
   <data name="ClickThrough" xml:space="preserve">
-    <value>クリック透過</value>
+    <value>ClickThrough</value>
   </data>
   <data name="GlobalHotkeyChangedFormat" xml:space="preserve">
-    <value>グローバルホットキーを {0} に変更しました。</value>
+    <value>The global hotkey has been changed to {0}.</value>
   </data>
   <data name="Color" xml:space="preserve">
-    <value>色</value>
+    <value>Color</value>
   </data>
   <data name="ColorPicker" xml:space="preserve">
-    <value>カラーピッカー</value>
+    <value>Color Picker</value>
   </data>
   <data name="CurrentSettings" xml:space="preserve">
-    <value>現在の設定</value>
+    <value>CurrentSettings</value>
   </data>
   <data name="CurrentValueFormat" xml:space="preserve">
-    <value>現在: {0}</value>
+    <value>Current: {0}</value>
   </data>
   <data name="Eraser" xml:space="preserve">
-    <value>消しゴム</value>
+    <value>Eraser</value>
   </data>
   <data name="Exit" xml:space="preserve">
-    <value>終了</value>
+    <value>Exit</value>
   </data>
   <data name="Fill" xml:space="preserve">
-    <value>塗りつぶし</value>
+    <value>Fill</value>
   </data>
   <data name="Font" xml:space="preserve">
-    <value>フォント</value>
+    <value>Font</value>
   </data>
   <data name="FontSize" xml:space="preserve">
-    <value>フォントサイズ</value>
+    <value>Font Size</value>
   </data>
   <data name="GlobalHotkeyRegisterFailedFormat" xml:space="preserve">
-    <value>グローバルホットキー {0} の登録に失敗しました。\n他のアプリで使われている可能性があります。</value>
+    <value>Failed to register the global hotkey {0}.\nIt may already be in use by another application.</value>
   </data>
   <data name="Hide" xml:space="preserve">
-    <value>非表示</value>
+    <value>Hide</value>
   </data>
   <data name="Hotkey" xml:space="preserve">
-    <value>ホットキー</value>
+    <value>Hotkey</value>
   </data>
   <data name="LightweightOverlayDrawingTool" xml:space="preserve">
     <value>Lightweight overlay drawing tool</value>
   </data>
   <data name="NotifyIconStatusOff" xml:space="preserve">
-    <value>描画OFF</value>
+    <value>Drawing OFF</value>
   </data>
   <data name="NotifyIconStatusOn" xml:space="preserve">
-    <value>描画ON</value>
+    <value>Drawing ON</value>
   </data>
   <data name="OK" xml:space="preserve">
     <value>OK</value>
   </data>
   <data name="Opacity" xml:space="preserve">
-    <value>不透明度</value>
+    <value>Opacity</value>
   </data>
   <data name="OpenBrowserFailed" xml:space="preserve">
-    <value>ブラウザを開けませんでした。</value>
+    <value>Could not open the browser.</value>
   </data>
   <data name="Pen" xml:space="preserve">
-    <value>ペン</value>
+    <value>Pen</value>
   </data>
   <data name="PenWidth" xml:space="preserve">
-    <value>線幅</value>
+    <value>Pen Width</value>
   </data>
   <data name="PresetColors" xml:space="preserve">
-    <value>プリセットカラー</value>
+    <value>Preset Colors</value>
   </data>
   <data name="RecentColors" xml:space="preserve">
-    <value>最近使った色</value>
+    <value>Recent Colors</value>
   </data>
   <data name="Rectangle" xml:space="preserve">
-    <value>四角</value>
+    <value>Rectangle</value>
   </data>
   <data name="Save" xml:space="preserve">
-    <value>セーブ</value>
+    <value>Save</value>
   </data>
   <data name="SelectAtLeastOneModifier" xml:space="preserve">
-    <value>修飾キーを1つ以上選択してください。</value>
+    <value>Please select at least one modifier key.</value>
   </data>
   <data name="SelectLineThickness" xml:space="preserve">
-    <value>線の太さを選択</value>
+    <value>Select Line Thickness</value>
   </data>
   <data name="Shape" xml:space="preserve">
-    <value>図形</value>
+    <value>Shape</value>
   </data>
   <data name="Text" xml:space="preserve">
-    <value>テキスト</value>
+    <value>Text</value>
   </data>
   <data name="Transparency" xml:space="preserve">
-    <value>透明度</value>
+    <value>Transparency</value>
   </data>
   <data name="TransparencyFormat" xml:space="preserve">
-    <value>透明度: {0}%</value>
+    <value>Transparency: {0}%</value>
   </data>
   <data name="TrayMenuTurnDrawingOff" xml:space="preserve">
-    <value>描画OFFにする</value>
+    <value>Turn Drawing OFF</value>
   </data>
   <data name="TrayMenuTurnDrawingOn" xml:space="preserve">
-    <value>描画ONにする</value>
+    <value>Turn Drawing ON</value>
   </data>
   <data name="Version" xml:space="preserve">
-    <value>バージョン</value>
+    <value>Version</value>
   </data>
   <data name="VersionFormat" xml:space="preserve">
     <value>Version: {0}</value>
   </data>
   <data name="Edit" xml:space="preserve">
-    <value>編集</value>
+    <value>Edit</value>
   </data>
   <data name="Delete" xml:space="preserve">
-    <value>削除</value>
+    <value>Delete</value>
   </data>
   <data name="On" xml:space="preserve">
     <value>ON</value>
@@ -265,22 +265,22 @@
     <value>Win</value>
   </data>
   <data name="PresetColorItemToolTipSuffix" xml:space="preserve">
-    <value>クリック: 選択 / ダブルクリック: 編集</value>
+    <value>Click: Select / Double-click: Edit</value>
   </data>
   <data name="PenWidthPresetItemToolTipSuffix" xml:space="preserve">
-    <value>クリック: 選択 / ダブルクリック: 編集</value>
+    <value>Click: Select / Double-click: Edit</value>
   </data>
   <data name="RectangleFilledToolTipFormat" xml:space="preserve">
-    <value>四角形（塗りつぶしON {0}% / 右クリックで設定）</value>
+    <value>Rectangle (Fill ON {0}% / Right-click for settings)</value>
   </data>
   <data name="RectangleNotFilledToolTip" xml:space="preserve">
-    <value>四角形（塗りつぶしOFF / 右クリックで設定）</value>
+    <value>Rectangle (Fill OFF / Right-click for settings)</value>
   </data>
   <data name="CircleFilledToolTipFormat" xml:space="preserve">
-    <value>円（塗りつぶしON {0}% / 右クリックで設定）</value>
+    <value>Circle (Fill ON {0}% / Right-click for settings)</value>
   </data>
   <data name="CircleNotFilledToolTip" xml:space="preserve">
-    <value>円（塗りつぶしOFF / 右クリックで設定）</value>
+    <value>Circle (Fill OFF / Right-click for settings)</value>
   </data>
   <data name="ColorDisplayWithAlphaFormat" xml:space="preserve">
     <value>#{0}{1}{2}{3} ({4}%)</value>
@@ -295,34 +295,34 @@
     <value>OFF</value>
   </data>
   <data name="DrawingToolTip" xml:space="preserve">
-    <value>描画ON/OFF切替</value>
+    <value>Toggle drawing ON/OFF</value>
   </data>
   <data name="DrawingDisabledToast" xml:space="preserve">
-    <value>描画OFF。OFFボタンかホットキー({0})でONにできます。</value>
+    <value>Drawing is OFF. Press the OFF button or use the hotkey ({0}) to turn it ON.</value>
   </data>
   <data name="DrawingEnabledToast" xml:space="preserve">
-    <value>描画ON</value>
+    <value>Drawing is ON</value>
   </data>
   <data name="PenToolTip" xml:space="preserve">
-    <value>ペン（右クリック: 線幅設定）</value>
+    <value>Pen (Right-click: Pen width settings)</value>
   </data>
   <data name="TextToolTip" xml:space="preserve">
-    <value>テキスト（ダブルクリックでフォント設定）</value>
+    <value>Text (Double-click for font settings)</value>
   </data>
   <data name="ColorToolTip" xml:space="preserve">
-    <value>色（クリックでプリセット色、ダブルクリックで現在色を編集）</value>
+    <value>Color (Click to PresetColors, Double-click to edit current color)</value>
   </data>
   <data name="SettingsToolTip" xml:space="preserve">
-    <value>設定</value>
+    <value>Settings</value>
   </data>
   <data name="ClickThroughOffToast" xml:space="preserve">
-    <value>描画OFF。描画ONにするには、ツールバーのOFFボタンかホットキーを押してください。</value>
+    <value>Drawing is OFF. Turn it ON using the toolbar button or the hotkey.</value>
   </data>
   <data name="PenWidthDialogTitle" xml:space="preserve">
-    <value>ペンの太さ</value>
+    <value>Pen Width</value>
   </data>
   <data name="PenWidthSelectLabel" xml:space="preserve">
-    <value>線の太さを選択</value>
+    <value>Select pen width</value>
   </data>
   <data name="PenWidthMinLabel" xml:space="preserve">
     <value>0.5</value>
@@ -337,21 +337,21 @@
     <value>100%</value>
   </data>
   <data name="AboutDialogTitle" xml:space="preserve">
-    <value>FlowInk について</value>
+    <value>About FlowInk</value>
   </data>
   <data name="AppName" xml:space="preserve">
     <value>FlowInk</value>
   </data>
   <data name="AboutDescription" xml:space="preserve">
-    <value>軽量なオーバーレイ描画ツール</value>
+    <value>Lightweight overlay drawing tool</value>
   </data>
   <data name="MessageBoxTitle" xml:space="preserve">
     <value>FlowInk</value>
   </data>
   <data name="CurrentValueDefault" xml:space="preserve">
-    <value>現在: 4</value>
+    <value>Current: 4</value>
   </data>
   <data name="UndoRedoToolTip" xml:space="preserve">
-    <value>左クリック: Undo / 右クリック: Redo</value>
+    <value>Left click: Undo / Right click: Redo</value>
   </data>
 </root>
