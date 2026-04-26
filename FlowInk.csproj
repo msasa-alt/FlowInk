@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>1.2.0</Version>
+		<Version>1.2.0-rc1</Version>
 		<InformationalVersion>$(Version)</InformationalVersion>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net8.0-windows</TargetFramework>
@@ -12,6 +12,7 @@
 		<AssemblyName>FlowInk</AssemblyName>
 		<RootNamespace>FlowInk</RootNamespace>
 		<ApplicationIcon>Assets\FlowInk.ico</ApplicationIcon>
+        <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
