@@ -130,36 +130,27 @@
     }
 
 
-
     .language-switch {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-bottom: 24px;
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 1000;
       font-size: 14px;
     }
 
     .language-switch a {
-      color: var(--muted);
+      display: inline-block;
+      padding: 8px 14px;
+      color: var(--text);
       text-decoration: none;
       border: 1px solid var(--line);
       border-radius: 999px;
-      padding: 6px 12px;
-      transition: 0.18s ease;
-      background: #fff;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
     }
 
     .language-switch a:hover {
-      color: var(--text);
-      border-color: #cfcfcf;
-      transform: translateY(-1px);
-    }
-
-    .language-switch a[aria-current="page"] {
-      color: #fff;
-      background: var(--accent);
-      border-color: var(--accent);
-      pointer-events: none;
+      background: var(--soft);
     }
 
     .subnote {
@@ -531,12 +522,11 @@
 <body>
   <div class="container">
     <nav class="language-switch" aria-label="Language switch">
-      <a href="/FlowInk/?lang=ja">日本語</a>
-      <a href="/FlowInk/en/" aria-current="page">English</a>
+      <a href="../?lang=ja" onclick="localStorage.setItem('flowink_lang', 'ja')">日本語</a>
     </nav>
     <section class="hero">
       <div class="logo-wrap">
-        <img src="../images/FlowInk_icon.png" class="logo" alt="FlowInk icon" />
+        <img src="images/FlowInk_icon.png" class="logo" alt="FlowInk icon" />
       </div>
 
       <div class="eyebrow">Desktop RAKUGAKI Tool</div>
@@ -556,9 +546,9 @@
 
       <div class="usage-gallery">
         <figure class="usage-shot">
-          <a href="../images/PresoWithFlowInk.png" target="_blank" rel="noopener noreferrer">
+          <a href="images/PresoWithFlowInk.png" target="_blank" rel="noopener noreferrer">
             <img
-              src="../images/PresoWithFlowInk.png"
+              src="images/PresoWithFlowInk.png"
               alt="Example of using FlowInk during a presentation"
             />
           </a>
@@ -566,9 +556,9 @@
         </figure>
 
         <figure class="usage-shot">
-          <a href="../images/ChartWithFlowInk.png" target="_blank" rel="noopener noreferrer">
+          <a href="images/ChartWithFlowInk.png" target="_blank" rel="noopener noreferrer">
             <img
-              src="../images/ChartWithFlowInk.png"
+              src="images/ChartWithFlowInk.png"
               alt="Example of using FlowInk for chart annotations"
             />
           </a>
@@ -615,13 +605,13 @@
       <div class="toolbar-diagram-wrap">
         <div class="toolbar-diagram">
           <div class="toolbar-image-col">
-            <img src="../images/toolbar.png" alt="FlowInk toolbar" />
+            <img src="images/toolbar.png" alt="FlowInk toolbar" />
           </div>
 
           <div class="tool-list">
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="../images/08ct.png" alt="Drawing on/off button" />
+                <img src="images/08ct.png" alt="Drawing on/off button" />
               </div>
               <div class="tool-body">
                 <strong>Drawing ON/OFF button</strong>
@@ -631,7 +621,7 @@
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="../images/01pen_button.png" alt="Pen button" />
+                <img src="images/01pen_button.png" alt="Pen button" />
               </div>
               <div class="tool-body">
                 <strong>Pen button</strong>
@@ -641,7 +631,7 @@
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="../images/02rectangle.png" alt="Rectangle button" />
+                <img src="images/02rectangle.png" alt="Rectangle button" />
               </div>
               <div class="tool-body">
                 <strong>Rectangle button</strong>
@@ -651,7 +641,7 @@
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="../images/03ellipse.png" alt="Ellipse button" />
+                <img src="images/03ellipse.png" alt="Ellipse button" />
               </div>
               <div class="tool-body">
                 <strong>Ellipse button</strong>
@@ -661,7 +651,7 @@
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="../images/04text.png" alt="Text button" />
+                <img src="images/04text.png" alt="Text button" />
               </div>
               <div class="tool-body">
                 <strong>Text button</strong>
@@ -671,7 +661,7 @@
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="../images/05eraser.png" alt="Eraser button" />
+                <img src="images/05eraser.png" alt="Eraser button" />
               </div>
               <div class="tool-body">
                 <strong>Eraser button</strong>
@@ -681,7 +671,7 @@
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="../images/06color.png" alt="Color button" />
+                <img src="images/06color.png" alt="Color button" />
               </div>
               <div class="tool-body">
                 <strong>Color button</strong>
@@ -691,7 +681,7 @@
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="../images/11undo_redo_btn.png" alt="Undo/Redo button" />
+                <img src="images/11undo_redo_btn.png" alt="Undo/Redo button" />
               </div>
               <div class="tool-body">
                 <strong>Undo/Redo button</strong>
@@ -701,7 +691,7 @@
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="../images/07clear.png" alt="Clear button" />
+                <img src="images/07clear.png" alt="Clear button" />
               </div>
               <div class="tool-body">
                 <strong>Clear button</strong>
@@ -711,7 +701,7 @@
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="../images/09settings.png" alt="Settings button" />
+                <img src="images/09settings.png" alt="Settings button" />
               </div>
               <div class="tool-body">
                 <strong>Settings button</strong>
@@ -721,7 +711,7 @@
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="../images/10exit.png" alt="Exit button" />
+                <img src="images/10exit.png" alt="Exit button" />
               </div>
               <div class="tool-body">
                 <strong>Exit button</strong>
@@ -804,9 +794,9 @@
         </p>
       </div>
       <figure class="download-shot">
-        <a href="../images/AssetsBox_with_annotation.png" target="_blank" rel="noopener noreferrer">
+        <a href="images/AssetsBox_with_annotation.png" target="_blank" rel="noopener noreferrer">
           <img
-            src="../images/AssetsBox_with_annotation.png"
+            src="images/AssetsBox_with_annotation.png"
             alt="Where to download FlowInk from the Assets section"
           />
         </a>
@@ -820,9 +810,9 @@
           <li>When you run the installer, Windows may show a SmartScreen protection screen. If it appears, click the details link, then click the run button.</li>
         </ol>
         <figure class="install-shot">
-          <a href="../images/PC保護画面_説明追記.png" target="_blank" rel="noopener noreferrer">
+          <a href="images/PC_Protected_dialog_with_annotations.png" target="_blank" rel="noopener noreferrer">
             <img
-              src="../images/PC保護画面_説明追記.png"
+              src="images/PC_Protected_dialog_with_annotations.png"
               alt="How to proceed when the Windows SmartScreen protection screen appears"
             />
           </a>
@@ -865,7 +855,7 @@
 
         <figure style="margin: 32px 0 0;">
           <img
-            src="../images/FlowInk1stVer.png"
+            src="images/FlowInk1stVer.png"
             alt="The first version of FlowInk"
             style="width: 100%; max-width: 900px; display: block; margin: 0 auto; border-radius: 16px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);"
           />
