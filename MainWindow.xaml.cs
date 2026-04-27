@@ -2552,6 +2552,11 @@ public partial class MainWindow : Window
 
         if (_currentTool == ToolMode.Text)
         {
+            if (IsClickOnActiveTextBox(e.OriginalSource))
+            {
+                return;
+            }
+
             if (IsClickOnCommittedTextElement(e.OriginalSource))
             {
                 return;
@@ -2631,6 +2636,28 @@ public partial class MainWindow : Window
 
         DrawingCanvas.CaptureMouse();
         e.Handled = true;
+    }
+
+    private bool IsClickOnActiveTextBox(object originalSource)
+    {
+        if (_activeTextBox == null)
+        {
+            return false;
+        }
+
+        DependencyObject? current = originalSource as DependencyObject;
+
+        while (current != null)
+        {
+            if (ReferenceEquals(current, _activeTextBox))
+            {
+                return true;
+            }
+
+            current = VisualTreeHelper.GetParent(current);
+        }
+
+        return false;
     }
 
     private bool IsClickOnCommittedTextElement(object originalSource)
