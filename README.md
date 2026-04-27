@@ -1,6 +1,6 @@
 ﻿# FlowInk
 
-Lightweight overlay drawing tool for Windows.
+FlowInk is a lightweight, free screen annotation (overlay drawing) tool for Windows10 above.
 
 ## Features
 
@@ -17,7 +17,7 @@ Lightweight overlay drawing tool for Windows.
 
 ## Download
 
-Coming soon
+https://msasa-alt.github.io/FlowInk/en/index.html
 
 ## Screenshots
 
@@ -28,4 +28,4 @@ Coming soon
 TBD
 
 ## Web site
-https://msasa-alt.github.io/FlowInk/
+https://msasa-alt.github.io/FlowInk/en/index.html
