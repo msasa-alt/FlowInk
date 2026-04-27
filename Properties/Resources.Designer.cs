@@ -745,6 +745,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   左クリック: Undo / 右クリック: Redo に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string UndoRedoToolTip {
+            get {
+                return ResourceManager.GetString("UndoRedoToolTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   バージョン に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Version {

@@ -1,6 +1,6 @@
-﻿#define MyAppName "FlowInk"
-#define MyAppVersion "1.1.0"
-#define MyAppPublisher "msasa"
+#define MyAppName "FlowInk"
+#define MyAppVersion "1.2.0-rc1"
+#define MyAppPublisher "FlowInk"
 #define MyAppExeName "FlowInk.exe"
 
 [Setup]
@@ -28,19 +28,33 @@ ArchitecturesInstallIn64BitMode=x64compatible
 
 UninstallDisplayIcon={app}\{#MyAppExeName}
 
+ShowLanguageDialog=yes
+
 [Languages]
+Name: "english";  MessagesFile: "compiler:Default.isl"
 Name: "japanese"; MessagesFile: "compiler:Languages\Japanese.isl"
 
+[CustomMessages]
+english.DesktopIconTask=Create a desktop shortcut
+english.AdditionalTasks=Additional tasks:
+english.UninstallApp=Uninstall {#MyAppName}
+english.LaunchApp=Launch {#MyAppName}
+
+japanese.DesktopIconTask=デスクトップショートカットを作成する
+japanese.AdditionalTasks=追加タスク:
+japanese.UninstallApp={#MyAppName} をアンインストール
+japanese.LaunchApp={#MyAppName} を起動する
+
 [Tasks]
-Name: "desktopicon"; Description: "デスクトップショートカットを作成する"; GroupDescription: "追加タスク:"; Flags: unchecked
+Name: "desktopicon"; Description: "{cm:DesktopIconTask}"; GroupDescription: "{cm:AdditionalTasks}"; Flags: unchecked
 
 [Files]
 Source: "..\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{group}\アンインストール {#MyAppName}"; Filename: "{uninstallexe}"
+Name: "{group}\{cm:UninstallApp}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "{#MyAppName} を起動する"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchApp}"; Flags: nowait postinstall skipifsilent

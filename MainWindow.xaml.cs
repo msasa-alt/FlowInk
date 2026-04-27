@@ -776,6 +776,17 @@ public partial class MainWindow : Window
         }
     }
 
+    private void UndoRedoButton_Click(object sender, RoutedEventArgs e)
+    {
+        UndoHistory();
+    }
+
+    private void UndoRedoButton_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+        RedoHistory();
+    }
+
     private void FinalizeOrCancelCurrentOperation()
     {
         switch (_currentInteractionState)
@@ -1135,7 +1146,7 @@ public partial class MainWindow : Window
         trayAboutMenuItem.Click += TrayAboutMenuItem_Click;
         trayExitMenuItem.Click += TrayExitMenuItem_Click;
 
-        _notifyIcon.Text = SR.AppName;
+        _notifyIcon.Text = "FlowInk";
         _notifyIcon.Icon = new Drawing.Icon(Path.Combine(AppContext.BaseDirectory, "Assets", "FlowInk.ico"));
         _notifyIcon.Visible = true;
         _notifyIcon.ContextMenuStrip = new Forms.ContextMenuStrip();
@@ -1569,7 +1580,7 @@ public partial class MainWindow : Window
         {
             MessageBox.Show(
                 string.Format(SR.GlobalHotkeyRegisterFailedFormat, GetCurrentHotkeyDisplayText()),
-                SR.MessageBoxTitle,
+                "FlowInk",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
         }
@@ -1634,7 +1645,7 @@ public partial class MainWindow : Window
         {
             MessageBox.Show(
                 SR.SelectAtLeastOneModifier,
-                SR.MessageBoxTitle,
+                "FlowInk",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
             return;
