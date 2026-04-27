@@ -132,6 +132,7 @@
       margin: 0;
     }
 
+
     .guide {
       max-width: 600px;
       margin: 0 auto 22px;
@@ -150,14 +151,28 @@
       margin: 0;
     }
 
-    .section {
-      margin-top: 72px;
+    .download-shot {
+      margin: 24px auto 32px;
+      text-align: center;
     }
 
-    h2 {
-      font-size: 32px;
-      letter-spacing: -0.02em;
-      margin: 0 0 12px;
+    .download-shot a {
+      display: inline-block;
+      cursor: zoom-in;
+    }
+
+    .download-shot img {
+      width: 100%;
+      max-width: 450px;
+      height: auto;
+      border-radius: 14px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .download-shot figcaption {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--muted);
     }
 
     .install-shot {
@@ -184,11 +199,21 @@
       color: var(--muted);
     }
 
+    .section {
+      margin-top: 72px;
+    }
+
+    h2 {
+      font-size: 32px;
+      letter-spacing: -0.02em;
+      margin: 0 0 12px;
+    }
+
     .section-lead {
-      max-width: 73000px;
+      max-width: 700px;
       margin: 0 auto 26px;
       color: var(--muted);
-      font-size: 21px;
+      font-size: 17px;
     }
 
     .features {
@@ -481,57 +506,8 @@
         Windows画面に直接描ける<br>
         軽量なオーバーレイ描画・落書きツール
       </p>
-<!--
-      <div class="btn-row">
-        <a
-          class="btn"
-          href="https://github.com/msasa-alt/FlowInk/releases"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          ダウンロード
-        </a>
-      </div>
-      <h2>ダウンロード方法</h2>
-      <div class="guide">
-        <ol>
-          <li>ダウンロードボタンをクリックします</li>
-          <li>「表示されたページの「Assets」（ダウンロード一覧）から以下のファイルをダウンロードしてください</li>
-            <ul>
-              <li>FlowInk-Setup.exe（通常はこちら／インストーラー版）</li>
-              <li>FlowInk.zip（インストーラー版がダウンロードできない場合）</li>
-            </ul>
-        </ol>
-        <p>
-        ※ EXEファイルはブラウザによりダウンロードがブロックされる場合があります、その時はZIP版をダウンロードしてください。<br>
-        ※ 「Source code」と書かれたZIPではありません。
-        </p>
-      </div>
-      <h2>インストール方法</h2>
-      <h3>FlowInk-Setup.exe（インストーラー版）</h3>
-      <div class="guide">
-        <ol>
-          <li>(無事に)FlowInk-Setup.exeがダウンロードできた方は、ダブルクリックで実行してください</li>
-          <li>無名なソフトなので実行時にWindowsのPC保護画面が表示される場合があります。その場合は詳細リンクをリンクをクリックし実行ボタンを押してください</li>
-        </ol>
-        <figure class="install-shot">
-          <a href="images/PC保護画面_説明追記.png" target="_blank" rel="noopener noreferrer">
-            <img
-              src="images/PC保護画面_説明追記.png"
-              alt="WindowsによってPCが保護されました画面の操作説明"
-            />
-          </a>
-          <figcaption>PC保護画面が表示された場合の操作</figcaption>
-        </figure>
-      </div>
-      <h3>FlowInk.zip</h3>
-      <div class="guide">
-        <ol>
-          <li>zipファイルを右クリックし「すべて展開」より、展開されたファイル内のFlowInk.exeを実行してください</li>
-        </ol>
-      </div>
     </section>
--->
+
     <section class="section">
       <p class="section-lead">
         使用例
@@ -758,6 +734,7 @@
       </div>
     </section>
 
+
     <section class="cta-box">
       <h2>FlowInkを試す</h2>
       <p>
@@ -776,23 +753,33 @@
       <div class="guide">
         <ol>
           <li>ダウンロードボタンをクリックします</li>
-          <li>「表示されたページの「Assets」（ダウンロード一覧）から以下のファイルをダウンロードしてください</li>
+          <li>表示されたページの「Assets」（ダウンロード一覧）から以下のファイルをダウンロードしてください
             <ul>
               <li>FlowInk-Setup.exe（通常はこちら / インストーラー版）</li>
               <li>FlowInk.zip（インストーラー版がダウンロードできない場合 / ZIP版）</li>
             </ul>
+          </li>
         </ol>
         <p>
-        ※ インストーラー版はブラウザによりダウンロードがブロックされる場合があります、その時はZIP版をダウンロードしてください。<br>
+        ※ インストーラー版はブラウザによりダウンロードがブロックされる場合があります。その時はZIP版をダウンロードしてください。<br>
         ※ 「Source code」と書かれたZIPではありません。
         </p>
       </div>
+      <figure class="download-shot">
+        <a href="images/AssetsBox_with_annotation.png" target="_blank" rel="noopener noreferrer">
+          <img
+            src="images/AssetsBox_with_annotation.png"
+            alt="GitHub ReleasesのAssetsからFlowInkをダウンロードする場所の説明"
+          />
+        </a>
+        <figcaption>Assetsからインストーラー版またはZIP版をダウンロードします</figcaption>
+      </figure>
       <h2>インストール方法</h2>
       <h3>FlowInk-Setup.exe（インストーラー版）</h3>
       <div class="guide">
         <ol>
           <li>(無事に)FlowInk-Setup.exeがダウンロードできた方は、ダブルクリックで実行してください。インストーラーが起動しますので、それに従ってインストールしてください</li>
-          <li>インストーラー実行時にWindowsのPC保護画面が表示される場合があります。その場合はPC保護画面の詳細リンクをリンクをクリックし、実行ボタンを押してください</li>
+          <li>インストーラー実行時にWindowsのPC保護画面が表示される場合があります。その場合はPC保護画面の詳細リンクをクリックし、実行ボタンを押してください</li>
         </ol>
         <figure class="install-shot">
           <a href="images/PC保護画面_説明追記.png" target="_blank" rel="noopener noreferrer">
@@ -867,17 +854,7 @@
         </p>
       </div>
     </section>
-
-    <!--
-    <section class="section">
-      <h2>今後の予定</h2>
-      <p>
-      2026.4.20: 現在のバージョンは1.1.0です。次のバージョン(1.2.0)では、Undo/Redoボタンの実装、英語対応を予定しています。
-      </p>
-    </section>
-    -->
-    
-    <section class="section">
+<section class="section">
       <h2>フィードバック・お問い合わせ</h2>
       <p class="section-lead">
         FlowInkの改善のため、ご意見・不具合報告・ご要望などをお待ちしています。
