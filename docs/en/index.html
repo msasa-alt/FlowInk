@@ -1,18 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FlowInk | Lightweight desktop annotation tool for Windows</title>
+  <title>FlowInk | Windows画面に直接描ける描画・落書きツール</title>
   <meta
     name="description"
-    content="FlowInk is a lightweight overlay drawing and desktop annotation tool for Windows. Draw directly on your screen for presentations, online meetings, chart analysis, and quick visual notes."
+    content="FlowInkはWindows画面に直接描ける軽量なオーバーレイ描画・落書きツールです。プレゼンやオンライン会議の画面説明・チャートへの書き込み等をすばやく行えます。"
   />
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://msasa-alt.github.io/FlowInk/en/">
-  <link rel="alternate" hreflang="ja" href="https://msasa-alt.github.io/FlowInk/">
-  <link rel="alternate" hreflang="en" href="https://msasa-alt.github.io/FlowInk/en/">
-  <link rel="alternate" hreflang="x-default" href="https://msasa-alt.github.io/FlowInk/">
+  <link rel="canonical" href="https://msasa-alt.github.io/FlowInk/">
 
   <style>
     :root {
@@ -135,6 +132,28 @@
       margin: 0;
     }
 
+    .language-switch {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin: -40px 0 24px;
+      font-size: 14px;
+    }
+
+    .language-switch a {
+      color: var(--muted);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 12px;
+      background: #fff;
+    }
+
+    .language-switch a:hover {
+      color: var(--text);
+      border-color: #cfcfcf;
+    }
+
 
     .guide {
       max-width: 600px;
@@ -154,28 +173,14 @@
       margin: 0;
     }
 
-    .download-shot {
-      margin: 24px auto 32px;
-      text-align: center;
+    .section {
+      margin-top: 72px;
     }
 
-    .download-shot a {
-      display: inline-block;
-      cursor: zoom-in;
-    }
-
-    .download-shot img {
-      width: 100%;
-      max-width: 620px;
-      height: auto;
-      border-radius: 14px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
-    }
-
-    .download-shot figcaption {
-      margin-top: 10px;
-      font-size: 14px;
-      color: var(--muted);
+    h2 {
+      font-size: 32px;
+      letter-spacing: -0.02em;
+      margin: 0 0 12px;
     }
 
     .install-shot {
@@ -202,21 +207,11 @@
       color: var(--muted);
     }
 
-    .section {
-      margin-top: 72px;
-    }
-
-    h2 {
-      font-size: 32px;
-      letter-spacing: -0.02em;
-      margin: 0 0 12px;
-    }
-
     .section-lead {
-      max-width: 700px;
+      max-width: 73000px;
       margin: 0 auto 26px;
       color: var(--muted);
-      font-size: 17px;
+      font-size: 21px;
     }
 
     .features {
@@ -492,14 +487,16 @@
       }
     }
   </style>
-
 </head>
 
 <body>
   <div class="container">
+    <nav class="language-switch" aria-label="Language switch">
+      <a href="https://msasa-alt.github.io/FlowInk/?lang=ja" onclick="try { localStorage.setItem('flowinkLanguage', 'ja'); } catch (e) {}">日本語</a>
+    </nav>
     <section class="hero">
       <div class="logo-wrap">
-        <img src="images/FlowInk_icon.png" class="logo" alt="FlowInk icon" />
+        <img src="../images/FlowInk_icon.png" class="logo" alt="FlowInk icon" />
       </div>
 
       <div class="eyebrow">Desktop RAKUGAKI Tool</div>
@@ -507,188 +504,237 @@
       <h1>FlowInk</h1>
 
       <p class="lead">
-        Draw directly on your Windows screen<br>
-        A lightweight overlay drawing and annotation tool
+        Windows画面に直接描ける<br>
+        軽量なオーバーレイ描画・落書きツール
       </p>
+<!--
+      <div class="btn-row">
+        <a
+          class="btn"
+          href="https://github.com/msasa-alt/FlowInk/releases"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          ダウンロード
+        </a>
+      </div>
+      <h2>ダウンロード方法</h2>
+      <div class="guide">
+        <ol>
+          <li>ダウンロードボタンをクリックします</li>
+          <li>「表示されたページの「Assets」（ダウンロード一覧）から以下のファイルをダウンロードしてください</li>
+            <ul>
+              <li>FlowInk-Setup.exe（通常はこちら／インストーラー版）</li>
+              <li>FlowInk.zip（インストーラー版がダウンロードできない場合）</li>
+            </ul>
+        </ol>
+        <p>
+        ※ EXEファイルはブラウザによりダウンロードがブロックされる場合があります、その時はZIP版をダウンロードしてください。<br>
+        ※ 「Source code」と書かれたZIPではありません。
+        </p>
+      </div>
+      <h2>インストール方法</h2>
+      <h3>FlowInk-Setup.exe（インストーラー版）</h3>
+      <div class="guide">
+        <ol>
+          <li>(無事に)FlowInk-Setup.exeがダウンロードできた方は、ダブルクリックで実行してください</li>
+          <li>無名なソフトなので実行時にWindowsのPC保護画面が表示される場合があります。その場合は詳細リンクをリンクをクリックし実行ボタンを押してください</li>
+        </ol>
+        <figure class="install-shot">
+          <a href="../images/PC保護画面_説明追記.png" target="_blank" rel="noopener noreferrer">
+            <img
+              src="../images/PC保護画面_説明追記.png"
+              alt="WindowsによってPCが保護されました画面の操作説明"
+            />
+          </a>
+          <figcaption>PC保護画面が表示された場合の操作</figcaption>
+        </figure>
+      </div>
+      <h3>FlowInk.zip</h3>
+      <div class="guide">
+        <ol>
+          <li>zipファイルを右クリックし「すべて展開」より、展開されたファイル内のFlowInk.exeを実行してください</li>
+        </ol>
+      </div>
     </section>
-
+-->
     <section class="section">
       <p class="section-lead">
-        Usage examples
+        使用例
       </p>
 
       <div class="usage-gallery">
         <figure class="usage-shot">
-          <a href="images/PresoWithFlowInk.png" target="_blank" rel="noopener noreferrer">
+          <a href="../images/PresoWithFlowInk.png" target="_blank" rel="noopener noreferrer">
             <img
-              src="images/PresoWithFlowInk.png"
-              alt="Example of using FlowInk during a presentation"
+              src="../images/PresoWithFlowInk.png"
+              alt="FlowInkを使ったプレゼン時の書き込み例"
             />
           </a>
-          <figcaption>Explaining a screen during a presentation</figcaption>
+          <figcaption>プレゼン中の画面説明</figcaption>
         </figure>
 
         <figure class="usage-shot">
-          <a href="images/ChartWithFlowInk.png" target="_blank" rel="noopener noreferrer">
+          <a href="../images/ChartWithFlowInk.png" target="_blank" rel="noopener noreferrer">
             <img
-              src="images/ChartWithFlowInk.png"
-              alt="Example of using FlowInk for chart annotations"
+              src="../images/ChartWithFlowInk.png"
+              alt="FlowInkを使ったチャートへの書き込み例"
             />
           </a>
-          <figcaption>Chart analysis</figcaption>
+          <figcaption>チャート分析</figcaption>
         </figure>
       </div>
     </section>
 
     <section class="section">
-      <h2>Features</h2>
+      <h2>特長</h2>
       <p class="section-lead">
-        FlowInk is designed to keep operations simple and make the tools you need immediately available.
+        余計な操作を増やさず、必要な機能をすぐ使えることを重視した設計です。
       </p>
 
       <div class="features">
         <div class="card">
-          <strong>Overlay drawing</strong>
-          <p>Draw directly over your desktop, so explanations and visual checks feel natural.</p>
+          <strong>オーバーレイ描画</strong>
+          <p>デスクトップ画面の上にそのまま書き込めるので、説明や確認が直感的です。</p>
         </div>
 
         <div class="card">
-          <strong>Simple controls</strong>
-          <p>A minimal UI makes it easy to start using FlowInk without getting lost.</p>
+          <strong>シンプル操作</strong>
+          <p>最小構成のUIで、迷いにくく、起動してすぐ使い始められます。</p>
         </div>
 
         <div class="card">
-          <strong>Text input</strong>
-          <p>Add labels and notes directly on screen, not just lines and shapes.</p>
+          <strong>テキスト入力</strong>
+          <p>線や図形だけでなく、補足説明やラベルもその場で追加できます。</p>
         </div>
 
         <div class="card">
-          <strong>Lightweight design</strong>
-          <p>Launch it quickly whenever you need to annotate your screen.</p>
+          <strong>軽量設計</strong>
+          <p>重たいセットアップなしで、必要なときにすぐ立ち上げて使えます。</p>
         </div>
       </div>
     </section>
 
     <section class="section">
-      <h2>Toolbar buttons</h2>
+      <h2>ツールバーの各ボタンの説明</h2>
       <p class="section-lead">
-        Here is what each toolbar button does.
+        ツールバーの各ボタンをクリックしたときの機能をまとめています。
       </p>
 
       <div class="toolbar-diagram-wrap">
         <div class="toolbar-diagram">
           <div class="toolbar-image-col">
-            <img src="images/toolbar.png" alt="FlowInk toolbar" />
+            <img src="../images/toolbar.png" alt="FlowInk toolbar" />
           </div>
 
           <div class="tool-list">
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="images/08ct.png" alt="Drawing on/off button" />
+                <img src="../images/08ct.png" alt="クリック透過ボタン" />
               </div>
               <div class="tool-body">
-                <strong>Drawing ON/OFF button</strong>
-                <p>Toggles drawing on or off. When drawing is off, you can interact with windows behind FlowInk. The toolbar is collapsed when drawing is off. This is the same action as pressing Ctrl+Alt+T.</p>
+                <strong>描画ON/OFFボタン</strong>
+                <p>描画ON/OFFの切り替えができます。クリックすると背後のウィンドウを操作できるようにします。描画OFFにするとツールバーは畳まれます。Ctrl+Alt+Tキーを同時に押す事と同じ機能です。</p>
               </div>
             </div>
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="images/01pen_button.png" alt="Pen button" />
+                <img src="../images/01pen_button.png" alt="ペンボタン" />
               </div>
               <div class="tool-body">
-                <strong>Pen button</strong>
-                <p>Drag with the left mouse button to draw. Hold Shift while dragging to draw a straight line, or Shift+Alt to draw an arrow. Right-click the pen button to open the pen width preset popup. Double-click a preset line to edit that preset width.</p>
+                <strong>ペンボタン</strong>
+                <p>マウスの左ボタンを押してドラッグすると線を描画できます。Shiftキーを押しながらドラッグすると直線、Shift+Altキーで矢印を描画できます。ペンボタンにカーソルを合わせてマウスの右ボタンをクリックすると線幅のプリセットポップアップが開いて線幅を変更できます。また、プリセットの線をダブルクリックするとプリセットの線幅を変更できます。</p>
               </div>
             </div>
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="images/02rectangle.png" alt="Rectangle button" />
+                <img src="../images/02rectangle.png" alt="四角形ボタン" />
               </div>
               <div class="tool-body">
-                <strong>Rectangle button</strong>
-                <p>Drag with the left mouse button to draw a rectangle. Right-click the rectangle button to change fill settings and fill transparency.</p>
+                <strong>四角形ボタン</strong>
+                <p>マウスの左ボタンをクリックしてドラッグすると四角形を描画できます。四角形ボタンにカーソルを当てて右クリックすると塗りつぶし／塗りつぶす色の透明度を変更できます。</p>
               </div>
             </div>
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="images/03ellipse.png" alt="Ellipse button" />
+                <img src="../images/03ellipse.png" alt="円ボタン" />
               </div>
               <div class="tool-body">
-                <strong>Ellipse button</strong>
-                <p>Drag with the left mouse button to draw an ellipse. Right-click the ellipse button to change fill settings and fill transparency.</p>
+                <strong>円ボタン</strong>
+                <p>マウスの左ボタンをクリックしてドラッグすると円を描画できます。円ボタンにカーソルを当てて右クリックすると塗りつぶし／塗りつぶす色の透明度を変更できます。</p>
               </div>
             </div>
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="images/04text.png" alt="Text button" />
+                <img src="../images/04text.png" alt="テキストボタン" />
               </div>
               <div class="tool-body">
-                <strong>Text button</strong>
-                <p>Enter text from the keyboard. Press Enter to confirm text, or Shift+Enter to insert a line break. Double-click the text button to change the font. Click existing text to select it, drag it to move it, and right-click selected text to edit or delete it.</p>
+                <strong>テキストボタン</strong>
+                <p>キーボードからテキストが入力できます。Enterで文字列確定、Shift+Enterでテキストボックス内で改行できます。テキストボタンをダブルクリックするとフォントを変更できます。入力したテキストをクリックするとテキスト選択状態となり、ドラッグするとテキストを移動できます。また、テキスト選択状態でテキストにカーソルを当てて右クリックするとテキストの編集／削除ができます。</p>
               </div>
             </div>
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="images/05eraser.png" alt="Eraser button" />
+                <img src="../images/05eraser.png" alt="消しゴムボタン" />
               </div>
               <div class="tool-body">
-                <strong>Eraser button</strong>
-                <p>Hold the left mouse button and move the cursor over drawn lines, rectangles, or ellipses to erase them. Text is not erased by the eraser.</p>
+                <strong>消しゴムボタン</strong>
+                <p>マウスの左ボタンを押しっぱなしにすることで、描いた線／円／四角をカーソルで消せます。ただしテキストは消せません。</p>
               </div>
             </div>
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="images/06color.png" alt="Color button" />
+                <img src="../images/06color.png" alt="カラーボタン" />
               </div>
               <div class="tool-body">
-                <strong>Color button</strong>
-                <p>Change the drawing color. Left-click to open the color selection popup. Double-click a preset color tile to edit that preset. Double-click the color button to edit the current color.</p>
+                <strong>カラーボタン</strong>
+                <p>描画色を変更できます。マウスの左ボタンをクリックすると、色選択ポップアップが開きます。選択することで描画色を変更できます。Preset Colorsの各色タイルをダブルクリックすることでプリセットの色を変更できます。また、色ボタンをダブルクリックすると現在の色を変更できます。</p>
               </div>
             </div>
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="images/11undo_redo_btn.png" alt="Undo/Redo button" />
+                <img src="../images/11undo_redo_btn.png" alt="Undo/Redoボタン" />
               </div>
               <div class="tool-body">
-                <strong>Undo/Redo button</strong>
-                <p>Left-click for Undo. Right-click for Redo.</p>
+                <strong>Undo/Redoボタン</strong>
+                <p>左クリックでUndo、右クリックでRedoができます。</p>
               </div>
             </div>
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="images/07clear.png" alt="Clear button" />
+                <img src="../images/07clear.png" alt="クリアボタン" />
               </div>
               <div class="tool-body">
-                <strong>Clear button</strong>
-                <p>Clears everything drawn on the screen. Text is also cleared.</p>
+                <strong>クリアボタン</strong>
+                <p>画面上に描いた内容をすべて消去します。テキストも消去されます。</p>
               </div>
             </div>
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="images/09settings.png" alt="Settings button" />
+                <img src="../images/09settings.png" alt="設定ボタン" />
               </div>
               <div class="tool-body">
-                <strong>Settings button</strong>
-                <p>Set the global hotkey for toggling drawing on and off. The default is Ctrl+Alt+T.</p>
+                <strong>設定ボタン</strong>
+                <p>描画ON/OFFができるグローバルホットキーを設定できます。デフォルトはCtrl+Alt+Tです。</p>
               </div>
             </div>
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="images/10exit.png" alt="Exit button" />
+                <img src="../images/10exit.png" alt="終了ボタン" />
               </div>
               <div class="tool-body">
-                <strong>Exit button</strong>
-                <p>Exits FlowInk.</p>
+                <strong>終了ボタン</strong>
+                <p>FlowInkを終了します。</p>
               </div>
             </div>
           </div>
@@ -696,52 +742,53 @@
       </div>
     </section>
 
+    
     <section class="section">
-      <h2>Other features</h2>
+      <h2>その他の機能</h2>
       <p class="section-lead">
-        Features that are not tied to toolbar buttons.
+        ツールバーボタン以外の機能です。
       </p>
       <div style="max-width:700px;margin:0 auto;text-align:left;color:var(--muted);line-height:1.8;">
         <ul>
-          <li>Press Ctrl + Alt + T to toggle drawing on/off. You can change the key combination from the settings button.</li>
-          <li>When the pen button is selected, hold Shift to draw a straight line, or Shift + Alt to draw an arrow.</li>
-          <li>Use Ctrl-Z / Ctrl-Y for Undo / Redo. The history limit is 200 actions.</li>
-          <li>While entering text, press Enter to confirm the text. Press Shift+Enter to insert a line break.</li>
-          <li>While entering text, hold Ctrl and use the mouse wheel to increase or decrease the font size.</li>
-          <li>Drag the empty area of the toolbar to move it.</li>
+          <li>Ctrl + Alt + T で描画ON/OFFを切り替えられます。設定ボタンでキーの組み合わせを変更できます</li>
+          <li>ペンボタン選択時、Shiftキーで直線、Shift + Altキーで矢印を描画できます</li>
+          <li>Ctrl-Z / Ctrl-yでUndo / Redoができます。履歴は200です</li>
+          <li>テキスト入力時にEnterで文字列確定。Shifet+Enterで改行できます</li>
+          <li>テキスト入力時に Ctrl + マウスホイールの上下で文字サイズを拡大・縮小できます</li>
+          <li>ツールバーの余白をつかむと移動できます。(余白にカーソルを合わせて左ボタンクリックでドラッグ)</li>
         </ul>
       </div>
     </section>
 
     <section class="section">
-      <h2>Use cases</h2>
+      <h2>こんな用途に</h2>
       <p class="section-lead">
-        A quick tool for moments when you need to write directly on screen.
+        ちょっと書き込みたい場面に、手早く使えるツールです。
       </p>
 
       <div class="use-cases">
         <div class="use-case">
-          <strong>Presentations / online meetings</strong>
-          <p>Write directly on the screen you are showing or sharing.</p>
+          <strong>プレゼン／オンライン会議</strong>
+          <p>表示／共有している画面に直接直接書き込みできます。</p>
         </div>
 
         <div class="use-case">
-          <strong>Temporary work notes</strong>
-          <p>Leave quick notes and visual marks on your screen.</p>
+          <strong>作業メモ</strong>
+          <p>一時的な書き込みや補足メモを画面上に残せます。</p>
         </div>
 
         <div class="use-case">
-          <strong>Chart annotations</strong>
-          <p>Add lines, arrows, zones, and text to trading charts.</p>
+          <strong>チャートへの書き込み</strong>
+          <p>デイトレード等のチャート画面にラインや矢印などを記入できます。</p>
         </div>
       </div>
     </section>
 
     <section class="cta-box">
-      <h2>Try FlowInk</h2>
+      <h2>FlowInkを試す</h2>
       <p>
-        Launch it when you need it and write directly on your screen.<br>
-        Download it for free and try it out.
+        必要なときにすぐ起動して、画面上にすぐ書ける。<br>
+        まずはダウンロードして、使い心地を試してみてください。
       </p>
       <a
         class="btn"
@@ -749,128 +796,129 @@
         target="_blank"
         rel="noopener noreferrer"
       >
-        Download
+        ダウンロード
       </a>
-      <h2>How to download</h2>
+      <h2>ダウンロード方法</h2>
       <div class="guide">
         <ol>
-          <li>Click the download button.</li>
-          <li>On the page that opens, download one of the following files from “Assets” (the download list).</li>
+          <li>ダウンロードボタンをクリックします</li>
+          <li>「表示されたページの「Assets」（ダウンロード一覧）から以下のファイルをダウンロードしてください</li>
             <ul>
-              <li>FlowInk-Setup.exe (recommended / installer version)</li>
-              <li>FlowInk.zip (ZIP version, if the installer download is blocked)</li>
+              <li>FlowInk-Setup.exe（通常はこちら / インストーラー版）</li>
+              <li>FlowInk.zip（インストーラー版がダウンロードできない場合 / ZIP版）</li>
             </ul>
         </ol>
         <p>
-        The installer version may be blocked by your browser. In that case, download the ZIP version instead.<br>
-        Do not download the ZIP file labeled “Source code”.
+        ※ インストーラー版はブラウザによりダウンロードがブロックされる場合があります、その時はZIP版をダウンロードしてください。<br>
+        ※ 「Source code」と書かれたZIPではありません。
         </p>
       </div>
-      <figure class="download-shot">
-        <a href="images/AssetsBox_with_annotation.png" target="_blank" rel="noopener noreferrer">
-          <img
-            src="images/AssetsBox_with_annotation.png"
-            alt="Where to download FlowInk from the Assets section"
-          />
-        </a>
-        <figcaption>Download FlowInk from the Assets section</figcaption>
-      </figure>
-      <h2>How to install</h2>
-      <h3>FlowInk-Setup.exe (installer version)</h3>
+      <h2>インストール方法</h2>
+      <h3>FlowInk-Setup.exe（インストーラー版）</h3>
       <div class="guide">
         <ol>
-          <li>If FlowInk-Setup.exe downloaded successfully, double-click it to start the installer, then follow the installer instructions.</li>
-          <li>When you run the installer, Windows may show a SmartScreen protection screen. If it appears, click the details link, then click the run button.</li>
+          <li>(無事に)FlowInk-Setup.exeがダウンロードできた方は、ダブルクリックで実行してください。インストーラーが起動しますので、それに従ってインストールしてください</li>
+          <li>インストーラー実行時にWindowsのPC保護画面が表示される場合があります。その場合はPC保護画面の詳細リンクをリンクをクリックし、実行ボタンを押してください</li>
         </ol>
         <figure class="install-shot">
-          <a href="images/PC_Protected_dialog_with_annotations.png" target="_blank" rel="noopener noreferrer">
+          <a href="../images/PC保護画面_説明追記.png" target="_blank" rel="noopener noreferrer">
             <img
-              src="images/PC_Protected_dialog_with_annotations.png"
-              alt="How to proceed when the Windows SmartScreen protection screen appears"
+              src="../images/PC保護画面_説明追記.png"
+              alt="WindowsによってPCが保護されました画面の操作説明"
             />
           </a>
-          <figcaption>What to do if the Windows protection screen appears</figcaption>
+          <figcaption>PC保護画面が表示された場合の操作</figcaption>
         </figure>
       </div>
-      <h3>FlowInk.zip (ZIP version)</h3>
+      <h3>FlowInk.zip(ZIP版)</h3>
       <div class="guide">
         <ol>
-          <li>Right-click the ZIP file, choose “Extract All”, and run FlowInk.exe from the extracted folder.</li>
+          <li>ZIPファイルを右クリックし「すべて展開」より、展開されたファイル内のFlowInk.exeを実行してください</li>
         </ol>
       </div>
     </section>
 
     <section class="section">
-      <h2>Why I developed FlowInk</h2>
+      <h2>FlowInkを開発した経緯</h2>
 
       <div style="max-width: 760px; margin: 0 auto; text-align: left; color: var(--muted); line-height: 1.9;">
         <p>
-          For technical day traders in FX or CFDs, a desktop annotation tool for drawing lines and text over MT4 or MT5 charts is extremely useful.
-          Epic Pen is widely used as a de facto standard among many traders, but it became subscription-based.
-          Even if the price is low, paying forever for a simple drawing tool unless you remember to cancel the subscription did not feel right to me.
-          I looked for an alternative and found a free tool called gInk.
-          gInk is feature-rich, but its behavior felt unstable in my environment.
-          Some recent versions also failed to launch with exceptions, which became frustrating.
-          Because gInk is open source, I looked into it with ChatGPT.
-          ChatGPT suggested that the design was old and that rewriting it in WPF might be better, but attempting to rewrite gInk led to many compile errors and inconsistent code suggestions.
-          So I gave up on improving gInk directly.
+          FXやCFDのテクニカルデイトレーダーにとってMT4やMT5のチャートソフトの画面に線や文字を書き込む落書きツールは必須です。
+          Epic Penはデファクトスタンダードとして多くのトレーダーに使われていますが、少し前にサブスクになりました。
+          必須なツールとはいえ、たかだが落書きソフトにサブスクって？(OfficeやAcrobatならともかく)、
+          安いとは言え、使わなくなっても契約解除しない限り(忘れたら)一生お金を払い続けるの？
+          となにか釈然としない。
+          と言うことで代替ソフトを探したところginkと言うフリーのソフトを見つけました。
+          ginkこれはこれで多機能だが、なーんか挙動がおかしく不安定。
+          さらに最近は起動時に例外を吐いて起動できないバージョンもありでストレスが溜まっていました。
+          幸いgink はソースが公開されており、チャッピー(ChatGPT)を相手に中身を調べていたんですが、
+          チャッピー曰く設計が古い、WPFで書き直して云々ってなことを言ってくるので、
+          WPFで書き直すチャレンジをしたけどコンパイルエラーを吐きまくるわ、
+          チャッピーは自分の言ったことを忘れて聞くたびに違うコードを吐くわで、ginkを改良することはあきらめました。
         </p>
 
         <p>
-          Later, I asked ChatGPT again and it suggested that building a new WPF app from scratch would be faster.
-          I tried having it write a simple prototype, and this time it quickly produced a basic screen annotation tool.
-          From there, I gradually added the features I needed.
+          その後しばらくして(あらためて)チャッピーに相談したところ、WPFで新たに書き直すのが早いとかいうので、
+          試しにコードを書いてもらったところ、こちらはサクッと簡単な落書きできるソフトを仕上げてきました。
+          そうなるとこっちも盛り上がって機能を追加していきました。
         </p>
 
         <p>
-          That tool became FlowInk.
+          こうして出来上がったのが、FlowInkです。
         </p>
 
         <figure style="margin: 32px 0 0;">
           <img
-            src="images/FlowInk1stVer.png"
-            alt="The first version of FlowInk"
+            src="../images/FlowInk1stVer.png"
+            alt="FlowInkの最初バージョン"
             style="width: 100%; max-width: 900px; display: block; margin: 0 auto; border-radius: 16px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);"
           />
           <figcaption style="margin-top: 10px; font-size: 14px; color: var(--muted); text-align: center;">
-            The first version of FlowInk
+            FlowInkの最初バージョン
           </figcaption>
         </figure>
         <p>
-          FlowInk was created as a simple alternative to tools such as gInk and Epic Pen for traders who want to write directly on charts.
-        </p>
+          このような経緯なので、FlowInkはデイトレーダーがginkやEpic Penの代替ソフトウェアとして使える最低限の機能を持たせています。
         <ul>
-          <li>Draw straight lines and arrows easily</li>
-          <li>Draw filled rectangles for support and resistance zones</li>
-          <li>Use transparency so the chart remains visible</li>
-          <li>Add text labels</li>
-          <li>Save preset line widths and colors</li>
-          <li>Move the toolbar by dragging its empty area</li>
+          <li>直線や矢印が簡単に引ける</li>
+          <li>サポート／レジスタンス帯の長方形(塗りつぶし)</li>
+          <li>色の透明度の設定(下のチャートが見えるように)</li>
+          <li>テキスト入力</li>
+          <li>線幅、色をプリセットしておける</li>
+          <li>ツールバーの余白をつかむと移動できます。(余白にカーソルを合わせて左ボタンクリックでドラッグ)</li>
         </ul>
-        <p>
-          For chart annotation, I believe these basic features are enough.
-          FlowInk can also be useful for presentations and online meetings when you want a simple way to explain something visually.
-          Please give it a try.
+          最低限といっても、チャートへの書き込みならこれぐらいの機能で十分と考えています。<br>
+          同じく、プレゼンやオンラインミーティングの画面説明にもシンプルで使いやすいかと。<br>
+          ぜひ使ってみてください。
         </p>
       </div>
     </section>
 
+    <!--
     <section class="section">
-      <h2>Feedback / contact</h2>
+      <h2>今後の予定</h2>
+      <p>
+      2026.4.20: 現在のバージョンは1.1.0です。次のバージョン(1.2.0)では、Undo/Redoボタンの実装、英語対応を予定しています。
+      </p>
+    </section>
+    -->
+    
+    <section class="section">
+      <h2>フィードバック・お問い合わせ</h2>
       <p class="section-lead">
-        Feedback, bug reports, and feature requests are welcome.
+        FlowInkの改善のため、ご意見・不具合報告・ご要望などをお待ちしています。
       </p>
 
       <p style="color: var(--muted);">
-        📩 Email: dev.sasaya@gmail.com
+        📩 メール： dev.sasaya@gmail.com
       </p>
 
       <div style="max-width:700px;margin:0 auto;text-align:left;color:var(--muted);line-height:1.8;">
         <ul>
-          <li>What happened</li>
-          <li>Steps to reproduce</li>
-          <li>Screenshot, if available</li>
-          <li>Your environment, such as Windows version</li>
+          <li>発生した内容</li>
+          <li>操作手順</li>
+          <li>スクリーンショット（あれば）</li>
+          <li>使用環境（Windowsバージョンなど）</li>
         </ul>
       </div>
     </section>

@@ -10,6 +10,39 @@
   />
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://msasa-alt.github.io/FlowInk/">
+  <link rel="alternate" hreflang="ja" href="https://msasa-alt.github.io/FlowInk/">
+  <link rel="alternate" hreflang="en" href="https://msasa-alt.github.io/FlowInk/en/">
+  <link rel="alternate" hreflang="x-default" href="https://msasa-alt.github.io/FlowInk/">
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var langParam = params.get("lang");
+
+      if (langParam === "ja" || langParam === "en") {
+        try {
+          localStorage.setItem("flowinkLanguage", langParam);
+        } catch (e) {}
+
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, "", window.location.pathname);
+        }
+      }
+
+      var savedLang = null;
+      try {
+        savedLang = localStorage.getItem("flowinkLanguage");
+      } catch (e) {}
+
+      if (savedLang) {
+        return;
+      }
+
+      var browserLang = (navigator.language || navigator.userLanguage || "").toLowerCase();
+      if (browserLang && !browserLang.startsWith("ja")) {
+        window.location.replace("/FlowInk/en/");
+      }
+    })();
+  </script>
 
   <style>
     :root {
@@ -132,6 +165,29 @@
       margin: 0;
     }
 
+    .language-switch {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin: -40px 0 24px;
+      font-size: 14px;
+    }
+
+    .language-switch a {
+      color: var(--muted);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 12px;
+      background: #fff;
+    }
+
+    .language-switch a:hover {
+      color: var(--text);
+      border-color: #cfcfcf;
+    }
+
+
 
     .guide {
       max-width: 600px;
@@ -163,7 +219,7 @@
 
     .download-shot img {
       width: 100%;
-      max-width: 450px;
+      max-width: 620px;
       height: auto;
       border-radius: 14px;
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
@@ -493,6 +549,9 @@
 
 <body>
   <div class="container">
+    <nav class="language-switch" aria-label="Language switch">
+      <a href="https://msasa-alt.github.io/FlowInk/en/?lang=en" onclick="try { localStorage.setItem('flowinkLanguage', 'en'); } catch (e) {}">English</a>
+    </nav>
     <section class="hero">
       <div class="logo-wrap">
         <img src="images/FlowInk_icon.png" class="logo" alt="FlowInk icon" />
