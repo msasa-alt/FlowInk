@@ -131,6 +131,12 @@ public partial class MainWindow : Window
     private const int WS_EX_TRANSPARENT = 0x00000020;
     private const int WS_EX_LAYERED = 0x00080000;
 
+    private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+    private const uint SWP_NOSIZE = 0x0001;
+    private const uint SWP_NOMOVE = 0x0002;
+    private const uint SWP_NOACTIVATE = 0x0010;
+    private const uint SWP_SHOWWINDOW = 0x0040;
+
     private const int WM_HOTKEY = 0x0312;
     private const int WM_NCHITTEST = 0x0084;
     private const int HTCLIENT = 1;
@@ -1245,6 +1251,13 @@ public partial class MainWindow : Window
         }
 
         SetWindowLongPtr(hwnd, GWL_EXSTYLE, new IntPtr(exStyle));
+        EnsureTopmost(hwnd);
+    }
+
+    private void EnsureTopmost(IntPtr hwnd)
+    {
+        Topmost = true;
+        SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
     }
 
     private bool IsCursorInsideToolbarPanel()
@@ -4605,6 +4618,9 @@ public partial class MainWindow : Window
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
 
     [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr", SetLastError = true)]
     private static extern IntPtr GetWindowLongPtr64(IntPtr hWnd, int nIndex);
