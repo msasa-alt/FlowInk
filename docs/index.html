@@ -13,32 +13,30 @@
   <link rel="alternate" hreflang="ja" href="https://msasa-alt.github.io/FlowInk/">
   <link rel="alternate" hreflang="en" href="https://msasa-alt.github.io/FlowInk/en/">
   <link rel="alternate" hreflang="x-default" href="https://msasa-alt.github.io/FlowInk/">
+
   <script>
     (function () {
-      var params = new URLSearchParams(window.location.search);
-      var langParam = params.get("lang");
+      var preferredLanguage = "";
 
-      if (langParam === "ja" || langParam === "en") {
-        try {
-          localStorage.setItem("flowinkLanguage", langParam);
-        } catch (e) {}
-
-        if (window.history && window.history.replaceState) {
-          window.history.replaceState(null, "", window.location.pathname);
+      try {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get("lang") === "ja") {
+          window.localStorage.setItem("flowinkPreferredLanguage", "ja");
+          return;
         }
+
+        preferredLanguage = window.localStorage.getItem("flowinkPreferredLanguage") || "";
+      } catch (e) {
+        preferredLanguage = "";
       }
 
-      var savedLang = null;
-      try {
-        savedLang = localStorage.getItem("flowinkLanguage");
-      } catch (e) {}
-
-      if (savedLang) {
+      if (preferredLanguage === "ja") {
         return;
       }
 
-      var browserLang = (navigator.language || navigator.userLanguage || "").toLowerCase();
-      if (browserLang && !browserLang.startsWith("ja")) {
+      var browserLanguage = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage || "";
+
+      if (browserLanguage && !browserLanguage.toLowerCase().startsWith("ja")) {
         window.location.replace("/FlowInk/en/");
       }
     })();
@@ -159,17 +157,13 @@
       transform: translateY(-1px);
     }
 
-    .subnote {
-      color: var(--muted);
-      font-size: 14px;
-      margin: 0;
-    }
+
 
     .language-switch {
       display: flex;
       justify-content: flex-end;
-      gap: 8px;
-      margin: -40px 0 24px;
+      gap: 10px;
+      margin-bottom: 24px;
       font-size: 14px;
     }
 
@@ -179,80 +173,27 @@
       border: 1px solid var(--line);
       border-radius: 999px;
       padding: 6px 12px;
+      transition: 0.18s ease;
       background: #fff;
     }
 
     .language-switch a:hover {
       color: var(--text);
       border-color: #cfcfcf;
+      transform: translateY(-1px);
     }
 
-
-
-    .guide {
-      max-width: 600px;
-      margin: 0 auto 22px;
-      padding: 0 30px;
-      text-align: left;
-      line-height: 1.8;
+    .language-switch a[aria-current="page"] {
+      color: #fff;
+      background: var(--accent);
+      border-color: var(--accent);
+      pointer-events: none;
     }
 
-    .guide ol,
-    .guide ul {
-      margin: 0 0 18px 1.4em;
-      padding: 0;
-    }
-
-    .guide p {
+    .subnote {
+      color: var(--muted);
+      font-size: 14px;
       margin: 0;
-    }
-
-    .download-shot {
-      margin: 24px auto 32px;
-      text-align: center;
-    }
-
-    .download-shot a {
-      display: inline-block;
-      cursor: zoom-in;
-    }
-
-    .download-shot img {
-      width: 100%;
-      max-width: 620px;
-      height: auto;
-      border-radius: 14px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
-    }
-
-    .download-shot figcaption {
-      margin-top: 10px;
-      font-size: 14px;
-      color: var(--muted);
-    }
-
-    .install-shot {
-      margin: 24px auto;
-      text-align: center;
-    }
-
-    .install-shot a {
-      display: inline-block;
-      cursor: zoom-in;
-    }
-
-    .install-shot img {
-      width: 100%;
-      max-width: 300px;
-      height: auto;
-      border-radius: 14px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
-    }
-
-    .install-shot figcaption {
-      margin-top: 10px;
-      font-size: 14px;
-      color: var(--muted);
     }
 
     .section {
@@ -550,7 +491,8 @@
 <body>
   <div class="container">
     <nav class="language-switch" aria-label="Language switch">
-      <a href="https://msasa-alt.github.io/FlowInk/en/?lang=en" onclick="try { localStorage.setItem('flowinkLanguage', 'en'); } catch (e) {}">English</a>
+      <a href="/FlowInk/?lang=ja" aria-current="page">日本語</a>
+      <a href="/FlowInk/en/">English</a>
     </nav>
     <section class="hero">
       <div class="logo-wrap">
@@ -565,11 +507,26 @@
         Windows画面に直接描ける<br>
         軽量なオーバーレイ描画・落書きツール
       </p>
+
+      <div class="btn-row">
+        <a
+          class="btn"
+          href="https://github.com/msasa-alt/FlowInk/releases/download/v1.1.0/FlowInk-Setup.exe"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          ダウンロード
+        </a>
+      </div>
+
+      <p class="subnote">
+        インストーラーをダウンロードして実行するとインストールできます。実行時にPC保護の警告が出る場合は「詳細情報」ボタンを押して実行してください。※無名なソフトなのでマイクロソフトから警告されてしまいます。
+      </p>
     </section>
 
     <section class="section">
       <p class="section-lead">
-        使用例
+        実際の使い方はこんな感じです。
       </p>
 
       <div class="usage-gallery">
@@ -580,7 +537,7 @@
               alt="FlowInkを使ったプレゼン時の書き込み例"
             />
           </a>
-          <figcaption>プレゼン中の画面説明</figcaption>
+          <figcaption>プレゼン中の画面説明に</figcaption>
         </figure>
 
         <figure class="usage-shot">
@@ -590,7 +547,7 @@
               alt="FlowInkを使ったチャートへの書き込み例"
             />
           </a>
-          <figcaption>チャート分析</figcaption>
+          <figcaption>チャート分析に</figcaption>
         </figure>
       </div>
     </section>
@@ -709,16 +666,6 @@
 
             <div class="tool-item">
               <div class="tool-icon">
-                <img src="images/11undo_redo_btn.png" alt="Undo/Redoボタン" />
-              </div>
-              <div class="tool-body">
-                <strong>Undo/Redoボタン</strong>
-                <p>左クリックでUndo、右クリックでRedoができます。</p>
-              </div>
-            </div>
-
-            <div class="tool-item">
-              <div class="tool-icon">
                 <img src="images/07clear.png" alt="クリアボタン" />
               </div>
               <div class="tool-body">
@@ -760,10 +707,10 @@
       <div style="max-width:700px;margin:0 auto;text-align:left;color:var(--muted);line-height:1.8;">
         <ul>
           <li>Ctrl + Alt + T で描画ON/OFFを切り替えられます。設定ボタンでキーの組み合わせを変更できます</li>
-          <li>ペンボタン選択時、Shiftキーで直線、Shift + Altキーで矢印を描画できます</li>
           <li>Ctrl-Z / Ctrl-yでUndo / Redoができます。履歴は200です</li>
           <li>テキスト入力時にEnterで文字列確定。Shifet+Enterで改行できます</li>
           <li>テキスト入力時に Ctrl + マウスホイールの上下で文字サイズを拡大・縮小できます</li>
+          <li>ペンボタン選択時、Shiftキーで直線、Shift + Altキーで矢印を描画できます</li>
           <li>ツールバーの余白をつかむと移動できます。(余白にカーソルを合わせて左ボタンクリックでドラッグ)</li>
         </ul>
       </div>
@@ -793,68 +740,16 @@
       </div>
     </section>
 
-
-    <section class="cta-box">
-      <h2>FlowInkを試す</h2>
-      <p>
-        必要なときにすぐ起動して、画面上にすぐ書ける。<br>
-        まずはダウンロードして、使い心地を試してみてください。
-      </p>
-      <a
-        class="btn"
-        href="https://github.com/msasa-alt/FlowInk/releases"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        ダウンロード
-      </a>
-      <h2>ダウンロード方法</h2>
-      <div class="guide">
-        <ol>
-          <li>ダウンロードボタンをクリックします</li>
-          <li>表示されたページの「Assets」（ダウンロード一覧）から以下のファイルをダウンロードしてください
-            <ul>
-              <li>FlowInk-Setup.exe（通常はこちら / インストーラー版）</li>
-              <li>FlowInk.zip（インストーラー版がダウンロードできない場合 / ZIP版）</li>
-            </ul>
-          </li>
-        </ol>
-        <p>
-        ※ インストーラー版はブラウザによりダウンロードがブロックされる場合があります。その時はZIP版をダウンロードしてください。<br>
-        ※ 「Source code」と書かれたZIPではありません。
-        </p>
-      </div>
-      <figure class="download-shot">
-        <a href="images/AssetsBox_with_annotation.png" target="_blank" rel="noopener noreferrer">
-          <img
-            src="images/AssetsBox_with_annotation.png"
-            alt="GitHub ReleasesのAssetsからFlowInkをダウンロードする場所の説明"
-          />
-        </a>
-        <figcaption>Assetsからインストーラー版またはZIP版をダウンロードします</figcaption>
-      </figure>
+    <section class="section">
       <h2>インストール方法</h2>
-      <h3>FlowInk-Setup.exe（インストーラー版）</h3>
-      <div class="guide">
-        <ol>
-          <li>(無事に)FlowInk-Setup.exeがダウンロードできた方は、ダブルクリックで実行してください。インストーラーが起動しますので、それに従ってインストールしてください</li>
-          <li>インストーラー実行時にWindowsのPC保護画面が表示される場合があります。その場合はPC保護画面の詳細リンクをクリックし、実行ボタンを押してください</li>
-        </ol>
-        <figure class="install-shot">
-          <a href="images/PC保護画面_説明追記.png" target="_blank" rel="noopener noreferrer">
-            <img
-              src="images/PC保護画面_説明追記.png"
-              alt="WindowsによってPCが保護されました画面の操作説明"
-            />
-          </a>
-          <figcaption>PC保護画面が表示された場合の操作</figcaption>
-        </figure>
-      </div>
-      <h3>FlowInk.zip(ZIP版)</h3>
-      <div class="guide">
-        <ol>
-          <li>ZIPファイルを右クリックし「すべて展開」より、展開されたファイル内のFlowInk.exeを実行してください</li>
-        </ol>
+      <p class="section-lead">
+        インストーラーを実行します。
+      </p>
+
+      <div class="steps">
+        <div class="step"><strong>1.</strong> FlowInk-Setup.exeをダウンロード</div>
+        <div class="step"><strong>2.</strong> FlowInk-Setup.exeを実行 「Windows によってPCが保護されました」の警告が出る場合は「詳細情報」ボタンを押して実行してください。※無名なソフトなのでマイクロソフトから警告されてしまいます。</div>
+        <div class="step"><strong>3.</strong> 画面に従ってインストール</div>
       </div>
     </section>
 
@@ -913,7 +808,31 @@
         </p>
       </div>
     </section>
-<section class="section">
+
+    <section class="cta-box">
+      <h2>FlowInkを試す</h2>
+      <p>
+        必要なときにすぐ起動して、画面上にすぐ書ける。<br>
+        まずはダウンロードして、使い心地を試してみてください。
+      </p>
+      <a
+        class="btn"
+        href="https://github.com/msasa-alt/FlowInk/releases/download/v1.1.0/FlowInk-Setup.exe"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        最新版をダウンロード
+      </a>
+    </section>
+
+    <section class="section">
+      <h2>今後の予定</h2>
+      <p>
+      2026.4.20: 現在のバージョンは1.1.0です。次のバージョン(1.2.0)では、Undo/Redoボタンの実装、英語対応を予定しています。
+      </p>
+    </section>
+
+    <section class="section">
       <h2>フィードバック・お問い合わせ</h2>
       <p class="section-lead">
         FlowInkの改善のため、ご意見・不具合報告・ご要望などをお待ちしています。
