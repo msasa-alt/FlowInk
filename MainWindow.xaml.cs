@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -124,7 +124,6 @@ public partial class MainWindow : Window
     private const double MinTextFontSize = 8.0;
     private const double MaxTextFontSize = 144.0;
     private const double TextMinWidth = 80.0;
-    private const double TextMaxWidth = 400.0;
     private const double TextPaddingX = 4.0;
     private const double TextPaddingY = 2.0;
 
@@ -3164,7 +3163,6 @@ public partial class MainWindow : Window
         var textBox = new TextBox
         {
             MinWidth = TextMinWidth,
-            MaxWidth = TextMaxWidth,
             FontFamily = CreateFontFamilySafe(_editingTextOriginalFontFamilyName ?? _currentTextFontFamilyName),
             FontSize = _editingTextOriginalFontSize ?? _currentTextFontSize,
             FontStyle = _editingTextOriginalFontStyle ?? _currentTextFontStyle,
@@ -3177,7 +3175,7 @@ public partial class MainWindow : Window
             Padding = new Thickness(TextPaddingX, TextPaddingY, TextPaddingX, TextPaddingY),
             AcceptsReturn = true,
             AcceptsTab = false,
-            TextWrapping = TextWrapping.Wrap,
+            TextWrapping = TextWrapping.NoWrap,
             VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled
         };
@@ -3289,7 +3287,6 @@ public partial class MainWindow : Window
 
         double width = maxLineWidth + 16.0;
         width = Math.Max(TextMinWidth, width);
-        width = Math.Min(TextMaxWidth, width);
 
         return width;
     }
@@ -3454,8 +3451,7 @@ public partial class MainWindow : Window
             FontStyle = fontStyle,
             FontWeight = fontWeight,
             Background = Brushes.Transparent,
-            TextWrapping = TextWrapping.Wrap,
-            MaxWidth = TextMaxWidth
+            TextWrapping = TextWrapping.NoWrap
         };
 
         var host = new Border
@@ -3465,8 +3461,7 @@ public partial class MainWindow : Window
             Child = textBlock,
             Focusable = false,
             IsHitTestVisible = true,
-            Cursor = Cursors.SizeAll,
-            MaxWidth = TextMaxWidth + (TextPaddingX * 2.0)
+            Cursor = Cursors.SizeAll
         };
 
         AttachTextElementHandlers(host);
