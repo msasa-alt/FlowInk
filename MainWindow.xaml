@@ -8,7 +8,7 @@
         AllowsTransparency="True"
         Background="Transparent"
         Topmost="True"
-        ShowInTaskbar="True"
+        ShowInTaskbar="False"
         WindowState="Maximized">
 
     <Window.Resources>

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -124,13 +124,18 @@ public partial class MainWindow : Window
     private const double MinTextFontSize = 8.0;
     private const double MaxTextFontSize = 144.0;
     private const double TextMinWidth = 80.0;
-    private const double TextMaxWidth = 400.0;
     private const double TextPaddingX = 4.0;
     private const double TextPaddingY = 2.0;
 
     private const int GWL_EXSTYLE = -20;
     private const int WS_EX_TRANSPARENT = 0x00000020;
     private const int WS_EX_LAYERED = 0x00080000;
+
+    private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+    private const uint SWP_NOSIZE = 0x0001;
+    private const uint SWP_NOMOVE = 0x0002;
+    private const uint SWP_NOACTIVATE = 0x0010;
+    private const uint SWP_SHOWWINDOW = 0x0040;
 
     private const int WM_HOTKEY = 0x0312;
     private const int WM_NCHITTEST = 0x0084;
@@ -1246,6 +1251,13 @@ public partial class MainWindow : Window
         }
 
         SetWindowLongPtr(hwnd, GWL_EXSTYLE, new IntPtr(exStyle));
+        EnsureTopmost(hwnd);
+    }
+
+    private void EnsureTopmost(IntPtr hwnd)
+    {
+        Topmost = true;
+        SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
     }
 
     private bool IsCursorInsideToolbarPanel()
@@ -2553,6 +2565,11 @@ public partial class MainWindow : Window
 
         if (_currentTool == ToolMode.Text)
         {
+            if (IsClickOnActiveTextBox(e.OriginalSource))
+            {
+                return;
+            }
+
             if (IsClickOnCommittedTextElement(e.OriginalSource))
             {
                 return;
@@ -2632,6 +2649,28 @@ public partial class MainWindow : Window
 
         DrawingCanvas.CaptureMouse();
         e.Handled = true;
+    }
+
+    private bool IsClickOnActiveTextBox(object originalSource)
+    {
+        if (_activeTextBox == null)
+        {
+            return false;
+        }
+
+        DependencyObject? current = originalSource as DependencyObject;
+
+        while (current != null)
+        {
+            if (ReferenceEquals(current, _activeTextBox))
+            {
+                return true;
+            }
+
+            current = VisualTreeHelper.GetParent(current);
+        }
+
+        return false;
     }
 
     private bool IsClickOnCommittedTextElement(object originalSource)
@@ -3164,7 +3203,6 @@ public partial class MainWindow : Window
         var textBox = new TextBox
         {
             MinWidth = TextMinWidth,
-            MaxWidth = TextMaxWidth,
             FontFamily = CreateFontFamilySafe(_editingTextOriginalFontFamilyName ?? _currentTextFontFamilyName),
             FontSize = _editingTextOriginalFontSize ?? _currentTextFontSize,
             FontStyle = _editingTextOriginalFontStyle ?? _currentTextFontStyle,
@@ -3177,7 +3215,7 @@ public partial class MainWindow : Window
             Padding = new Thickness(TextPaddingX, TextPaddingY, TextPaddingX, TextPaddingY),
             AcceptsReturn = true,
             AcceptsTab = false,
-            TextWrapping = TextWrapping.Wrap,
+            TextWrapping = TextWrapping.NoWrap,
             VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled
         };
@@ -3289,7 +3327,6 @@ public partial class MainWindow : Window
 
         double width = maxLineWidth + 16.0;
         width = Math.Max(TextMinWidth, width);
-        width = Math.Min(TextMaxWidth, width);
 
         return width;
     }
@@ -3454,8 +3491,7 @@ public partial class MainWindow : Window
             FontStyle = fontStyle,
             FontWeight = fontWeight,
             Background = Brushes.Transparent,
-            TextWrapping = TextWrapping.Wrap,
-            MaxWidth = TextMaxWidth
+            TextWrapping = TextWrapping.NoWrap
         };
 
         var host = new Border
@@ -3465,8 +3501,7 @@ public partial class MainWindow : Window
             Child = textBlock,
             Focusable = false,
             IsHitTestVisible = true,
-            Cursor = Cursors.SizeAll,
-            MaxWidth = TextMaxWidth + (TextPaddingX * 2.0)
+            Cursor = Cursors.SizeAll
         };
 
         AttachTextElementHandlers(host);
@@ -4583,6 +4618,9 @@ public partial class MainWindow : Window
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
 
     [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr", SetLastError = true)]
     private static extern IntPtr GetWindowLongPtr64(IntPtr hWnd, int nIndex);
