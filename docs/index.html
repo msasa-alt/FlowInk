@@ -254,6 +254,30 @@
       color: var(--muted);
     }
 
+    .unzip-shot {
+      margin: 24px auto;
+      text-align: center;
+    }
+
+    .unzip-shot a {
+      display: inline-block;
+      cursor: zoom-in;
+    }
+
+    .unzip-shot img {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      border-radius: 14px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .unzip-shot figcaption {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--muted);
+    }    
+
     .section {
       margin-top: 72px;
     }
@@ -848,11 +872,30 @@
           </a>
           <figcaption>PC保護画面が表示された場合の操作</figcaption>
         </figure>
-      </div>
+      </div><br>
       <h3>FlowInk.zip(ZIP版)</h3>
       <div class="guide">
         <ol>
           <li>ZIPファイルを右クリックし「すべて展開」より、展開されたファイル内のFlowInk.exeを実行してください</li>
+            <figure class="unzip-shot">
+              <a href="images/unziped_ja.png" target="_blank" rel="noopener noreferrer">
+                <img
+                  src="images/unziped_ja.png"
+                  alt="ZIP解凍後に実行するファイル"
+                />
+              </a>
+              <figcaption>ZIP解凍後に実行するファイル</figcaption>
+            </figure>
+          <li>初回のFlowInk.exe実行時にWindowsのPC保護画面が表示される場合があります。その場合はPC保護画面の詳細リンクをクリックし、実行ボタンを押してください</li>
+            <figure class="install-shot">
+              <a href="images/PC保護画面_説明追記.png" target="_blank" rel="noopener noreferrer">
+                <img
+                  src="images/PC保護画面_説明追記.png"
+                  alt="WindowsによってPCが保護されました画面の操作説明"
+                />
+              </a>
+              <figcaption>PC保護画面が表示された場合の操作</figcaption>
+            </figure>
         </ol>
       </div>
     </section>
