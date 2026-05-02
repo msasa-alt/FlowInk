@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -4430,12 +4430,22 @@ public partial class MainWindow : Window
 
         var selectItem = new MenuItem
         {
-            Header = SR.ResourceManager.GetString("Select", System.Globalization.CultureInfo.CurrentUICulture) ?? "Select"
+            Header = SR.Select
         };
         selectItem.Click += (_, _) => UpdateShapeSelectionAdorner();
 
-        var editItem = new MenuItem { Header = SR.Edit };
-        editItem.Click += (_, _) => ApplyCurrentStyleToSelectedShape();
+        var applyCurrentStyleItem = new MenuItem
+        {
+            Header = SR.ApplyCurrentStyle
+        };
+        applyCurrentStyleItem.Click += (_, _) => ApplyCurrentStyleToSelectedShape();
+
+        var restoreFillItem = new MenuItem
+        {
+            Header = SR.RestoreFill,
+            IsEnabled = CanRestoreSelectedShapeFill()
+        };
+        restoreFillItem.Click += (_, _) => RestoreSelectedShapeFill();
 
         var deleteItem = new MenuItem { Header = SR.Delete };
         deleteItem.Click += (_, _) => DeleteSelectedShape();
@@ -4446,7 +4456,8 @@ public partial class MainWindow : Window
             Placement = PlacementMode.MousePoint
         };
         menu.Items.Add(selectItem);
-        menu.Items.Add(editItem);
+        menu.Items.Add(applyCurrentStyleItem);
+        menu.Items.Add(restoreFillItem);
         menu.Items.Add(deleteItem);
         menu.IsOpen = true;
     }
@@ -4485,6 +4496,29 @@ public partial class MainWindow : Window
         UpdateShapeSelectionAdorner();
         return true;
     }
+
+    private bool CanRestoreSelectedShapeFill()
+    {
+        return _selectedFillShape != null
+            && DrawingCanvas.Children.Contains(_selectedFillShape)
+            && _selectedFillShape.Clip != null;
+    }
+
+    private bool RestoreSelectedShapeFill()
+    {
+        if (!CanRestoreSelectedShapeFill() || _selectedFillShape == null)
+        {
+            return false;
+        }
+
+        Geometry? beforeClip = CloneGeometry(_selectedFillShape.Clip);
+        _selectedFillShape.Clip = null;
+
+        PushHistory(new ShapeClipChangeAction(_selectedFillShape, beforeClip, null));
+        UpdateShapeSelectionAdorner();
+        return true;
+    }
+
 
     private bool DeleteSelectedShape()
     {

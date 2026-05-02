@@ -357,4 +357,10 @@
   <data name="Select" xml:space="preserve">
     <value>Select</value>
   </data>
+  <data name="ApplyCurrentStyle" xml:space="preserve">
+    <value>Apply Current Style</value>
+  </data>
+  <data name="RestoreFill" xml:space="preserve">
+    <value>Restore Fill</value>
+  </data>
 </root>

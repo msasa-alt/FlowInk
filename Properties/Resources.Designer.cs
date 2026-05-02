@@ -97,6 +97,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   Apply Current Style に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ApplyCurrentStyle {
+            get {
+                return ResourceManager.GetString("ApplyCurrentStyle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   FlowInk に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string AppName {
@@ -624,6 +633,15 @@ namespace FlowInk.Properties {
         public static string RectangleNotFilledToolTip {
             get {
                 return ResourceManager.GetString("RectangleNotFilledToolTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Restore Fill に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string RestoreFill {
+            get {
+                return ResourceManager.GetString("RestoreFill", resourceCulture);
             }
         }
         
