@@ -92,6 +92,7 @@ public partial class MainWindow : Window
     private bool _isEraserGestureActive;
     private readonly List<Stroke> _eraserGestureAddedStrokes = new();
     private readonly List<Stroke> _eraserGestureRemovedStrokes = new();
+    private readonly List<ShapeClipChangeEntry> _eraserGestureShapeClipChanges = new();
     private Point _textDragCommittedStartPoint;
 
     private Border? _draggingTextElement;
@@ -367,6 +368,65 @@ public partial class MainWindow : Window
         public void Redo(MainWindow window)
         {
             window.AddCanvasElement(_element, _index);
+        }
+    }
+
+    private sealed class CanvasElementRemoveAction : IUndoableAction
+    {
+        private readonly UIElement _element;
+        private readonly int _index;
+
+        public CanvasElementRemoveAction(UIElement element, int index)
+        {
+            _element = element;
+            _index = index;
+        }
+
+        public void Undo(MainWindow window)
+        {
+            window.AddCanvasElement(_element, _index);
+        }
+
+        public void Redo(MainWindow window)
+        {
+            window.RemoveCanvasElementIfPresent(_element);
+        }
+    }
+
+    private sealed class ShapeClipChangeEntry
+    {
+        public ShapeClipChangeEntry(WpfShape shape, Geometry? originalClip)
+        {
+            Shape = shape;
+            OriginalClip = CloneGeometry(originalClip);
+        }
+
+        public WpfShape Shape { get; }
+        public Geometry? OriginalClip { get; }
+        public Geometry? LatestClip { get; set; }
+    }
+
+    private sealed class ShapeClipChangeAction : IUndoableAction
+    {
+        private readonly WpfShape _shape;
+        private readonly Geometry? _before;
+        private readonly Geometry? _after;
+
+        public ShapeClipChangeAction(WpfShape shape, Geometry? before, Geometry? after)
+        {
+            _shape = shape;
+            _before = CloneGeometry(before);
+            _after = CloneGeometry(after);
+        }
+
+        public void Undo(MainWindow window)
+        {
+            _shape.Clip = CloneGeometry(_before);
+        }
+
+        public void Redo(MainWindow window)
+        {
+            _shape.Clip = CloneGeometry(_after);
         }
     }
 
@@ -699,6 +759,7 @@ public partial class MainWindow : Window
         _isEraserGestureActive = true;
         _eraserGestureAddedStrokes.Clear();
         _eraserGestureRemovedStrokes.Clear();
+        _eraserGestureShapeClipChanges.Clear();
     }
 
     private void CompleteEraserGesture()
@@ -710,23 +771,192 @@ public partial class MainWindow : Window
 
         _isEraserGestureActive = false;
 
-        if (_eraserGestureAddedStrokes.Count == 0 && _eraserGestureRemovedStrokes.Count == 0)
+        if (_eraserGestureAddedStrokes.Count == 0
+            && _eraserGestureRemovedStrokes.Count == 0
+            && _eraserGestureShapeClipChanges.Count == 0)
         {
             _eraserGestureAddedStrokes.Clear();
             _eraserGestureRemovedStrokes.Clear();
+            _eraserGestureShapeClipChanges.Clear();
             _currentInteractionState = InteractionState.None;
             return;
         }
 
-        PushHistory(new StrokeCollectionAction(_eraserGestureAddedStrokes, _eraserGestureRemovedStrokes));
+        var actions = new List<IUndoableAction>();
+
+        if (_eraserGestureAddedStrokes.Count > 0 || _eraserGestureRemovedStrokes.Count > 0)
+        {
+            actions.Add(new StrokeCollectionAction(_eraserGestureAddedStrokes, _eraserGestureRemovedStrokes));
+        }
+
+        foreach (ShapeClipChangeEntry entry in _eraserGestureShapeClipChanges)
+        {
+            actions.Add(new ShapeClipChangeAction(entry.Shape, entry.OriginalClip, entry.LatestClip));
+        }
+
+        if (actions.Count == 1)
+        {
+            PushHistory(actions[0]);
+        }
+        else
+        {
+            PushHistory(new CompositeAction(actions));
+        }
+
         _eraserGestureAddedStrokes.Clear();
         _eraserGestureRemovedStrokes.Clear();
+        _eraserGestureShapeClipChanges.Clear();
         _currentInteractionState = InteractionState.None;
     }
 
     private void CompleteEraserGestureDeferred()
     {
         Dispatcher.InvokeAsync(CompleteEraserGesture, DispatcherPriority.Background);
+    }
+
+    private void EraseCanvasElementsAtPoint(Point point)
+    {
+        double radius = GetFillEraserRadius();
+
+        for (int i = DrawingCanvas.Children.Count - 1; i >= 0; i--)
+        {
+            UIElement child = DrawingCanvas.Children[i];
+
+            if (child is not WpfShape shape || !IsErasableFillShapeNearPoint(shape, point, radius))
+            {
+                continue;
+            }
+
+            ApplyFillShapeEraserAtPoint(shape, point, radius);
+        }
+    }
+
+    private double GetFillEraserRadius()
+    {
+        return Math.Max(2.0, _currentPenWidth / 2.0);
+    }
+
+    private void ApplyFillShapeEraserAtPoint(WpfShape shape, Point point, double radius)
+    {
+        ShapeClipChangeEntry entry = GetOrCreateShapeClipChangeEntry(shape);
+        Geometry visibleGeometry = CreateCurrentVisibleGeometry(shape);
+        Point localPoint = ToShapeLocalPoint(shape, point);
+        var eraserGeometry = new EllipseGeometry(localPoint, radius, radius);
+        var clippedGeometry = new CombinedGeometry(GeometryCombineMode.Exclude, visibleGeometry, eraserGeometry);
+
+        shape.Clip = clippedGeometry;
+        entry.LatestClip = CloneGeometry(clippedGeometry);
+    }
+
+    private ShapeClipChangeEntry GetOrCreateShapeClipChangeEntry(WpfShape shape)
+    {
+        foreach (ShapeClipChangeEntry entry in _eraserGestureShapeClipChanges)
+        {
+            if (ReferenceEquals(entry.Shape, shape))
+            {
+                return entry;
+            }
+        }
+
+        var newEntry = new ShapeClipChangeEntry(shape, shape.Clip);
+        _eraserGestureShapeClipChanges.Add(newEntry);
+        return newEntry;
+    }
+
+    private Geometry CreateCurrentVisibleGeometry(WpfShape shape)
+    {
+        if (shape.Clip != null)
+        {
+            return shape.Clip.CloneCurrentValue();
+        }
+
+        return CreateFullShapeGeometry(shape);
+    }
+
+    private static Geometry CreateFullShapeGeometry(WpfShape shape)
+    {
+        double width = Math.Max(0.0, shape.Width);
+        double height = Math.Max(0.0, shape.Height);
+
+        if (shape is WpfEllipse)
+        {
+            return new EllipseGeometry(new Rect(0, 0, width, height));
+        }
+
+        return new RectangleGeometry(new Rect(0, 0, width, height));
+    }
+
+    private static Geometry? CloneGeometry(Geometry? geometry)
+    {
+        return geometry?.CloneCurrentValue();
+    }
+
+    private static bool IsErasableFillShapeNearPoint(WpfShape shape, Point point, double radius)
+    {
+        if (shape.Fill == null || shape.StrokeThickness != 0)
+        {
+            return false;
+        }
+
+        Rect bounds = GetShapeBounds(shape);
+        bounds.Inflate(radius, radius);
+
+        if (!bounds.Contains(point))
+        {
+            return false;
+        }
+
+        if (shape is WpfEllipse ellipse)
+        {
+            return IsPointNearEllipse(ellipse, point, radius);
+        }
+
+        return true;
+    }
+
+    private static Rect GetShapeBounds(WpfShape shape)
+    {
+        double left = InkCanvas.GetLeft(shape);
+        double top = InkCanvas.GetTop(shape);
+
+        if (double.IsNaN(left))
+        {
+            left = 0;
+        }
+
+        if (double.IsNaN(top))
+        {
+            top = 0;
+        }
+
+        return new Rect(left, top, Math.Max(0.0, shape.Width), Math.Max(0.0, shape.Height));
+    }
+
+    private static Point ToShapeLocalPoint(WpfShape shape, Point point)
+    {
+        Rect bounds = GetShapeBounds(shape);
+        return new Point(point.X - bounds.Left, point.Y - bounds.Top);
+    }
+
+    private static bool IsPointNearEllipse(WpfEllipse ellipse, Point point, double radius)
+    {
+        Rect bounds = GetShapeBounds(ellipse);
+        double width = bounds.Width;
+        double height = bounds.Height;
+
+        if (width <= 0 || height <= 0)
+        {
+            return false;
+        }
+
+        double radiusX = (width / 2.0) + radius;
+        double radiusY = (height / 2.0) + radius;
+        double centerX = bounds.Left + (width / 2.0);
+        double centerY = bounds.Top + (height / 2.0);
+        double normalizedX = (point.X - centerX) / radiusX;
+        double normalizedY = (point.Y - centerY) / radiusY;
+
+        return (normalizedX * normalizedX) + (normalizedY * normalizedY) <= 1.0;
     }
 
     private void PushHistory(IUndoableAction action)
@@ -2623,6 +2853,7 @@ public partial class MainWindow : Window
             CommitActiveTextInput();
             BeginEraserGesture();
             _currentInteractionState = InteractionState.Erasing;
+            EraseCanvasElementsAtPoint(e.GetPosition(DrawingCanvas));
             return;
         }
 
@@ -2710,6 +2941,7 @@ public partial class MainWindow : Window
 
         if (_currentTool == ToolMode.Eraser && _isEraserGestureActive)
         {
+            EraseCanvasElementsAtPoint(e.GetPosition(DrawingCanvas));
             return;
         }
 
