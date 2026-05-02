@@ -61,7 +61,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   アバウト に類似しているローカライズされた文字列を検索します。
+        ///   About に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string About {
             get {
@@ -70,7 +70,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   軽量なオーバーレイ描画ツール に類似しているローカライズされた文字列を検索します。
+        ///   Lightweight overlay drawing tool に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string AboutDescription {
             get {
@@ -79,7 +79,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   FlowInk について に類似しているローカライズされた文字列を検索します。
+        ///   About FlowInk に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string AboutDialogTitle {
             get {
@@ -88,7 +88,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   FlowInkについて に類似しているローカライズされた文字列を検索します。
+        ///   About FlowInk に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string AboutWindowTitle {
             get {
@@ -106,7 +106,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   キャンセル に類似しているローカライズされた文字列を検索します。
+        ///   Cancel に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Cancel {
             get {
@@ -115,7 +115,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   色を選ぶ に類似しているローカライズされた文字列を検索します。
+        ///   Choose Color... に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string ChooseColor {
             get {
@@ -124,7 +124,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   円（塗りつぶしON {0}% / 右クリックで設定） に類似しているローカライズされた文字列を検索します。
+        ///   Circle (Fill ON {0}% / Right-click for settings) に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string CircleFilledToolTipFormat {
             get {
@@ -133,7 +133,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   円（塗りつぶしOFF / 右クリックで設定） に類似しているローカライズされた文字列を検索します。
+        ///   Circle (Fill OFF / Right-click for settings) に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string CircleNotFilledToolTip {
             get {
@@ -142,7 +142,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   クリア に類似しているローカライズされた文字列を検索します。
+        ///   Clear に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Clear {
             get {
@@ -151,7 +151,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   クリック透過 に類似しているローカライズされた文字列を検索します。
+        ///   ClickThrough に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string ClickThrough {
             get {
@@ -160,7 +160,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   描画OFF。描画ONにするには、ツールバーのOFFボタンかホットキーを押してください。 に類似しているローカライズされた文字列を検索します。
+        ///   Drawing is OFF. Turn it ON using the toolbar button or the hotkey. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string ClickThroughOffToast {
             get {
@@ -169,7 +169,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   色 に類似しているローカライズされた文字列を検索します。
+        ///   Color に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Color {
             get {
@@ -196,7 +196,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   カラーピッカー に類似しているローカライズされた文字列を検索します。
+        ///   Color Picker に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string ColorPicker {
             get {
@@ -205,7 +205,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   色（クリックでプリセット色、ダブルクリックで現在色を編集） に類似しているローカライズされた文字列を検索します。
+        ///   Color (Click to PresetColors, Double-click to edit current color) に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string ColorToolTip {
             get {
@@ -214,7 +214,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   現在の設定 に類似しているローカライズされた文字列を検索します。
+        ///   CurrentSettings に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string CurrentSettings {
             get {
@@ -223,7 +223,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   現在: 4 に類似しているローカライズされた文字列を検索します。
+        ///   Current: 4 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string CurrentValueDefault {
             get {
@@ -232,7 +232,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   現在: {0} に類似しているローカライズされた文字列を検索します。
+        ///   Current: {0} に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string CurrentValueFormat {
             get {
@@ -241,7 +241,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   削除 に類似しているローカライズされた文字列を検索します。
+        ///   Delete に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Delete {
             get {
@@ -250,7 +250,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   描画OFF。OFFボタンかホットキー({0})でONにできます。 に類似しているローカライズされた文字列を検索します。
+        ///   Drawing is OFF. Press the OFF button or use the hotkey ({0}) to turn it ON. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string DrawingDisabledToast {
             get {
@@ -259,7 +259,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   描画ON に類似しているローカライズされた文字列を検索します。
+        ///   Drawing is ON に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string DrawingEnabledToast {
             get {
@@ -286,7 +286,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   描画ON/OFF切替 に類似しているローカライズされた文字列を検索します。
+        ///   Toggle drawing ON/OFF に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string DrawingToolTip {
             get {
@@ -295,7 +295,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   編集 に類似しているローカライズされた文字列を検索します。
+        ///   Edit に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Edit {
             get {
@@ -304,7 +304,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   消しゴム に類似しているローカライズされた文字列を検索します。
+        ///   Eraser に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Eraser {
             get {
@@ -313,7 +313,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   終了 に類似しているローカライズされた文字列を検索します。
+        ///   Exit に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Exit {
             get {
@@ -322,7 +322,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   塗りつぶし に類似しているローカライズされた文字列を検索します。
+        ///   Fill に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Fill {
             get {
@@ -331,7 +331,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   フォント に類似しているローカライズされた文字列を検索します。
+        ///   Font に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Font {
             get {
@@ -340,7 +340,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   フォントサイズ に類似しているローカライズされた文字列を検索します。
+        ///   Font Size に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string FontSize {
             get {
@@ -349,7 +349,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   グローバルホットキーを {0} に変更しました。 に類似しているローカライズされた文字列を検索します。
+        ///   The global hotkey has been changed to {0}. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string GlobalHotkeyChangedFormat {
             get {
@@ -358,7 +358,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   グローバルホットキー {0} の登録に失敗しました。\n他のアプリで使われている可能性があります。 に類似しているローカライズされた文字列を検索します。
+        ///   Failed to register the global hotkey {0}.\nIt may already be in use by another application. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string GlobalHotkeyRegisterFailedFormat {
             get {
@@ -367,7 +367,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   非表示 に類似しているローカライズされた文字列を検索します。
+        ///   Hide に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Hide {
             get {
@@ -376,7 +376,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   ホットキー に類似しているローカライズされた文字列を検索します。
+        ///   Hotkey に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Hotkey {
             get {
@@ -439,7 +439,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   描画OFF に類似しているローカライズされた文字列を検索します。
+        ///   Drawing OFF に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string NotifyIconStatusOff {
             get {
@@ -448,7 +448,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   描画ON に類似しているローカライズされた文字列を検索します。
+        ///   Drawing ON に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string NotifyIconStatusOn {
             get {
@@ -484,7 +484,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   不透明度 に類似しているローカライズされた文字列を検索します。
+        ///   Opacity に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Opacity {
             get {
@@ -493,7 +493,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   ブラウザを開けませんでした。 に類似しているローカライズされた文字列を検索します。
+        ///   Could not open the browser. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string OpenBrowserFailed {
             get {
@@ -502,7 +502,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   ペン に類似しているローカライズされた文字列を検索します。
+        ///   Pen に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Pen {
             get {
@@ -511,7 +511,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   ペン（右クリック: 線幅設定） に類似しているローカライズされた文字列を検索します。
+        ///   Pen (Right-click: Pen width settings) に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string PenToolTip {
             get {
@@ -520,7 +520,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   線幅 に類似しているローカライズされた文字列を検索します。
+        ///   Pen Width に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string PenWidth {
             get {
@@ -529,7 +529,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   ペンの太さ に類似しているローカライズされた文字列を検索します。
+        ///   Pen Width に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string PenWidthDialogTitle {
             get {
@@ -556,7 +556,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   クリック: 選択 / ダブルクリック: 編集 に類似しているローカライズされた文字列を検索します。
+        ///   Click: Select / Double-click: Edit に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string PenWidthPresetItemToolTipSuffix {
             get {
@@ -565,7 +565,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   線の太さを選択 に類似しているローカライズされた文字列を検索します。
+        ///   Select pen width に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string PenWidthSelectLabel {
             get {
@@ -574,7 +574,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   クリック: 選択 / ダブルクリック: 編集 に類似しているローカライズされた文字列を検索します。
+        ///   Click: Select / Double-click: Edit に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string PresetColorItemToolTipSuffix {
             get {
@@ -583,7 +583,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   プリセットカラー に類似しているローカライズされた文字列を検索します。
+        ///   Preset Colors に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string PresetColors {
             get {
@@ -592,7 +592,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   最近使った色 に類似しているローカライズされた文字列を検索します。
+        ///   Recent Colors に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string RecentColors {
             get {
@@ -601,7 +601,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   四角 に類似しているローカライズされた文字列を検索します。
+        ///   Rectangle に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Rectangle {
             get {
@@ -610,7 +610,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   四角形（塗りつぶしON {0}% / 右クリックで設定） に類似しているローカライズされた文字列を検索します。
+        ///   Rectangle (Fill ON {0}% / Right-click for settings) に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string RectangleFilledToolTipFormat {
             get {
@@ -619,7 +619,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   四角形（塗りつぶしOFF / 右クリックで設定） に類似しているローカライズされた文字列を検索します。
+        ///   Rectangle (Fill OFF / Right-click for settings) に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string RectangleNotFilledToolTip {
             get {
@@ -628,7 +628,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   セーブ に類似しているローカライズされた文字列を検索します。
+        ///   Save に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Save {
             get {
@@ -637,7 +637,16 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   修飾キーを1つ以上選択してください。 に類似しているローカライズされた文字列を検索します。
+        ///   Select に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Select {
+            get {
+                return ResourceManager.GetString("Select", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Please select at least one modifier key. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string SelectAtLeastOneModifier {
             get {
@@ -646,7 +655,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   線の太さを選択 に類似しているローカライズされた文字列を検索します。
+        ///   Select Line Thickness に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string SelectLineThickness {
             get {
@@ -655,7 +664,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   設定 に類似しているローカライズされた文字列を検索します。
+        ///   Settings に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string SettingsToolTip {
             get {
@@ -664,7 +673,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   図形 に類似しているローカライズされた文字列を検索します。
+        ///   Shape に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Shape {
             get {
@@ -673,7 +682,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   テキスト に類似しているローカライズされた文字列を検索します。
+        ///   Text に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Text {
             get {
@@ -682,7 +691,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   テキスト（ダブルクリックでフォント設定） に類似しているローカライズされた文字列を検索します。
+        ///   Text (Double-click for font settings) に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string TextToolTip {
             get {
@@ -691,7 +700,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   透明度 に類似しているローカライズされた文字列を検索します。
+        ///   Transparency に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Transparency {
             get {
@@ -700,7 +709,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   透明度: {0}% に類似しているローカライズされた文字列を検索します。
+        ///   Transparency: {0}% に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string TransparencyFormat {
             get {
@@ -727,7 +736,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   描画OFFにする に類似しているローカライズされた文字列を検索します。
+        ///   Turn Drawing OFF に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string TrayMenuTurnDrawingOff {
             get {
@@ -736,7 +745,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   描画ONにする に類似しているローカライズされた文字列を検索します。
+        ///   Turn Drawing ON に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string TrayMenuTurnDrawingOn {
             get {
@@ -745,7 +754,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   左クリック: Undo / 右クリック: Redo に類似しているローカライズされた文字列を検索します。
+        ///   Left click: Undo / Right click: Redo に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string UndoRedoToolTip {
             get {
@@ -754,7 +763,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   バージョン に類似しているローカライズされた文字列を検索します。
+        ///   Version に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Version {
             get {

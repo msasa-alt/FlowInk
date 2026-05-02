@@ -354,4 +354,7 @@
   <data name="UndoRedoToolTip" xml:space="preserve">
     <value>左クリック: Undo / 右クリック: Redo</value>
   </data>
+  <data name="Select" xml:space="preserve">
+    <value>選択</value>
+  </data>
 </root>

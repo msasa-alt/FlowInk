@@ -4428,10 +4428,16 @@ public partial class MainWindow : Window
             return;
         }
 
-        var editItem = new MenuItem { Header = "Edit" };
+        var selectItem = new MenuItem
+        {
+            Header = SR.ResourceManager.GetString("Select", System.Globalization.CultureInfo.CurrentUICulture) ?? "Select"
+        };
+        selectItem.Click += (_, _) => UpdateShapeSelectionAdorner();
+
+        var editItem = new MenuItem { Header = SR.Edit };
         editItem.Click += (_, _) => ApplyCurrentStyleToSelectedShape();
 
-        var deleteItem = new MenuItem { Header = "Delete" };
+        var deleteItem = new MenuItem { Header = SR.Delete };
         deleteItem.Click += (_, _) => DeleteSelectedShape();
 
         var menu = new ContextMenu
@@ -4439,6 +4445,7 @@ public partial class MainWindow : Window
             PlacementTarget = DrawingCanvas,
             Placement = PlacementMode.MousePoint
         };
+        menu.Items.Add(selectItem);
         menu.Items.Add(editItem);
         menu.Items.Add(deleteItem);
         menu.IsOpen = true;
