@@ -99,12 +99,13 @@ public partial class MainWindow : Window
     private readonly Dictionary<Stroke, ShapeKind> _shapeOutlineKinds = new();
     private WpfShape? _selectedFillShape;
     private Stroke? _selectedShapeOutlineStroke;
+    private readonly List<Stroke> _selectedShapeOutlineStrokes = new();
     private WpfRectangle? _shapeSelectionAdorner;
     private bool _isDraggingSelectedShape;
     private bool _hasSelectedShapeDragMoved;
     private Point _shapeDragStartMousePoint;
     private Rect? _shapeDragStartFillBounds;
-    private StylusPointCollection? _shapeDragStartStrokePoints;
+    private readonly Dictionary<Stroke, StylusPointCollection> _shapeDragStartOutlineStrokePoints = new();
     private Point _textDragCommittedStartPoint;
 
     private Border? _draggingTextElement;
@@ -449,29 +450,69 @@ public partial class MainWindow : Window
         }
     }
 
+    private sealed class RemovedShapeOutlineInfo
+    {
+        public RemovedShapeOutlineInfo(Stroke stroke, ShapeKind kind, WpfShape? fillShape)
+        {
+            Stroke = stroke;
+            Kind = kind;
+            FillShape = fillShape;
+            Bounds = GetStrokeBounds(stroke);
+            Tolerance = GetStrokeHitTolerance(stroke);
+        }
+
+        public Stroke Stroke { get; }
+        public ShapeKind Kind { get; }
+        public WpfShape? FillShape { get; }
+        public Rect Bounds { get; }
+        public double Tolerance { get; }
+    }
+
+    private sealed class ShapeStrokeMoveEntry
+    {
+        public ShapeStrokeMoveEntry(Stroke stroke, StylusPointCollection? beforePoints, StylusPointCollection? afterPoints)
+        {
+            Stroke = stroke;
+            BeforePoints = CloneStylusPoints(beforePoints);
+            AfterPoints = CloneStylusPoints(afterPoints);
+        }
+
+        public Stroke Stroke { get; }
+        public StylusPointCollection? BeforePoints { get; }
+        public StylusPointCollection? AfterPoints { get; }
+    }
+
+    private sealed class ShapeStrokeStyleEntry
+    {
+        public ShapeStrokeStyleEntry(Stroke stroke, DrawingAttributes? beforeAttributes, DrawingAttributes? afterAttributes)
+        {
+            Stroke = stroke;
+            BeforeAttributes = beforeAttributes?.Clone();
+            AfterAttributes = afterAttributes?.Clone();
+        }
+
+        public Stroke Stroke { get; }
+        public DrawingAttributes? BeforeAttributes { get; }
+        public DrawingAttributes? AfterAttributes { get; }
+    }
+
     private sealed class ShapeMoveAction : IUndoableAction
     {
         private readonly WpfShape? _fillShape;
         private readonly Rect? _beforeFillBounds;
         private readonly Rect? _afterFillBounds;
-        private readonly Stroke? _outlineStroke;
-        private readonly StylusPointCollection? _beforeStrokePoints;
-        private readonly StylusPointCollection? _afterStrokePoints;
+        private readonly List<ShapeStrokeMoveEntry> _outlineStrokeMoves;
 
         public ShapeMoveAction(
             WpfShape? fillShape,
             Rect? beforeFillBounds,
             Rect? afterFillBounds,
-            Stroke? outlineStroke,
-            StylusPointCollection? beforeStrokePoints,
-            StylusPointCollection? afterStrokePoints)
+            IEnumerable<ShapeStrokeMoveEntry> outlineStrokeMoves)
         {
             _fillShape = fillShape;
             _beforeFillBounds = beforeFillBounds;
             _afterFillBounds = afterFillBounds;
-            _outlineStroke = outlineStroke;
-            _beforeStrokePoints = CloneStylusPoints(beforeStrokePoints);
-            _afterStrokePoints = CloneStylusPoints(afterStrokePoints);
+            _outlineStrokeMoves = new List<ShapeStrokeMoveEntry>(outlineStrokeMoves);
         }
 
         public void Undo(MainWindow window)
@@ -481,9 +522,12 @@ public partial class MainWindow : Window
                 SetShapeBounds(_fillShape, _beforeFillBounds.Value);
             }
 
-            if (_outlineStroke != null && _beforeStrokePoints != null)
+            foreach (ShapeStrokeMoveEntry entry in _outlineStrokeMoves)
             {
-                SetStrokeStylusPoints(_outlineStroke, _beforeStrokePoints);
+                if (entry.BeforePoints != null)
+                {
+                    SetStrokeStylusPoints(entry.Stroke, entry.BeforePoints);
+                }
             }
 
             window.UpdateShapeSelectionAdorner();
@@ -496,9 +540,12 @@ public partial class MainWindow : Window
                 SetShapeBounds(_fillShape, _afterFillBounds.Value);
             }
 
-            if (_outlineStroke != null && _afterStrokePoints != null)
+            foreach (ShapeStrokeMoveEntry entry in _outlineStrokeMoves)
             {
-                SetStrokeStylusPoints(_outlineStroke, _afterStrokePoints);
+                if (entry.AfterPoints != null)
+                {
+                    SetStrokeStylusPoints(entry.Stroke, entry.AfterPoints);
+                }
             }
 
             window.UpdateShapeSelectionAdorner();
@@ -510,24 +557,18 @@ public partial class MainWindow : Window
         private readonly WpfShape? _fillShape;
         private readonly Brush? _beforeFill;
         private readonly Brush? _afterFill;
-        private readonly Stroke? _outlineStroke;
-        private readonly DrawingAttributes? _beforeOutlineAttributes;
-        private readonly DrawingAttributes? _afterOutlineAttributes;
+        private readonly List<ShapeStrokeStyleEntry> _outlineStrokeStyles;
 
         public ShapeStyleAction(
             WpfShape? fillShape,
             Brush? beforeFill,
             Brush? afterFill,
-            Stroke? outlineStroke,
-            DrawingAttributes? beforeOutlineAttributes,
-            DrawingAttributes? afterOutlineAttributes)
+            IEnumerable<ShapeStrokeStyleEntry> outlineStrokeStyles)
         {
             _fillShape = fillShape;
             _beforeFill = CloneBrush(beforeFill);
             _afterFill = CloneBrush(afterFill);
-            _outlineStroke = outlineStroke;
-            _beforeOutlineAttributes = beforeOutlineAttributes?.Clone();
-            _afterOutlineAttributes = afterOutlineAttributes?.Clone();
+            _outlineStrokeStyles = new List<ShapeStrokeStyleEntry>(outlineStrokeStyles);
         }
 
         public void Undo(MainWindow window)
@@ -537,10 +578,15 @@ public partial class MainWindow : Window
                 _fillShape.Fill = CloneBrush(_beforeFill);
             }
 
-            if (_outlineStroke != null && _beforeOutlineAttributes != null)
+            foreach (ShapeStrokeStyleEntry entry in _outlineStrokeStyles)
             {
-                _outlineStroke.DrawingAttributes = _beforeOutlineAttributes.Clone();
+                if (entry.BeforeAttributes != null)
+                {
+                    entry.Stroke.DrawingAttributes = entry.BeforeAttributes.Clone();
+                }
             }
+
+            window.UpdateShapeSelectionAdorner();
         }
 
         public void Redo(MainWindow window)
@@ -550,10 +596,15 @@ public partial class MainWindow : Window
                 _fillShape.Fill = CloneBrush(_afterFill);
             }
 
-            if (_outlineStroke != null && _afterOutlineAttributes != null)
+            foreach (ShapeStrokeStyleEntry entry in _outlineStrokeStyles)
             {
-                _outlineStroke.DrawingAttributes = _afterOutlineAttributes.Clone();
+                if (entry.AfterAttributes != null)
+                {
+                    entry.Stroke.DrawingAttributes = entry.AfterAttributes.Clone();
+                }
             }
+
+            window.UpdateShapeSelectionAdorner();
         }
     }
 
@@ -828,6 +879,8 @@ public partial class MainWindow : Window
         {
             return;
         }
+
+        UpdateShapeOutlineMappingsForStrokeChanges(e.Added, e.Removed);
 
         if (_isEraserGestureActive)
         {
@@ -3656,6 +3709,86 @@ public partial class MainWindow : Window
         return brush;
     }
 
+    private void UpdateShapeOutlineMappingsForStrokeChanges(IEnumerable<Stroke> addedStrokes, IEnumerable<Stroke> removedStrokes)
+    {
+        var removedShapeOutlines = new List<RemovedShapeOutlineInfo>();
+
+        foreach (Stroke removedStroke in removedStrokes)
+        {
+            ShapeKind? kind = GetKnownOrInferredShapeKind(removedStroke);
+            if (!kind.HasValue)
+            {
+                continue;
+            }
+
+            _outlineStrokeFilledShapes.TryGetValue(removedStroke, out WpfShape? fillShape);
+            removedShapeOutlines.Add(new RemovedShapeOutlineInfo(removedStroke, kind.Value, fillShape));
+        }
+
+        if (removedShapeOutlines.Count == 0)
+        {
+            return;
+        }
+
+        foreach (Stroke addedStroke in addedStrokes)
+        {
+            foreach (RemovedShapeOutlineInfo removedInfo in removedShapeOutlines)
+            {
+                if (!IsStrokeDerivedFromRemovedOutline(addedStroke, removedInfo))
+                {
+                    continue;
+                }
+
+                if (removedInfo.FillShape != null
+                    && DrawingCanvas.Children.Contains(removedInfo.FillShape)
+                    && !IsStrokeOnFillShapeBoundary(addedStroke, removedInfo.FillShape, removedInfo.Kind))
+                {
+                    continue;
+                }
+
+                RegisterShapeOutline(addedStroke, removedInfo.Kind);
+                if (removedInfo.FillShape != null && DrawingCanvas.Children.Contains(removedInfo.FillShape))
+                {
+                    RegisterFilledShapeOutlineFragment(removedInfo.FillShape, addedStroke, removedInfo.Kind);
+                }
+
+                break;
+            }
+        }
+    }
+
+    private static bool IsStrokeDerivedFromRemovedOutline(Stroke addedStroke, RemovedShapeOutlineInfo removedInfo)
+    {
+        Rect addedBounds = GetStrokeBounds(addedStroke);
+        Rect expandedRemovedBounds = removedInfo.Bounds;
+        double tolerance = Math.Max(4.0, removedInfo.Tolerance + 2.0);
+        expandedRemovedBounds.Inflate(tolerance, tolerance);
+
+        if (!expandedRemovedBounds.Contains(addedBounds.TopLeft)
+            || !expandedRemovedBounds.Contains(addedBounds.BottomRight))
+        {
+            return false;
+        }
+
+        StylusPointCollection points = addedStroke.StylusPoints;
+        if (points.Count == 0)
+        {
+            return false;
+        }
+
+        int insideCount = 0;
+        foreach (StylusPoint point in points)
+        {
+            if (expandedRemovedBounds.Contains(ToPoint(point)))
+            {
+                insideCount++;
+            }
+        }
+
+        int requiredCount = Math.Max(1, (int)Math.Ceiling(points.Count * 0.75));
+        return insideCount >= requiredCount;
+    }
+
     private void RegisterShapeOutline(Stroke outlineStroke, ShapeKind kind)
     {
         _shapeOutlineKinds[outlineStroke] = kind;
@@ -3664,13 +3797,24 @@ public partial class MainWindow : Window
     private void RegisterFilledShape(WpfShape fillShape, Stroke outlineStroke, ShapeKind kind)
     {
         _filledShapeOutlineStrokes[fillShape] = outlineStroke;
+        RegisterFilledShapeOutlineFragment(fillShape, outlineStroke, kind);
+    }
+
+    private void RegisterFilledShapeOutlineFragment(WpfShape fillShape, Stroke outlineStroke, ShapeKind kind)
+    {
         _outlineStrokeFilledShapes[outlineStroke] = fillShape;
         RegisterShapeOutline(outlineStroke, kind);
+
+        if (!_filledShapeOutlineStrokes.TryGetValue(fillShape, out Stroke? primaryStroke)
+            || !DrawingCanvas.Strokes.Contains(primaryStroke))
+        {
+            _filledShapeOutlineStrokes[fillShape] = outlineStroke;
+        }
     }
 
     private bool HasSelectedShape()
     {
-        return _selectedFillShape != null || _selectedShapeOutlineStroke != null;
+        return _selectedFillShape != null || GetSelectedShapeOutlineStrokesSnapshot().Count > 0;
     }
 
     private bool TrySelectShapeAtPoint(Point point)
@@ -3678,22 +3822,7 @@ public partial class MainWindow : Window
         WpfShape? fillShape = FindFillShapeAtPoint(point);
         if (fillShape != null)
         {
-            Stroke? outlineStroke = null;
-            if (_filledShapeOutlineStrokes.TryGetValue(fillShape, out Stroke? registeredOutline)
-                && DrawingCanvas.Strokes.Contains(registeredOutline))
-            {
-                outlineStroke = registeredOutline;
-            }
-            else
-            {
-                outlineStroke = FindOutlineStrokeForFillShape(fillShape);
-                if (outlineStroke != null)
-                {
-                    RegisterFilledShape(fillShape, outlineStroke, fillShape is WpfEllipse ? ShapeKind.Ellipse : ShapeKind.Rectangle);
-                }
-            }
-
-            SelectShape(fillShape, outlineStroke);
+            SelectShape(fillShape, null);
             return true;
         }
 
@@ -3763,7 +3892,8 @@ public partial class MainWindow : Window
         for (int i = DrawingCanvas.Strokes.Count - 1; i >= 0; i--)
         {
             Stroke stroke = DrawingCanvas.Strokes[i];
-            if (!IsShapeOutlineStroke(stroke))
+            ShapeKind? kind = GetKnownOrInferredShapeKind(stroke);
+            if (!kind.HasValue)
             {
                 continue;
             }
@@ -3771,6 +3901,7 @@ public partial class MainWindow : Window
             double tolerance = GetStrokeHitTolerance(stroke);
             if (stroke.HitTest(point, tolerance))
             {
+                RegisterShapeOutline(stroke, kind.Value);
                 return stroke;
             }
         }
@@ -3780,7 +3911,22 @@ public partial class MainWindow : Window
 
     private bool IsShapeOutlineStroke(Stroke stroke)
     {
-        return _shapeOutlineKinds.ContainsKey(stroke);
+        return GetKnownOrInferredShapeKind(stroke).HasValue;
+    }
+
+    private ShapeKind? GetKnownOrInferredShapeKind(Stroke stroke)
+    {
+        if (_shapeOutlineKinds.TryGetValue(stroke, out ShapeKind knownKind))
+        {
+            return knownKind;
+        }
+
+        if (TryInferShapeKindFromStroke(stroke, out ShapeKind inferredKind))
+        {
+            return inferredKind;
+        }
+
+        return null;
     }
 
     private static bool TryInferShapeKindFromStroke(Stroke stroke, out ShapeKind kind)
@@ -3840,30 +3986,115 @@ public partial class MainWindow : Window
 
     private Stroke? FindOutlineStrokeForFillShape(WpfShape fillShape)
     {
-        Rect fillBounds = GetShapeBounds(fillShape);
+        List<Stroke> outlineStrokes = FindOutlineStrokesForFillShape(fillShape);
+        return outlineStrokes.Count > 0 ? outlineStrokes[0] : null;
+    }
+
+    private List<Stroke> FindOutlineStrokesForFillShape(WpfShape fillShape)
+    {
+        var outlineStrokes = new List<Stroke>();
         ShapeKind expectedKind = fillShape is WpfEllipse ? ShapeKind.Ellipse : ShapeKind.Rectangle;
 
-        for (int i = DrawingCanvas.Strokes.Count - 1; i >= 0; i--)
+        if (_filledShapeOutlineStrokes.TryGetValue(fillShape, out Stroke? primaryStroke)
+            && DrawingCanvas.Strokes.Contains(primaryStroke))
         {
-            Stroke stroke = DrawingCanvas.Strokes[i];
-            if (!IsShapeOutlineStroke(stroke))
-            {
-                continue;
-            }
+            AddStrokeReferenceIfMissing(outlineStrokes, primaryStroke);
+        }
 
-            if (_shapeOutlineKinds.TryGetValue(stroke, out ShapeKind kind) && kind != expectedKind)
+        foreach (KeyValuePair<Stroke, WpfShape> pair in _outlineStrokeFilledShapes)
+        {
+            if (ReferenceEquals(pair.Value, fillShape) && DrawingCanvas.Strokes.Contains(pair.Key))
             {
-                continue;
-            }
-
-            Rect strokeBounds = GetStrokeBounds(stroke);
-            if (AreRectsClose(fillBounds, strokeBounds, Math.Max(2.0, stroke.DrawingAttributes.Width)))
-            {
-                return stroke;
+                AddStrokeReferenceIfMissing(outlineStrokes, pair.Key);
             }
         }
 
-        return null;
+        foreach (Stroke stroke in DrawingCanvas.Strokes)
+        {
+            if (ContainsStrokeReference(outlineStrokes, stroke))
+            {
+                continue;
+            }
+
+            if (IsStrokeOnFillShapeBoundary(stroke, fillShape, expectedKind))
+            {
+                RegisterFilledShapeOutlineFragment(fillShape, stroke, expectedKind);
+                AddStrokeReferenceIfMissing(outlineStrokes, stroke);
+            }
+        }
+
+        return outlineStrokes;
+    }
+
+    private bool IsStrokeOnFillShapeBoundary(Stroke stroke, WpfShape fillShape, ShapeKind expectedKind)
+    {
+        if (_shapeOutlineKinds.TryGetValue(stroke, out ShapeKind knownKind) && knownKind != expectedKind)
+        {
+            return false;
+        }
+
+        Rect fillBounds = GetShapeBounds(fillShape);
+        Rect strokeBounds = GetStrokeBounds(stroke);
+        double tolerance = Math.Max(4.0, GetStrokeHitTolerance(stroke));
+        Rect expandedFillBounds = fillBounds;
+        expandedFillBounds.Inflate(tolerance, tolerance);
+
+        if (!expandedFillBounds.IntersectsWith(strokeBounds))
+        {
+            return false;
+        }
+
+        StylusPointCollection points = stroke.StylusPoints;
+        if (points.Count == 0)
+        {
+            return false;
+        }
+
+        int nearCount = 0;
+        foreach (StylusPoint stylusPoint in points)
+        {
+            if (IsPointNearFillShapeBoundary(fillShape, ToPoint(stylusPoint), tolerance))
+            {
+                nearCount++;
+            }
+        }
+
+        int requiredCount = Math.Max(1, (int)Math.Ceiling(points.Count * 0.75));
+        return nearCount >= requiredCount;
+    }
+
+    private static bool IsPointNearFillShapeBoundary(WpfShape fillShape, Point point, double tolerance)
+    {
+        Rect bounds = GetShapeBounds(fillShape);
+        Rect expandedBounds = bounds;
+        expandedBounds.Inflate(tolerance, tolerance);
+        if (!expandedBounds.Contains(point))
+        {
+            return false;
+        }
+
+        if (fillShape is WpfEllipse)
+        {
+            double radiusX = bounds.Width / 2.0;
+            double radiusY = bounds.Height / 2.0;
+            if (radiusX <= 0.0 || radiusY <= 0.0)
+            {
+                return false;
+            }
+
+            double centerX = bounds.Left + radiusX;
+            double centerY = bounds.Top + radiusY;
+            double normalizedX = (point.X - centerX) / radiusX;
+            double normalizedY = (point.Y - centerY) / radiusY;
+            double normalizedDistance = Math.Sqrt((normalizedX * normalizedX) + (normalizedY * normalizedY));
+            double normalizedTolerance = tolerance / Math.Max(radiusX, radiusY);
+            return Math.Abs(normalizedDistance - 1.0) <= normalizedTolerance;
+        }
+
+        return Math.Abs(point.X - bounds.Left) <= tolerance
+            || Math.Abs(point.X - bounds.Right) <= tolerance
+            || Math.Abs(point.Y - bounds.Top) <= tolerance
+            || Math.Abs(point.Y - bounds.Bottom) <= tolerance;
     }
 
     private static bool AreRectsClose(Rect a, Rect b, double tolerance)
@@ -3887,25 +4118,80 @@ public partial class MainWindow : Window
             fillShape = null;
         }
 
-        if (outlineStroke != null && !DrawingCanvas.Strokes.Contains(outlineStroke))
+        _selectedFillShape = fillShape;
+        _selectedShapeOutlineStrokes.Clear();
+        _shapeDragStartOutlineStrokePoints.Clear();
+
+        if (outlineStroke != null && DrawingCanvas.Strokes.Contains(outlineStroke))
         {
-            outlineStroke = null;
+            AddSelectedShapeOutlineStroke(outlineStroke);
         }
 
-        _selectedFillShape = fillShape;
-        _selectedShapeOutlineStroke = outlineStroke;
+        if (fillShape != null)
+        {
+            foreach (Stroke stroke in FindOutlineStrokesForFillShape(fillShape))
+            {
+                AddSelectedShapeOutlineStroke(stroke);
+            }
+        }
+
+        _selectedShapeOutlineStroke = _selectedShapeOutlineStrokes.Count > 0 ? _selectedShapeOutlineStrokes[0] : null;
         ClearSelectedTextElement();
         UpdateShapeSelectionAdorner();
+    }
+
+    private void AddSelectedShapeOutlineStroke(Stroke stroke)
+    {
+        if (DrawingCanvas.Strokes.Contains(stroke))
+        {
+            AddStrokeReferenceIfMissing(_selectedShapeOutlineStrokes, stroke);
+        }
+    }
+
+    private List<Stroke> GetSelectedShapeOutlineStrokesSnapshot()
+    {
+        for (int i = _selectedShapeOutlineStrokes.Count - 1; i >= 0; i--)
+        {
+            if (!DrawingCanvas.Strokes.Contains(_selectedShapeOutlineStrokes[i]))
+            {
+                _selectedShapeOutlineStrokes.RemoveAt(i);
+            }
+        }
+
+        _selectedShapeOutlineStroke = _selectedShapeOutlineStrokes.Count > 0 ? _selectedShapeOutlineStrokes[0] : null;
+        return new List<Stroke>(_selectedShapeOutlineStrokes);
+    }
+
+    private static void AddStrokeReferenceIfMissing(List<Stroke> strokes, Stroke stroke)
+    {
+        if (!ContainsStrokeReference(strokes, stroke))
+        {
+            strokes.Add(stroke);
+        }
+    }
+
+    private static bool ContainsStrokeReference(List<Stroke> strokes, Stroke target)
+    {
+        foreach (Stroke stroke in strokes)
+        {
+            if (ReferenceEquals(stroke, target))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void ClearSelectedShape()
     {
         _selectedFillShape = null;
         _selectedShapeOutlineStroke = null;
+        _selectedShapeOutlineStrokes.Clear();
         _isDraggingSelectedShape = false;
         _hasSelectedShapeDragMoved = false;
         _shapeDragStartFillBounds = null;
-        _shapeDragStartStrokePoints = null;
+        _shapeDragStartOutlineStrokePoints.Clear();
 
         if (_shapeSelectionAdorner != null)
         {
@@ -3929,7 +4215,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        double margin = Math.Max(4.0, _selectedShapeOutlineStroke?.DrawingAttributes.Width ?? _currentPenWidth);
+        double margin = Math.Max(4.0, GetSelectedShapeOutlineMaxWidth());
         bounds.Inflate(margin, margin);
 
         if (_shapeSelectionAdorner == null)
@@ -3957,6 +4243,17 @@ public partial class MainWindow : Window
         DrawingCanvas.Children.Add(_shapeSelectionAdorner);
     }
 
+    private double GetSelectedShapeOutlineMaxWidth()
+    {
+        double maxWidth = _currentPenWidth;
+        foreach (Stroke stroke in GetSelectedShapeOutlineStrokesSnapshot())
+        {
+            maxWidth = Math.Max(maxWidth, Math.Max(stroke.DrawingAttributes.Width, stroke.DrawingAttributes.Height));
+        }
+
+        return maxWidth;
+    }
+
     private Rect GetSelectedShapeBounds()
     {
         Rect? bounds = null;
@@ -3966,9 +4263,9 @@ public partial class MainWindow : Window
             bounds = GetShapeBounds(_selectedFillShape);
         }
 
-        if (_selectedShapeOutlineStroke != null && DrawingCanvas.Strokes.Contains(_selectedShapeOutlineStroke))
+        foreach (Stroke stroke in GetSelectedShapeOutlineStrokesSnapshot())
         {
-            Rect strokeBounds = GetStrokeBounds(_selectedShapeOutlineStroke);
+            Rect strokeBounds = GetStrokeBounds(stroke);
             bounds = bounds.HasValue ? Rect.Union(bounds.Value, strokeBounds) : strokeBounds;
         }
 
@@ -3982,9 +4279,12 @@ public partial class MainWindow : Window
             return true;
         }
 
-        if (_selectedShapeOutlineStroke != null && DrawingCanvas.Strokes.Contains(_selectedShapeOutlineStroke))
+        foreach (Stroke stroke in GetSelectedShapeOutlineStrokesSnapshot())
         {
-            return _selectedShapeOutlineStroke.HitTest(point, GetStrokeHitTolerance(_selectedShapeOutlineStroke));
+            if (stroke.HitTest(point, GetStrokeHitTolerance(stroke)))
+            {
+                return true;
+            }
         }
 
         return false;
@@ -4002,9 +4302,16 @@ public partial class MainWindow : Window
         _currentInteractionState = InteractionState.MovingShape;
         _shapeDragStartMousePoint = point;
         _shapeDragStartFillBounds = _selectedFillShape != null ? GetShapeBounds(_selectedFillShape) : null;
-        _shapeDragStartStrokePoints = _selectedShapeOutlineStroke != null
-            ? CloneStylusPoints(_selectedShapeOutlineStroke.StylusPoints)
-            : null;
+        _shapeDragStartOutlineStrokePoints.Clear();
+
+        foreach (Stroke stroke in GetSelectedShapeOutlineStrokesSnapshot())
+        {
+            StylusPointCollection? points = CloneStylusPoints(stroke.StylusPoints);
+            if (points != null)
+            {
+                _shapeDragStartOutlineStrokePoints[stroke] = points;
+            }
+        }
 
         DrawingCanvas.CaptureMouse();
     }
@@ -4028,9 +4335,12 @@ public partial class MainWindow : Window
             SetShapeBounds(_selectedFillShape, new Rect(start.Left + offset.X, start.Top + offset.Y, start.Width, start.Height));
         }
 
-        if (_selectedShapeOutlineStroke != null && _shapeDragStartStrokePoints != null)
+        foreach (KeyValuePair<Stroke, StylusPointCollection> pair in _shapeDragStartOutlineStrokePoints)
         {
-            SetStrokeStylusPoints(_selectedShapeOutlineStroke, OffsetStylusPoints(_shapeDragStartStrokePoints, offset.X, offset.Y));
+            if (DrawingCanvas.Strokes.Contains(pair.Key))
+            {
+                SetStrokeStylusPoints(pair.Key, OffsetStylusPoints(pair.Value, offset.X, offset.Y));
+            }
         }
 
         UpdateShapeSelectionAdorner();
@@ -4044,16 +4354,25 @@ public partial class MainWindow : Window
         }
 
         WpfShape? fillShape = _selectedFillShape;
-        Stroke? outlineStroke = _selectedShapeOutlineStroke;
         Rect? beforeFillBounds = _shapeDragStartFillBounds;
-        StylusPointCollection? beforeStrokePoints = CloneStylusPoints(_shapeDragStartStrokePoints);
         Rect? afterFillBounds = fillShape != null ? GetShapeBounds(fillShape) : null;
-        StylusPointCollection? afterStrokePoints = outlineStroke != null ? CloneStylusPoints(outlineStroke.StylusPoints) : null;
+        var strokeMoveEntries = new List<ShapeStrokeMoveEntry>();
+
+        foreach (KeyValuePair<Stroke, StylusPointCollection> pair in _shapeDragStartOutlineStrokePoints)
+        {
+            if (DrawingCanvas.Strokes.Contains(pair.Key))
+            {
+                strokeMoveEntries.Add(new ShapeStrokeMoveEntry(
+                    pair.Key,
+                    pair.Value,
+                    CloneStylusPoints(pair.Key.StylusPoints)));
+            }
+        }
 
         _isDraggingSelectedShape = false;
         _currentInteractionState = InteractionState.None;
         _shapeDragStartFillBounds = null;
-        _shapeDragStartStrokePoints = null;
+        _shapeDragStartOutlineStrokePoints.Clear();
 
         if (DrawingCanvas.IsMouseCaptured)
         {
@@ -4066,9 +4385,7 @@ public partial class MainWindow : Window
                 fillShape,
                 beforeFillBounds,
                 afterFillBounds,
-                outlineStroke,
-                beforeStrokePoints,
-                afterStrokePoints));
+                strokeMoveEntries));
         }
 
         _hasSelectedShapeDragMoved = false;
@@ -4087,16 +4404,19 @@ public partial class MainWindow : Window
             SetShapeBounds(_selectedFillShape, _shapeDragStartFillBounds.Value);
         }
 
-        if (_selectedShapeOutlineStroke != null && _shapeDragStartStrokePoints != null)
+        foreach (KeyValuePair<Stroke, StylusPointCollection> pair in _shapeDragStartOutlineStrokePoints)
         {
-            SetStrokeStylusPoints(_selectedShapeOutlineStroke, _shapeDragStartStrokePoints);
+            if (DrawingCanvas.Strokes.Contains(pair.Key))
+            {
+                SetStrokeStylusPoints(pair.Key, pair.Value);
+            }
         }
 
         _isDraggingSelectedShape = false;
         _hasSelectedShapeDragMoved = false;
         _currentInteractionState = InteractionState.None;
         _shapeDragStartFillBounds = null;
-        _shapeDragStartStrokePoints = null;
+        _shapeDragStartOutlineStrokePoints.Clear();
 
         UpdateShapeSelectionAdorner();
     }
@@ -4132,9 +4452,8 @@ public partial class MainWindow : Window
         }
 
         Brush? beforeFill = _selectedFillShape?.Fill;
-        DrawingAttributes? beforeOutlineAttributes = _selectedShapeOutlineStroke?.DrawingAttributes.Clone();
         Brush? afterFill = null;
-        DrawingAttributes? afterOutlineAttributes = null;
+        var outlineStyleEntries = new List<ShapeStrokeStyleEntry>();
 
         if (_selectedFillShape != null)
         {
@@ -4142,19 +4461,19 @@ public partial class MainWindow : Window
             _selectedFillShape.Fill = CloneBrush(afterFill);
         }
 
-        if (_selectedShapeOutlineStroke != null)
+        foreach (Stroke stroke in GetSelectedShapeOutlineStrokesSnapshot())
         {
-            afterOutlineAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth);
-            _selectedShapeOutlineStroke.DrawingAttributes = afterOutlineAttributes.Clone();
+            DrawingAttributes? beforeAttributes = stroke.DrawingAttributes.Clone();
+            DrawingAttributes afterAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth);
+            stroke.DrawingAttributes = afterAttributes.Clone();
+            outlineStyleEntries.Add(new ShapeStrokeStyleEntry(stroke, beforeAttributes, afterAttributes));
         }
 
         PushHistory(new ShapeStyleAction(
             _selectedFillShape,
             beforeFill,
             afterFill,
-            _selectedShapeOutlineStroke,
-            beforeOutlineAttributes,
-            afterOutlineAttributes));
+            outlineStyleEntries));
 
         UpdateShapeSelectionAdorner();
         return true;
@@ -4168,7 +4487,7 @@ public partial class MainWindow : Window
         }
 
         WpfShape? fillShape = _selectedFillShape;
-        Stroke? outlineStroke = _selectedShapeOutlineStroke;
+        List<Stroke> outlineStrokes = GetSelectedShapeOutlineStrokesSnapshot();
         var actions = new List<IUndoableAction>();
 
         if (fillShape != null && DrawingCanvas.Children.Contains(fillShape))
@@ -4176,9 +4495,9 @@ public partial class MainWindow : Window
             actions.Add(new CanvasElementRemoveAction(fillShape, DrawingCanvas.Children.IndexOf(fillShape)));
         }
 
-        if (outlineStroke != null && DrawingCanvas.Strokes.Contains(outlineStroke))
+        if (outlineStrokes.Count > 0)
         {
-            actions.Add(new StrokeCollectionAction(Array.Empty<Stroke>(), new[] { outlineStroke }));
+            actions.Add(new StrokeCollectionAction(Array.Empty<Stroke>(), outlineStrokes));
         }
 
         if (actions.Count == 0)
@@ -4194,9 +4513,9 @@ public partial class MainWindow : Window
                 RemoveCanvasElementIfPresent(fillShape);
             }
 
-            if (outlineStroke != null)
+            foreach (Stroke stroke in outlineStrokes)
             {
-                RemoveStrokeIfPresent(outlineStroke);
+                RemoveStrokeIfPresent(stroke);
             }
         });
 
