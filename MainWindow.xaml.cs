@@ -93,6 +93,7 @@ public partial class MainWindow : Window
     private readonly List<Stroke> _eraserGestureAddedStrokes = new();
     private readonly List<Stroke> _eraserGestureRemovedStrokes = new();
     private readonly List<ShapeClipChangeEntry> _eraserGestureShapeClipChanges = new();
+    private readonly Dictionary<WpfShape, Point> _lastFillEraserClipPoints = new();
     private Point _textDragCommittedStartPoint;
 
     private Border? _draggingTextElement;
@@ -760,6 +761,7 @@ public partial class MainWindow : Window
         _eraserGestureAddedStrokes.Clear();
         _eraserGestureRemovedStrokes.Clear();
         _eraserGestureShapeClipChanges.Clear();
+        _lastFillEraserClipPoints.Clear();
     }
 
     private void CompleteEraserGesture()
@@ -778,6 +780,7 @@ public partial class MainWindow : Window
             _eraserGestureAddedStrokes.Clear();
             _eraserGestureRemovedStrokes.Clear();
             _eraserGestureShapeClipChanges.Clear();
+            _lastFillEraserClipPoints.Clear();
             _currentInteractionState = InteractionState.None;
             return;
         }
@@ -806,6 +809,7 @@ public partial class MainWindow : Window
         _eraserGestureAddedStrokes.Clear();
         _eraserGestureRemovedStrokes.Clear();
         _eraserGestureShapeClipChanges.Clear();
+        _lastFillEraserClipPoints.Clear();
         _currentInteractionState = InteractionState.None;
     }
 
@@ -838,6 +842,11 @@ public partial class MainWindow : Window
 
     private void ApplyFillShapeEraserAtPoint(WpfShape shape, Point point, double radius)
     {
+        if (ShouldSkipFillEraserClip(shape, point, radius))
+        {
+            return;
+        }
+
         ShapeClipChangeEntry entry = GetOrCreateShapeClipChangeEntry(shape);
         Geometry visibleGeometry = CreateCurrentVisibleGeometry(shape);
         Point localPoint = ToShapeLocalPoint(shape, point);
@@ -846,6 +855,18 @@ public partial class MainWindow : Window
 
         shape.Clip = clippedGeometry;
         entry.LatestClip = CloneGeometry(clippedGeometry);
+        _lastFillEraserClipPoints[shape] = point;
+    }
+
+    private bool ShouldSkipFillEraserClip(WpfShape shape, Point point, double radius)
+    {
+        if (!_lastFillEraserClipPoints.TryGetValue(shape, out Point previousPoint))
+        {
+            return false;
+        }
+
+        double minDistance = Math.Max(1.0, radius * 0.35);
+        return (point - previousPoint).Length < minDistance;
     }
 
     private ShapeClipChangeEntry GetOrCreateShapeClipChangeEntry(WpfShape shape)
