@@ -226,6 +226,30 @@
       color: var(--muted);
     }
 
+    .unzip-shot {
+      margin: 24px auto;
+      text-align: center;
+    }
+
+    .unzip-shot a {
+      display: inline-block;
+      cursor: zoom-in;
+    }
+
+    .unzip-shot img {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      border-radius: 14px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .unzip-shot figcaption {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
     .section {
       margin-top: 72px;
     }
@@ -809,20 +833,39 @@
           <li>If FlowInk-Setup.exe downloaded successfully, double-click it to start the installer, then follow the installer instructions.</li>
           <li>When you run the installer, Windows may show a SmartScreen protection screen. If it appears, click the details link, then click the run button.</li>
         </ol>
-        <figure class="install-shot">
-          <a href="images/PC_Protected_dialog_with_annotations.png" target="_blank" rel="noopener noreferrer">
-            <img
-              src="images/PC_Protected_dialog_with_annotations.png"
-              alt="How to proceed when the Windows SmartScreen protection screen appears"
-            />
-          </a>
-          <figcaption>What to do if the Windows protection screen appears</figcaption>
-        </figure>
-      </div>
+          <figure class="install-shot">
+            <a href="images/PC_Protected_dialog_with_annotations.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/PC_Protected_dialog_with_annotations.png"
+                alt="How to proceed when the Windows SmartScreen protection screen appears"
+              />
+            </a>
+            <figcaption>What to do if the Windows protection screen appears</figcaption>
+          </figure>
+      </div><br>
       <h3>FlowInk.zip (ZIP version)</h3>
       <div class="guide">
         <ol>
           <li>Right-click the ZIP file, choose “Extract All”, and run FlowInk.exe from the extracted folder.</li>
+          <figure class="unzip-shot">
+            <a href="images/unziped_en.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/unziped_en.png"
+                alt="File to run after extracting the ZIP"
+              />
+            </a>
+            <figcaption>File to run after extracting the ZIP</figcaption>
+          </figure>
+          <li>When running FlowInk.exe for the first time, you may see the "Windows protected your PC" screen. In that case, click "More info" and then click "Run anyway".</li>
+          <figure class="install-shot">
+            <a href="images/PC_Protected_dialog_with_annotations.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/PC_Protected_dialog_with_annotations.png"
+                alt="How to proceed when the Windows SmartScreen protection screen appears"
+              />
+            </a>
+            <figcaption>What to do if the Windows protection screen appears</figcaption>
+          </figure>
         </ol>
       </div>
     </section>
