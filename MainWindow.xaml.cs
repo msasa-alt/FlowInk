@@ -2810,8 +2810,16 @@ public partial class MainWindow : Window
 
         _penWidthPresetClickTimer.Stop();
         _pendingPenWidthPresetIndex = index;
-        _penWidthPresetClickTimer.Start();
         e.Handled = true;
+
+        if (index < 0 || index >= _penWidthPresets.Count)
+        {
+            _pendingPenWidthPresetIndex = null;
+            return;
+        }
+
+        SelectPenWidth(_penWidthPresets[index]);
+        _penWidthPresetClickTimer.Start();
     }
 
     private void OpenPenWidthPresetPopup()
