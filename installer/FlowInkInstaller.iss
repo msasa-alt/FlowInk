@@ -1,5 +1,5 @@
 #define MyAppName "FlowInk"
-#define MyAppVersion "1.2.0"
+#define MyAppVersion "1.3.0-rc1"
 #define MyAppPublisher "FlowInk"
 #define MyAppExeName "FlowInk.exe"
 
