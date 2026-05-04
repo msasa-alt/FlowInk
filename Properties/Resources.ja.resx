@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="About" xml:space="preserve">
-    <value>アバウト</value>
+    <value>About</value>
   </data>
   <data name="AboutWindowTitle" xml:space="preserve">
     <value>FlowInkについて</value>
@@ -343,7 +343,7 @@
     <value>FlowInk</value>
   </data>
   <data name="AboutDescription" xml:space="preserve">
-    <value>軽量なオーバーレイ描画ツール</value>
+    <value>軽量なデスクトップオーバーレイ描画ツール</value>
   </data>
   <data name="MessageBoxTitle" xml:space="preserve">
     <value>FlowInk</value>

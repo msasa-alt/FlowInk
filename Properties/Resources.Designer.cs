@@ -70,7 +70,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   Lightweight overlay drawing tool に類似しているローカライズされた文字列を検索します。
+        ///   Lightweight desktop overlay drawing tool に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string AboutDescription {
             get {
