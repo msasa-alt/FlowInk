@@ -1550,7 +1550,7 @@ public partial class MainWindow : Window
 
     private bool IsPointInsideToolbarPanelScreenBounds(IntPtr lParam)
     {
-        if (!_isClickThroughEnabled || ToolbarPanel == null || !ToolbarPanel.IsVisible)
+        if (!_isClickThroughEnabled)
         {
             return false;
         }
@@ -1559,8 +1559,26 @@ public partial class MainWindow : Window
         int screenX = unchecked((short)(raw & 0xFFFF));
         int screenY = unchecked((short)((raw >> 16) & 0xFFFF));
 
+        return IsScreenPointInsideToolbarPanel(screenX, screenY);
+    }
+
+    private bool IsScreenPointInsideToolbarPanel(double screenX, double screenY)
+    {
+        if (ToolbarPanel == null || !ToolbarPanel.IsVisible || ToolbarPanel.ActualWidth <= 0 || ToolbarPanel.ActualHeight <= 0)
+        {
+            return false;
+        }
+
         Point topLeft = ToolbarPanel.PointToScreen(new Point(0, 0));
-        Rect bounds = new(topLeft.X, topLeft.Y, ToolbarPanel.ActualWidth, ToolbarPanel.ActualHeight);
+        Point bottomRight = ToolbarPanel.PointToScreen(new Point(ToolbarPanel.ActualWidth, ToolbarPanel.ActualHeight));
+
+        double left = Math.Min(topLeft.X, bottomRight.X);
+        double top = Math.Min(topLeft.Y, bottomRight.Y);
+        double right = Math.Max(topLeft.X, bottomRight.X);
+        double bottom = Math.Max(topLeft.Y, bottomRight.Y);
+
+        Rect bounds = new(left, top, right - left, bottom - top);
+        bounds.Inflate(1.0, 1.0);
 
         return bounds.Contains(new Point(screenX, screenY));
     }
@@ -1710,18 +1728,8 @@ public partial class MainWindow : Window
 
     private bool IsCursorInsideToolbarPanel()
     {
-        if (ToolbarPanel == null || !ToolbarPanel.IsVisible || ToolbarPanel.ActualWidth <= 0 || ToolbarPanel.ActualHeight <= 0)
-        {
-            return false;
-        }
-
         var cursorPosition = Forms.Cursor.Position;
-        Point localPoint = ToolbarPanel.PointFromScreen(new Point(cursorPosition.X, cursorPosition.Y));
-
-        return localPoint.X >= 0
-            && localPoint.Y >= 0
-            && localPoint.X <= ToolbarPanel.ActualWidth
-            && localPoint.Y <= ToolbarPanel.ActualHeight;
+        return IsScreenPointInsideToolbarPanel(cursorPosition.X, cursorPosition.Y);
     }
 
     private void ShowClickThroughToastIfNeeded()
