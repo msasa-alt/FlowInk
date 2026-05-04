@@ -361,7 +361,4 @@
   <data name="RestoreFill" xml:space="preserve">
     <value>塗りつぶしを復元</value>
   </data>
-  <data name="AboutWindowTitle" xml:space="preserve">
-    <value>FlowInkについて</value>
-  </data>
 </root>
