@@ -410,7 +410,7 @@
                 </StackPanel>
 
                 <StackPanel x:Name="CtMiniPanel"
-                            Width="34"
+                            Width="38"
                             Orientation="Vertical"
                             HorizontalAlignment="Center"
                             Visibility="Collapsed">
