@@ -88,15 +88,6 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   About FlowInk に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        public static string AboutWindowTitle {
-            get {
-                return ResourceManager.GetString("AboutWindowTitle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Apply Current Style に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string ApplyCurrentStyle {
