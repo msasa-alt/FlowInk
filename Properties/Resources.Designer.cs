@@ -88,6 +88,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   About FlowInk に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string AboutWindowTitle {
+            get {
+                return ResourceManager.GetString("AboutWindowTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Apply Current Style に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string ApplyCurrentStyle {
@@ -358,7 +367,8 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   Failed to register the global hotkey {0}.\nIt may already be in use by another application. に類似しているローカライズされた文字列を検索します。
+        ///   Failed to register the global hotkey {0}.
+        ///It may already be in use by another application. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string GlobalHotkeyRegisterFailedFormat {
             get {

@@ -163,7 +163,8 @@
     <value>Font Size</value>
   </data>
   <data name="GlobalHotkeyRegisterFailedFormat" xml:space="preserve">
-    <value>Failed to register the global hotkey {0}.\nIt may already be in use by another application.</value>
+    <value>Failed to register the global hotkey {0}.
+It may already be in use by another application.</value>
   </data>
   <data name="Hide" xml:space="preserve">
     <value>Hide</value>
@@ -359,5 +360,8 @@
   </data>
   <data name="RestoreFill" xml:space="preserve">
     <value>Restore Fill</value>
+  </data>
+  <data name="AboutWindowTitle" xml:space="preserve">
+    <value>About FlowInk</value>
   </data>
 </root>
