@@ -97,6 +97,8 @@ public partial class MainWindow : Window
     private readonly Dictionary<WpfShape, Stroke> _filledShapeOutlineStrokes = new();
     private readonly Dictionary<Stroke, WpfShape> _outlineStrokeFilledShapes = new();
     private readonly Dictionary<Stroke, ShapeKind> _shapeOutlineKinds = new();
+    private readonly Dictionary<Stroke, int> _shapeOutlineGroupIds = new();
+    private int _nextShapeOutlineGroupId = 1;
     private WpfShape? _selectedFillShape;
     private Stroke? _selectedShapeOutlineStroke;
     private readonly List<Stroke> _selectedShapeOutlineStrokes = new();
@@ -452,11 +454,12 @@ public partial class MainWindow : Window
 
     private sealed class RemovedShapeOutlineInfo
     {
-        public RemovedShapeOutlineInfo(Stroke stroke, ShapeKind kind, WpfShape? fillShape)
+        public RemovedShapeOutlineInfo(Stroke stroke, ShapeKind kind, WpfShape? fillShape, int outlineGroupId)
         {
             Stroke = stroke;
             Kind = kind;
             FillShape = fillShape;
+            OutlineGroupId = outlineGroupId;
             Bounds = GetStrokeBounds(stroke);
             Tolerance = GetStrokeHitTolerance(stroke);
         }
@@ -464,6 +467,7 @@ public partial class MainWindow : Window
         public Stroke Stroke { get; }
         public ShapeKind Kind { get; }
         public WpfShape? FillShape { get; }
+        public int OutlineGroupId { get; }
         public Rect Bounds { get; }
         public double Tolerance { get; }
     }
@@ -3722,7 +3726,8 @@ public partial class MainWindow : Window
             }
 
             _outlineStrokeFilledShapes.TryGetValue(removedStroke, out WpfShape? fillShape);
-            removedShapeOutlines.Add(new RemovedShapeOutlineInfo(removedStroke, kind.Value, fillShape));
+            int outlineGroupId = GetOrCreateShapeOutlineGroupId(removedStroke);
+            removedShapeOutlines.Add(new RemovedShapeOutlineInfo(removedStroke, kind.Value, fillShape, outlineGroupId));
         }
 
         if (removedShapeOutlines.Count == 0)
@@ -3746,10 +3751,10 @@ public partial class MainWindow : Window
                     continue;
                 }
 
-                RegisterShapeOutline(addedStroke, removedInfo.Kind);
+                RegisterShapeOutline(addedStroke, removedInfo.Kind, removedInfo.OutlineGroupId);
                 if (removedInfo.FillShape != null && DrawingCanvas.Children.Contains(removedInfo.FillShape))
                 {
-                    RegisterFilledShapeOutlineFragment(removedInfo.FillShape, addedStroke, removedInfo.Kind);
+                    RegisterFilledShapeOutlineFragment(removedInfo.FillShape, addedStroke, removedInfo.Kind, removedInfo.OutlineGroupId);
                 }
 
                 break;
@@ -3791,7 +3796,32 @@ public partial class MainWindow : Window
 
     private void RegisterShapeOutline(Stroke outlineStroke, ShapeKind kind)
     {
+        RegisterShapeOutline(outlineStroke, kind, null);
+    }
+
+    private void RegisterShapeOutline(Stroke outlineStroke, ShapeKind kind, int? outlineGroupId)
+    {
         _shapeOutlineKinds[outlineStroke] = kind;
+
+        if (outlineGroupId.HasValue)
+        {
+            _shapeOutlineGroupIds[outlineStroke] = outlineGroupId.Value;
+            return;
+        }
+
+        GetOrCreateShapeOutlineGroupId(outlineStroke);
+    }
+
+    private int GetOrCreateShapeOutlineGroupId(Stroke outlineStroke)
+    {
+        if (_shapeOutlineGroupIds.TryGetValue(outlineStroke, out int outlineGroupId))
+        {
+            return outlineGroupId;
+        }
+
+        int newGroupId = _nextShapeOutlineGroupId++;
+        _shapeOutlineGroupIds[outlineStroke] = newGroupId;
+        return newGroupId;
     }
 
     private void RegisterFilledShape(WpfShape fillShape, Stroke outlineStroke, ShapeKind kind)
@@ -3802,8 +3832,13 @@ public partial class MainWindow : Window
 
     private void RegisterFilledShapeOutlineFragment(WpfShape fillShape, Stroke outlineStroke, ShapeKind kind)
     {
+        RegisterFilledShapeOutlineFragment(fillShape, outlineStroke, kind, null);
+    }
+
+    private void RegisterFilledShapeOutlineFragment(WpfShape fillShape, Stroke outlineStroke, ShapeKind kind, int? outlineGroupId)
+    {
         _outlineStrokeFilledShapes[outlineStroke] = fillShape;
-        RegisterShapeOutline(outlineStroke, kind);
+        RegisterShapeOutline(outlineStroke, kind, outlineGroupId);
 
         if (!_filledShapeOutlineStrokes.TryGetValue(fillShape, out Stroke? primaryStroke)
             || !DrawingCanvas.Strokes.Contains(primaryStroke))
@@ -4026,6 +4061,37 @@ public partial class MainWindow : Window
         return outlineStrokes;
     }
 
+    private List<Stroke> FindOutlineStrokesInSameShape(Stroke outlineStroke)
+    {
+        var outlineStrokes = new List<Stroke>();
+
+        if (!_shapeOutlineGroupIds.TryGetValue(outlineStroke, out int outlineGroupId))
+        {
+            if (DrawingCanvas.Strokes.Contains(outlineStroke))
+            {
+                AddStrokeReferenceIfMissing(outlineStrokes, outlineStroke);
+            }
+
+            return outlineStrokes;
+        }
+
+        foreach (Stroke stroke in DrawingCanvas.Strokes)
+        {
+            if (_shapeOutlineGroupIds.TryGetValue(stroke, out int currentGroupId)
+                && currentGroupId == outlineGroupId)
+            {
+                AddStrokeReferenceIfMissing(outlineStrokes, stroke);
+            }
+        }
+
+        if (outlineStrokes.Count == 0 && DrawingCanvas.Strokes.Contains(outlineStroke))
+        {
+            AddStrokeReferenceIfMissing(outlineStrokes, outlineStroke);
+        }
+
+        return outlineStrokes;
+    }
+
     private bool IsStrokeOnFillShapeBoundary(Stroke stroke, WpfShape fillShape, ShapeKind expectedKind)
     {
         if (_shapeOutlineKinds.TryGetValue(stroke, out ShapeKind knownKind) && knownKind != expectedKind)
@@ -4124,7 +4190,17 @@ public partial class MainWindow : Window
 
         if (outlineStroke != null && DrawingCanvas.Strokes.Contains(outlineStroke))
         {
-            AddSelectedShapeOutlineStroke(outlineStroke);
+            if (fillShape == null)
+            {
+                foreach (Stroke stroke in FindOutlineStrokesInSameShape(outlineStroke))
+                {
+                    AddSelectedShapeOutlineStroke(stroke);
+                }
+            }
+            else
+            {
+                AddSelectedShapeOutlineStroke(outlineStroke);
+            }
         }
 
         if (fillShape != null)
