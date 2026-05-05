@@ -242,7 +242,7 @@
                             Style="{StaticResource ToolbarButtonStyle}"
                             Content="T"
                             ToolTip="{x:Static res:Resources.TextToolTip}"
-                            PreviewMouseLeftButtonDown="TextButton_PreviewMouseLeftButtonDown"
+                            PreviewMouseRightButtonUp="TextButton_PreviewMouseRightButtonUp"
                             Click="TextButton_Click"/>
 
                     <Button x:Name="EraserButton"

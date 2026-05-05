@@ -2810,16 +2810,8 @@ public partial class MainWindow : Window
 
         _penWidthPresetClickTimer.Stop();
         _pendingPenWidthPresetIndex = index;
-        e.Handled = true;
-
-        if (index < 0 || index >= _penWidthPresets.Count)
-        {
-            _pendingPenWidthPresetIndex = null;
-            return;
-        }
-
-        SelectPenWidth(_penWidthPresets[index]);
         _penWidthPresetClickTimer.Start();
+        e.Handled = true;
     }
 
     private void OpenPenWidthPresetPopup()
@@ -5916,12 +5908,26 @@ public partial class MainWindow : Window
         UpdateCursor();
     }
 
-    private void TextButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    private void TextButton_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
     {
-        if (e.ClickCount < 2)
+        if (_isClickThroughEnabled)
         {
             return;
         }
+
+        e.Handled = true;
+
+        ColorPopup.IsOpen = false;
+        PenWidthPopup.IsOpen = false;
+        RectangleSettingsPopup.IsOpen = false;
+
+        FinalizeOrCancelCurrentOperation();
+        ClearSelectedTextElement();
+        ClearSelectedShape();
+
+        _isStraightLineDrawing = false;
+        _isRectangleDrawing = false;
+        _isCircleDrawing = false;
 
         _currentTool = ToolMode.Text;
         DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
@@ -5929,7 +5935,6 @@ public partial class MainWindow : Window
         UpdateCursor();
 
         ShowFontDialog();
-        e.Handled = true;
     }
 
     private void EraserButton_Click(object sender, RoutedEventArgs e)
