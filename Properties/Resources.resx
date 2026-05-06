@@ -305,7 +305,7 @@ It may already be in use by another application.</value>
     <value>Pen (Right-click: Pen width settings)</value>
   </data>
   <data name="TextToolTip" xml:space="preserve">
-    <value>Text (Double-click for font settings)</value>
+    <value>Text (Right-click for font settings)</value>
   </data>
   <data name="ColorToolTip" xml:space="preserve">
     <value>Color (Click to PresetColors, Double-click to edit current color)</value>

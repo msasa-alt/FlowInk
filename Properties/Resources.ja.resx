@@ -305,7 +305,7 @@
     <value>ペン（右クリック: 線幅設定）</value>
   </data>
   <data name="TextToolTip" xml:space="preserve">
-    <value>テキスト（ダブルクリックでフォント設定）</value>
+    <value>テキスト（右クリックでフォント設定）</value>
   </data>
   <data name="ColorToolTip" xml:space="preserve">
     <value>色（クリックでプリセット色、ダブルクリックで現在色を編集）</value>

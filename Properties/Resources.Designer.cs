@@ -701,7 +701,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   Text (Double-click for font settings) に類似しているローカライズされた文字列を検索します。
+        ///   Text (Right-click for font settings) に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string TextToolTip {
             get {
