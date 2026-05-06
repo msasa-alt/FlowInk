@@ -367,4 +367,7 @@ It may already be in use by another application.</value>
   <data name="ColorSettings" xml:space="preserve">
     <value>Color settings...</value>
   </data>
+  <data name="EraserWidth" xml:space="preserve">
+    <value>Eraser width</value>
+  </data>
 </root>

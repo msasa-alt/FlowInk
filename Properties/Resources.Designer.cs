@@ -322,6 +322,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   Eraser width に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string EraserWidth {
+            get {
+                return ResourceManager.GetString("EraserWidth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Exit に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Exit {

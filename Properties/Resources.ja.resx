@@ -367,4 +367,7 @@
   <data name="ColorSettings" xml:space="preserve">
     <value>色設定...</value>
   </data>
+  <data name="EraserWidth" xml:space="preserve">
+    <value>消しゴム幅</value>
+  </data>
 </root>

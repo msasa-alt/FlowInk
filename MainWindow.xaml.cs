@@ -36,6 +36,7 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _presetColorClickTimer = new();
     private readonly DispatcherTimer _penButtonClickTimer = new();
     private readonly DispatcherTimer _penWidthPresetClickTimer = new();
+    private readonly DispatcherTimer _eraserWidthPresetClickTimer = new();
     private readonly DispatcherTimer _clickThroughHoverTimer = new();
     private Forms.ToolStripMenuItem? _trayEnableClickThroughMenuItem;
     private Forms.ToolStripMenuItem? _trayDisableClickThroughMenuItem;
@@ -50,6 +51,7 @@ public partial class MainWindow : Window
 
     private Color _currentPenColor = Color.FromArgb(255, 255, 0, 0);
     private double _currentPenWidth = 4;
+    private double _currentEraserWidth = 4;
     private string _currentTextFontFamilyName = DefaultTextFontFamilyName;
     private double _currentTextFontSize = DefaultTextFontSize;
     private FontStyle _currentTextFontStyle = FontStyles.Normal;
@@ -59,10 +61,12 @@ public partial class MainWindow : Window
     private List<Color> _recentColors = new();
     private List<int> _customColorValues = new();
     private List<double> _penWidthPresets = new();
+    private List<double> _eraserWidthPresets = new();
 
     private bool _pendingPenButtonSingleClick;
     private int? _pendingPresetColorIndex;
     private int? _pendingPenWidthPresetIndex;
+    private int? _pendingEraserWidthPresetIndex;
 
     private bool _isStraightLineDrawing;
     private Point _straightLineStartPoint;
@@ -709,6 +713,8 @@ public partial class MainWindow : Window
         public List<int> CustomColors { get; set; } = new();
         public double PenWidth { get; set; } = 4.0;
         public List<double> PenWidthPresets { get; set; } = new();
+        public double EraserWidth { get; set; } = 4.0;
+        public List<double> EraserWidthPresets { get; set; } = new();
         public string? CurrentColor { get; set; }
         public string? TextFontFamily { get; set; }
         public double TextFontSize { get; set; } = DefaultTextFontSize;
@@ -741,14 +747,17 @@ public partial class MainWindow : Window
         UpdateShapeButtonToolTips();
         UpdateRectangleSettingsUi();
         _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
+        _eraserWidthPresets = NormalizeEraserWidthPresets(_eraserWidthPresets);
 
         BuildPresetColorButtons();
         BuildRecentColorButtons();
         BuildPenWidthPresetButtons();
+        BuildEraserWidthPresetButtons();
         UpdateToolbarForCT();
         UpdateClickThroughButtonLabel();
 
         ApplyPenColor(_currentPenColor, addToRecent: false);
+        ApplyEraserWidthToCanvas();
         _isInitializing = false;
 
         DrawingCanvas.EditingMode = InkCanvasEditingMode.Ink;
@@ -773,6 +782,7 @@ public partial class MainWindow : Window
         InitializePresetColorClickTimer();
         InitializePenButtonClickTimer();
         InitializePenWidthPresetClickTimer();
+        InitializeEraserWidthPresetClickTimer();
         InitializeClickThroughHoverTimer();
         InitializeHotkeySettingsControls();
 
@@ -813,6 +823,7 @@ public partial class MainWindow : Window
     {
         _toastTimer.Stop();
         _presetColorClickTimer.Stop();
+        _eraserWidthPresetClickTimer.Stop();
         _clickThroughHoverTimer.Stop();
         EndToolbarDrag(saveSettings: false);
         _notifyIcon.Visible = false;
@@ -1024,7 +1035,7 @@ public partial class MainWindow : Window
 
     private double GetFillEraserRadius()
     {
-        return Math.Max(2.0, _currentPenWidth / 2.0);
+        return Math.Max(2.0, _currentEraserWidth / 2.0);
     }
 
     private void ApplyFillShapeEraserAtPoint(WpfShape shape, Point point, double radius)
@@ -1672,6 +1683,12 @@ public partial class MainWindow : Window
         _penWidthPresetClickTimer.Tick += PenWidthPresetClickTimer_Tick;
     }
 
+    private void InitializeEraserWidthPresetClickTimer()
+    {
+        _eraserWidthPresetClickTimer.Interval = TimeSpan.FromMilliseconds(Forms.SystemInformation.DoubleClickTime + 50);
+        _eraserWidthPresetClickTimer.Tick += EraserWidthPresetClickTimer_Tick;
+    }
+
     private void InitializeClickThroughHoverTimer()
     {
         _clickThroughHoverTimer.Interval = TimeSpan.FromMilliseconds(50);
@@ -1815,6 +1832,21 @@ public partial class MainWindow : Window
         _pendingPenWidthPresetIndex = null;
 
         ApplyPenWidthPreset(index);
+    }
+
+    private void EraserWidthPresetClickTimer_Tick(object? sender, EventArgs e)
+    {
+        _eraserWidthPresetClickTimer.Stop();
+
+        if (_pendingEraserWidthPresetIndex == null)
+        {
+            return;
+        }
+
+        int index = _pendingEraserWidthPresetIndex.Value;
+        _pendingEraserWidthPresetIndex = null;
+
+        ApplyEraserWidthPreset(index);
     }
 
     private void TrayEnableClickThroughMenuItem_Click(object? sender, EventArgs e)
@@ -2189,6 +2221,8 @@ public partial class MainWindow : Window
                 _customColorValues = new List<int>();
                 _currentPenWidth = 4.0;
                 _penWidthPresets = new List<double>(GetDefaultPenWidthPresets());
+                _currentEraserWidth = 4.0;
+                _eraserWidthPresets = new List<double>(GetDefaultEraserWidthPresets());
                 _currentTextFontFamilyName = DefaultTextFontFamilyName;
                 _currentTextFontSize = DefaultTextFontSize;
                 _currentTextFontStyle = FontStyles.Normal;
@@ -2213,6 +2247,8 @@ public partial class MainWindow : Window
                 _customColorValues = new List<int>();
                 _currentPenWidth = 4.0;
                 _penWidthPresets = new List<double>(GetDefaultPenWidthPresets());
+                _currentEraserWidth = 4.0;
+                _eraserWidthPresets = new List<double>(GetDefaultEraserWidthPresets());
                 _currentTextFontFamilyName = DefaultTextFontFamilyName;
                 _currentTextFontSize = DefaultTextFontSize;
                 _currentTextFontStyle = FontStyles.Normal;
@@ -2231,6 +2267,8 @@ public partial class MainWindow : Window
             _customColorValues = NormalizeCustomColors(settings.CustomColors);
             _currentPenWidth = NormalizePenWidth(settings.PenWidth);
             _penWidthPresets = NormalizePenWidthPresets(settings.PenWidthPresets);
+            _currentEraserWidth = NormalizePenWidth(settings.EraserWidth);
+            _eraserWidthPresets = NormalizeEraserWidthPresets(settings.EraserWidthPresets);
             _currentTextFontFamilyName = NormalizeTextFontFamilyName(settings.TextFontFamily);
             _currentTextFontSize = NormalizeTextFontSize(settings.TextFontSize);
             _currentTextFontStyle = settings.TextItalic ? FontStyles.Italic : FontStyles.Normal;
@@ -2274,6 +2312,8 @@ public partial class MainWindow : Window
             _customColorValues = new List<int>();
             _currentPenWidth = 4.0;
             _penWidthPresets = new List<double>(GetDefaultPenWidthPresets());
+            _currentEraserWidth = 4.0;
+            _eraserWidthPresets = new List<double>(GetDefaultEraserWidthPresets());
             _currentTextFontFamilyName = DefaultTextFontFamilyName;
             _currentTextFontSize = DefaultTextFontSize;
             _currentTextFontStyle = FontStyles.Normal;
@@ -2297,6 +2337,7 @@ public partial class MainWindow : Window
         string filePath = GetAppDataFilePath(AppSettingsFileName);
 
         _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
+        _eraserWidthPresets = NormalizeEraserWidthPresets(_eraserWidthPresets);
 
         var settings = new AppSettings
         {
@@ -2305,6 +2346,8 @@ public partial class MainWindow : Window
             CustomColors = new List<int>(_customColorValues),
             PenWidth = NormalizePenWidth(_currentPenWidth),
             PenWidthPresets = new List<double>(_penWidthPresets),
+            EraserWidth = NormalizePenWidth(_currentEraserWidth),
+            EraserWidthPresets = new List<double>(_eraserWidthPresets),
             CurrentColor = ToColorHexString(_currentPenColor),
             TextFontFamily = _currentTextFontFamilyName,
             TextFontSize = NormalizeTextFontSize(_currentTextFontSize),
@@ -2385,6 +2428,11 @@ public partial class MainWindow : Window
         return new List<double> { 1.0, 2.0, 4.0, 6.0, 10.0 };
     }
 
+    private static List<double> GetDefaultEraserWidthPresets()
+    {
+        return new List<double>(GetDefaultPenWidthPresets());
+    }
+
     private static List<double> NormalizePenWidthPresets(List<double>? presets)
     {
         var normalized = new List<double>();
@@ -2410,6 +2458,50 @@ public partial class MainWindow : Window
         }
 
         foreach (double fallback in GetDefaultPenWidthPresets())
+        {
+            double normalizedFallback = NormalizePenWidth(fallback);
+
+            if (normalized.Contains(normalizedFallback))
+            {
+                continue;
+            }
+
+            normalized.Add(normalizedFallback);
+
+            if (normalized.Count >= PenWidthPresetCount)
+            {
+                break;
+            }
+        }
+
+        return normalized;
+    }
+
+    private static List<double> NormalizeEraserWidthPresets(List<double>? presets)
+    {
+        var normalized = new List<double>();
+
+        if (presets != null)
+        {
+            foreach (double value in presets)
+            {
+                double normalizedValue = NormalizePenWidth(value);
+
+                if (normalized.Contains(normalizedValue))
+                {
+                    continue;
+                }
+
+                normalized.Add(normalizedValue);
+
+                if (normalized.Count >= PenWidthPresetCount)
+                {
+                    break;
+                }
+            }
+        }
+
+        foreach (double fallback in GetDefaultEraserWidthPresets())
         {
             double normalizedFallback = NormalizePenWidth(fallback);
 
@@ -2691,6 +2783,85 @@ public partial class MainWindow : Window
         }
     }
 
+    private void BuildEraserWidthPresetButtons()
+    {
+        _eraserWidthPresets = NormalizeEraserWidthPresets(_eraserWidthPresets);
+
+        EraserWidthPresetGrid.Children.Clear();
+
+        for (int i = 0; i < PenWidthPresetCount; i++)
+        {
+            double width = _eraserWidthPresets[i];
+            var button = CreateEraserWidthPresetButton(i, width);
+            EraserWidthPresetGrid.Children.Add(button);
+        }
+
+        UpdateEraserWidthPresetButtonHighlight();
+    }
+
+    private Button CreateEraserWidthPresetButton(int index, double width)
+    {
+        var previewLine = new Border
+        {
+            Width = 34,
+            Height = Math.Max(2.0, width),
+            Background = Brushes.White,
+            CornerRadius = new CornerRadius(Math.Max(1.0, width / 2.0)),
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+
+        var widthText = new TextBlock
+        {
+            Text = FormatPenWidthText(width),
+            Foreground = Brushes.White,
+            FontSize = 11,
+            Margin = new Thickness(8, 0, 0, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Right
+        };
+
+        var contentGrid = new Grid
+        {
+            Margin = new Thickness(8, 0, 8, 0)
+        };
+        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+        Grid.SetColumn(previewLine, 0);
+        Grid.SetColumn(widthText, 2);
+        contentGrid.Children.Add(previewLine);
+        contentGrid.Children.Add(widthText);
+
+        var button = new Button
+        {
+            Style = (Style)FindResource("PenWidthPresetButtonStyle"),
+            Content = contentGrid,
+            Tag = index,
+            ToolTip = $"{FormatPenWidthText(width)}  {SR.PenWidthPresetItemToolTipSuffix}"
+        };
+
+        button.PreviewMouseLeftButtonDown += EraserWidthPresetButton_PreviewMouseLeftButtonDown;
+        return button;
+    }
+
+    private void UpdateEraserWidthPresetButtonHighlight()
+    {
+        foreach (object child in EraserWidthPresetGrid.Children)
+        {
+            if (child is not Button button || button.Tag is not int index || index < 0 || index >= _eraserWidthPresets.Count)
+            {
+                continue;
+            }
+
+            bool isSelected = ArePenWidthsEqual(_eraserWidthPresets[index], _currentEraserWidth);
+            button.BorderBrush = isSelected ? Brushes.White : new SolidColorBrush(Color.FromRgb(102, 102, 102));
+            button.BorderThickness = isSelected ? new Thickness(2) : new Thickness(1);
+            button.FontWeight = isSelected ? FontWeights.Bold : FontWeights.Normal;
+        }
+    }
+
     private Button CreateColorSwatchButton(Color color)
     {
         return new Button
@@ -2787,6 +2958,15 @@ public partial class MainWindow : Window
         }
 
         _penWidthPresetClickTimer.Stop();
+
+        if (index < 0 || index >= _penWidthPresets.Count)
+        {
+            _pendingPenWidthPresetIndex = null;
+            e.Handled = true;
+            return;
+        }
+
+        SelectPenWidth(_penWidthPresets[index]);
         _pendingPenWidthPresetIndex = index;
         _penWidthPresetClickTimer.Start();
         e.Handled = true;
@@ -2797,7 +2977,9 @@ public partial class MainWindow : Window
         OpenPopupDeferred(PenWidthPopup, () =>
         {
             ColorPopup.IsOpen = false;
+            EraserWidthPopup.IsOpen = false;
             RectangleSettingsPopup.IsOpen = false;
+            HotkeySettingsPopup.IsOpen = false;
             BuildPenWidthPresetButtons();
         });
     }
@@ -2844,6 +3026,93 @@ public partial class MainWindow : Window
         SaveAppSettings();
         BuildPenWidthPresetButtons();
         PenWidthPopup.IsOpen = false;
+    }
+
+    private void EraserWidthPresetButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not Button button || button.Tag is not int index)
+        {
+            return;
+        }
+
+        if (e.ClickCount >= 2)
+        {
+            _eraserWidthPresetClickTimer.Stop();
+            _pendingEraserWidthPresetIndex = null;
+            e.Handled = true;
+            EditEraserWidthPreset(index);
+            return;
+        }
+
+        _eraserWidthPresetClickTimer.Stop();
+
+        if (index < 0 || index >= _eraserWidthPresets.Count)
+        {
+            _pendingEraserWidthPresetIndex = null;
+            e.Handled = true;
+            return;
+        }
+
+        SelectEraserWidth(_eraserWidthPresets[index]);
+        _pendingEraserWidthPresetIndex = index;
+        _eraserWidthPresetClickTimer.Start();
+        e.Handled = true;
+    }
+
+    private void OpenEraserWidthPresetPopup()
+    {
+        OpenPopupDeferred(EraserWidthPopup, () =>
+        {
+            ColorPopup.IsOpen = false;
+            PenWidthPopup.IsOpen = false;
+            RectangleSettingsPopup.IsOpen = false;
+            HotkeySettingsPopup.IsOpen = false;
+            BuildEraserWidthPresetButtons();
+        });
+    }
+
+    private void ApplyEraserWidthPreset(int index)
+    {
+        if (index < 0 || index >= _eraserWidthPresets.Count)
+        {
+            return;
+        }
+
+        SelectEraserWidth(_eraserWidthPresets[index]);
+        EraserWidthPopup.IsOpen = false;
+    }
+
+    private void EditEraserWidthPreset(int index)
+    {
+        _eraserWidthPresets = NormalizeEraserWidthPresets(_eraserWidthPresets);
+
+        if (index < 0 || index >= PenWidthPresetCount)
+        {
+            return;
+        }
+
+        ActivateEraserTool();
+
+        var dialog = new EraserWidthDialog(_eraserWidthPresets[index])
+        {
+            Owner = this
+        };
+
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        double updated = NormalizePenWidth(dialog.SelectedWidth);
+
+        var nextPresets = new List<double>(_eraserWidthPresets);
+        nextPresets[index] = updated;
+        _eraserWidthPresets = NormalizeEraserWidthPresets(nextPresets);
+
+        SelectEraserWidth(updated);
+        SaveAppSettings();
+        BuildEraserWidthPresetButtons();
+        EraserWidthPopup.IsOpen = false;
     }
 
     private void ActivatePenTool()
@@ -2933,6 +3202,11 @@ public partial class MainWindow : Window
         };
     }
 
+    private void ApplyEraserWidthToCanvas()
+    {
+        DrawingCanvas.EraserShape = new EllipseStylusShape(_currentEraserWidth, _currentEraserWidth);
+    }
+
     private void UpdateShapeButtonToolTips()
     {
         string rectangleText = _isRectangleFilled
@@ -2973,6 +3247,7 @@ public partial class MainWindow : Window
         {
             RectangleSettingsPopup.PlacementTarget = placementTarget;
             PenWidthPopup.IsOpen = false;
+            EraserWidthPopup.IsOpen = false;
             ColorPopup.IsOpen = false;
             UpdateRectangleSettingsUi();
         });
@@ -5657,6 +5932,14 @@ public partial class MainWindow : Window
         SaveAppSettings();
     }
 
+    private void SelectEraserWidth(double width)
+    {
+        _currentEraserWidth = NormalizePenWidth(width);
+        ApplyEraserWidthToCanvas();
+        UpdateEraserWidthPresetButtonHighlight();
+        SaveAppSettings();
+    }
+
     private void SelectTextFont(
         string fontFamilyName,
         double fontSize,
@@ -5840,6 +6123,7 @@ public partial class MainWindow : Window
     private void RectangleButton_Click(object sender, RoutedEventArgs e)
     {
         PenWidthPopup.IsOpen = false;
+        EraserWidthPopup.IsOpen = false;
         FinalizeOrCancelCurrentOperation();
         ClearSelectedTextElement();
 
@@ -5856,6 +6140,7 @@ public partial class MainWindow : Window
     private void CircleButton_Click(object sender, RoutedEventArgs e)
     {
         PenWidthPopup.IsOpen = false;
+        EraserWidthPopup.IsOpen = false;
         FinalizeOrCancelCurrentOperation();
         ClearSelectedTextElement();
 
@@ -5872,6 +6157,7 @@ public partial class MainWindow : Window
     private void TextButton_Click(object sender, RoutedEventArgs e)
     {
         PenWidthPopup.IsOpen = false;
+        EraserWidthPopup.IsOpen = false;
         FinalizeOrCancelCurrentOperation();
         ClearSelectedTextElement();
 
@@ -5912,9 +6198,8 @@ public partial class MainWindow : Window
         ShowTextButtonContextMenu();
     }
 
-    private void EraserButton_Click(object sender, RoutedEventArgs e)
+    private void ActivateEraserTool()
     {
-        PenWidthPopup.IsOpen = false;
         FinalizeOrCancelCurrentOperation();
         ClearSelectedTextElement();
 
@@ -5924,8 +6209,30 @@ public partial class MainWindow : Window
 
         _currentTool = ToolMode.Eraser;
         DrawingCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+        ApplyEraserWidthToCanvas();
         UpdateToolHighlight();
         UpdateCursor();
+    }
+
+    private void EraserButton_Click(object sender, RoutedEventArgs e)
+    {
+        PenWidthPopup.IsOpen = false;
+        EraserWidthPopup.IsOpen = false;
+        ActivateEraserTool();
+    }
+
+    private void EraserButton_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (_isClickThroughEnabled)
+        {
+            return;
+        }
+
+        e.Handled = true;
+
+        CloseToolbarPopupsAndPendingClicks();
+        ActivateEraserTool();
+        OpenEraserWidthPresetPopup();
     }
 
     private void ColorButton_Click(object sender, RoutedEventArgs e)
@@ -5940,6 +6247,7 @@ public partial class MainWindow : Window
         _presetColorClickTimer.Stop();
         _pendingPresetColorIndex = null;
         PenWidthPopup.IsOpen = false;
+        EraserWidthPopup.IsOpen = false;
         RectangleSettingsPopup.IsOpen = false;
         HotkeySettingsPopup.IsOpen = false;
 
@@ -5964,6 +6272,7 @@ public partial class MainWindow : Window
         OpenPopupDeferred(ColorPopup, () =>
         {
             PenWidthPopup.IsOpen = false;
+            EraserWidthPopup.IsOpen = false;
             RectangleSettingsPopup.IsOpen = false;
             HotkeySettingsPopup.IsOpen = false;
             BuildRecentColorButtons();
@@ -6020,8 +6329,12 @@ public partial class MainWindow : Window
         _penWidthPresetClickTimer.Stop();
         _pendingPenWidthPresetIndex = null;
 
+        _eraserWidthPresetClickTimer.Stop();
+        _pendingEraserWidthPresetIndex = null;
+
         ColorPopup.IsOpen = false;
         PenWidthPopup.IsOpen = false;
+        EraserWidthPopup.IsOpen = false;
         RectangleSettingsPopup.IsOpen = false;
         HotkeySettingsPopup.IsOpen = false;
     }
@@ -6158,13 +6471,16 @@ public partial class MainWindow : Window
 
         ColorPopup.IsOpen = false;
         PenWidthPopup.IsOpen = false;
+        EraserWidthPopup.IsOpen = false;
         RectangleSettingsPopup.IsOpen = false;
         _presetColorClickTimer.Stop();
         _pendingPresetColorIndex = null;
         _penButtonClickTimer.Stop();
         _penWidthPresetClickTimer.Stop();
+        _eraserWidthPresetClickTimer.Stop();
         _pendingPenButtonSingleClick = false;
         _pendingPenWidthPresetIndex = null;
+        _pendingEraserWidthPresetIndex = null;
 
         UpdateToolbarForCT();
         UpdateClickThroughButtonLabel();
@@ -6186,6 +6502,7 @@ public partial class MainWindow : Window
                 ToolMode.Text => InkCanvasEditingMode.None,
                 _ => InkCanvasEditingMode.EraseByPoint
             };
+            ApplyEraserWidthToCanvas();
             _clickThroughHoverTimer.Stop();
         }
 
