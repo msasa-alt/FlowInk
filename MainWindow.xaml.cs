@@ -33,7 +33,6 @@ public partial class MainWindow : Window
     private bool _hasShownClickThroughTrayMessage;
     private readonly Forms.NotifyIcon _notifyIcon = new();
     private readonly DispatcherTimer _toastTimer = new();
-    private readonly DispatcherTimer _colorButtonClickTimer = new();
     private readonly DispatcherTimer _presetColorClickTimer = new();
     private readonly DispatcherTimer _penButtonClickTimer = new();
     private readonly DispatcherTimer _penWidthPresetClickTimer = new();
@@ -771,7 +770,6 @@ public partial class MainWindow : Window
         UpdateCursor();
         InitializeNotifyIcon();
         InitializeToastTimer();
-        InitializeColorButtonClickTimer();
         InitializePresetColorClickTimer();
         InitializePenButtonClickTimer();
         InitializePenWidthPresetClickTimer();
@@ -814,7 +812,6 @@ public partial class MainWindow : Window
     private void MainWindow_Closed(object? sender, EventArgs e)
     {
         _toastTimer.Stop();
-        _colorButtonClickTimer.Stop();
         _presetColorClickTimer.Stop();
         _clickThroughHoverTimer.Stop();
         EndToolbarDrag(saveSettings: false);
@@ -1273,7 +1270,6 @@ public partial class MainWindow : Window
                 break;
         }
 
-        _colorButtonClickTimer.Stop();
         _presetColorClickTimer.Stop();
         _pendingPresetColorIndex = null;
         ColorPopup.IsOpen = false;
@@ -1658,12 +1654,6 @@ public partial class MainWindow : Window
         _toastTimer.Tick += ToastTimer_Tick;
     }
 
-    private void InitializeColorButtonClickTimer()
-    {
-        _colorButtonClickTimer.Interval = TimeSpan.FromMilliseconds(Forms.SystemInformation.DoubleClickTime + 50);
-        _colorButtonClickTimer.Tick += ColorButtonClickTimer_Tick;
-    }
-
     private void InitializePresetColorClickTimer()
     {
         _presetColorClickTimer.Interval = TimeSpan.FromMilliseconds(Forms.SystemInformation.DoubleClickTime + 50);
@@ -1775,18 +1765,6 @@ public partial class MainWindow : Window
     private void ToastTimer_Tick(object? sender, EventArgs e)
     {
         HideToastMessage();
-    }
-
-    private void ColorButtonClickTimer_Tick(object? sender, EventArgs e)
-    {
-        _colorButtonClickTimer.Stop();
-
-        if (_isClickThroughEnabled)
-        {
-            return;
-        }
-
-        ColorPopup.IsOpen = true;
     }
 
     private void PresetColorClickTimer_Tick(object? sender, EventArgs e)
@@ -2818,7 +2796,6 @@ public partial class MainWindow : Window
     {
         OpenPopupDeferred(PenWidthPopup, () =>
         {
-            _colorButtonClickTimer.Stop();
             ColorPopup.IsOpen = false;
             RectangleSettingsPopup.IsOpen = false;
             BuildPenWidthPresetButtons();
@@ -5951,7 +5928,7 @@ public partial class MainWindow : Window
         UpdateCursor();
     }
 
-    private void ColorButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    private void ColorButton_Click(object sender, RoutedEventArgs e)
     {
         if (_isClickThroughEnabled)
         {
@@ -5960,7 +5937,6 @@ public partial class MainWindow : Window
 
         e.Handled = true;
 
-        _colorButtonClickTimer.Stop();
         _presetColorClickTimer.Stop();
         _pendingPresetColorIndex = null;
         PenWidthPopup.IsOpen = false;
@@ -6035,7 +6011,6 @@ public partial class MainWindow : Window
 
     private void CloseToolbarPopupsAndPendingClicks()
     {
-        _colorButtonClickTimer.Stop();
         _presetColorClickTimer.Stop();
         _pendingPresetColorIndex = null;
 
@@ -6184,7 +6159,6 @@ public partial class MainWindow : Window
         ColorPopup.IsOpen = false;
         PenWidthPopup.IsOpen = false;
         RectangleSettingsPopup.IsOpen = false;
-        _colorButtonClickTimer.Stop();
         _presetColorClickTimer.Stop();
         _pendingPresetColorIndex = null;
         _penButtonClickTimer.Stop();
