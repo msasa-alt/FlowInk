@@ -2764,6 +2764,7 @@ public partial class MainWindow : Window
         };
 
         button.PreviewMouseLeftButtonDown += PenWidthPresetButton_PreviewMouseLeftButtonDown;
+        button.PreviewMouseRightButtonUp += PenWidthPresetButton_PreviewMouseRightButtonUp;
         return button;
     }
 
@@ -2843,6 +2844,7 @@ public partial class MainWindow : Window
         };
 
         button.PreviewMouseLeftButtonDown += EraserWidthPresetButton_PreviewMouseLeftButtonDown;
+        button.PreviewMouseRightButtonUp += EraserWidthPresetButton_PreviewMouseRightButtonUp;
         return button;
     }
 
@@ -2948,28 +2950,45 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (e.ClickCount >= 2)
+        _penWidthPresetClickTimer.Stop();
+        _pendingPenWidthPresetIndex = null;
+        e.Handled = true;
+
+        ApplyPenWidthPreset(index);
+    }
+
+    private void PenWidthPresetButton_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not Button button || button.Tag is not int index)
         {
-            _penWidthPresetClickTimer.Stop();
-            _pendingPenWidthPresetIndex = null;
-            e.Handled = true;
-            EditPenWidthPreset(index);
             return;
         }
 
         _penWidthPresetClickTimer.Stop();
+        _pendingPenWidthPresetIndex = null;
+        e.Handled = true;
 
         if (index < 0 || index >= _penWidthPresets.Count)
         {
-            _pendingPenWidthPresetIndex = null;
-            e.Handled = true;
             return;
         }
 
-        SelectPenWidth(_penWidthPresets[index]);
-        _pendingPenWidthPresetIndex = index;
-        _penWidthPresetClickTimer.Start();
-        e.Handled = true;
+        ShowPenWidthPresetContextMenu(button, index);
+    }
+
+    private void ShowPenWidthPresetContextMenu(Button placementTarget, int index)
+    {
+        var editPresetValueItem = new MenuItem
+        {
+            Header = SR.EditPresetValue
+        };
+        editPresetValueItem.Click += (_, _) =>
+        {
+            PenWidthPopup.IsOpen = false;
+            EditPenWidthPreset(index);
+        };
+
+        ShowToolbarContextMenu(placementTarget, editPresetValueItem);
     }
 
     private void OpenPenWidthPresetPopup()
@@ -3035,28 +3054,45 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (e.ClickCount >= 2)
+        _eraserWidthPresetClickTimer.Stop();
+        _pendingEraserWidthPresetIndex = null;
+        e.Handled = true;
+
+        ApplyEraserWidthPreset(index);
+    }
+
+    private void EraserWidthPresetButton_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not Button button || button.Tag is not int index)
         {
-            _eraserWidthPresetClickTimer.Stop();
-            _pendingEraserWidthPresetIndex = null;
-            e.Handled = true;
-            EditEraserWidthPreset(index);
             return;
         }
 
         _eraserWidthPresetClickTimer.Stop();
+        _pendingEraserWidthPresetIndex = null;
+        e.Handled = true;
 
         if (index < 0 || index >= _eraserWidthPresets.Count)
         {
-            _pendingEraserWidthPresetIndex = null;
-            e.Handled = true;
             return;
         }
 
-        SelectEraserWidth(_eraserWidthPresets[index]);
-        _pendingEraserWidthPresetIndex = index;
-        _eraserWidthPresetClickTimer.Start();
-        e.Handled = true;
+        ShowEraserWidthPresetContextMenu(button, index);
+    }
+
+    private void ShowEraserWidthPresetContextMenu(Button placementTarget, int index)
+    {
+        var editPresetValueItem = new MenuItem
+        {
+            Header = SR.EditPresetValue
+        };
+        editPresetValueItem.Click += (_, _) =>
+        {
+            EraserWidthPopup.IsOpen = false;
+            EditEraserWidthPreset(index);
+        };
+
+        ShowToolbarContextMenu(placementTarget, editPresetValueItem);
     }
 
     private void OpenEraserWidthPresetPopup()

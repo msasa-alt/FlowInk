@@ -313,6 +313,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   Edit preset value... に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string EditPresetValue {
+            get {
+                return ResourceManager.GetString("EditPresetValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Eraser に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Eraser {

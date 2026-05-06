@@ -370,4 +370,7 @@
   <data name="EraserWidth" xml:space="preserve">
     <value>消しゴム幅</value>
   </data>
+  <data name="EditPresetValue" xml:space="preserve">
+    <value>プリセット値の変更...</value>
+  </data>
 </root>

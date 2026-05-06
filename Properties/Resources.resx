@@ -370,4 +370,7 @@ It may already be in use by another application.</value>
   <data name="EraserWidth" xml:space="preserve">
     <value>Eraser width</value>
   </data>
+  <data name="EditPresetValue" xml:space="preserve">
+    <value>Edit preset value...</value>
+  </data>
 </root>
