@@ -205,6 +205,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   Color settings... に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ColorSettings {
+            get {
+                return ResourceManager.GetString("ColorSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Color (Click to PresetColors, Double-click to edit current color) に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string ColorToolTip {
@@ -336,6 +345,15 @@ namespace FlowInk.Properties {
         public static string Font {
             get {
                 return ResourceManager.GetString("Font", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Font settings... に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string FontSettings {
+            get {
+                return ResourceManager.GetString("FontSettings", resourceCulture);
             }
         }
         

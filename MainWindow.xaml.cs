@@ -5917,9 +5917,7 @@ public partial class MainWindow : Window
 
         e.Handled = true;
 
-        ColorPopup.IsOpen = false;
-        PenWidthPopup.IsOpen = false;
-        RectangleSettingsPopup.IsOpen = false;
+        CloseToolbarPopupsAndPendingClicks();
 
         FinalizeOrCancelCurrentOperation();
         ClearSelectedTextElement();
@@ -5934,7 +5932,7 @@ public partial class MainWindow : Window
         UpdateToolHighlight();
         UpdateCursor();
 
-        ShowFontDialog();
+        ShowTextButtonContextMenu();
     }
 
     private void EraserButton_Click(object sender, RoutedEventArgs e)
@@ -5960,21 +5958,97 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (e.ClickCount >= 2)
+        e.Handled = true;
+
+        _colorButtonClickTimer.Stop();
+        _presetColorClickTimer.Stop();
+        _pendingPresetColorIndex = null;
+        PenWidthPopup.IsOpen = false;
+        RectangleSettingsPopup.IsOpen = false;
+        HotkeySettingsPopup.IsOpen = false;
+
+        OpenColorPopup();
+    }
+
+    private void ColorButton_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (_isClickThroughEnabled)
         {
-            _colorButtonClickTimer.Stop();
-            _presetColorClickTimer.Stop();
-            _pendingPresetColorIndex = null;
-            PenWidthPopup.IsOpen = false;
-            e.Handled = true;
-            OpenCurrentColorEditor();
             return;
         }
 
-        PenWidthPopup.IsOpen = false;
-        _colorButtonClickTimer.Stop();
-        _colorButtonClickTimer.Start();
         e.Handled = true;
+
+        CloseToolbarPopupsAndPendingClicks();
+        ShowColorButtonContextMenu();
+    }
+
+    private void OpenColorPopup()
+    {
+        OpenPopupDeferred(ColorPopup, () =>
+        {
+            PenWidthPopup.IsOpen = false;
+            RectangleSettingsPopup.IsOpen = false;
+            HotkeySettingsPopup.IsOpen = false;
+            BuildRecentColorButtons();
+            BuildPresetColorButtons();
+        });
+    }
+
+    private void ShowTextButtonContextMenu()
+    {
+        var fontSettingsItem = new MenuItem
+        {
+            Header = SR.FontSettings
+        };
+        fontSettingsItem.Click += (_, _) => ShowFontDialog();
+
+        ShowToolbarContextMenu(TextButton, fontSettingsItem);
+    }
+
+    private void ShowColorButtonContextMenu()
+    {
+        var colorSettingsItem = new MenuItem
+        {
+            Header = SR.ColorSettings
+        };
+        colorSettingsItem.Click += (_, _) => OpenCurrentColorEditor();
+
+        ShowToolbarContextMenu(ColorButton, colorSettingsItem);
+    }
+
+    private void ShowToolbarContextMenu(Button placementTarget, params MenuItem[] menuItems)
+    {
+        var menu = new ContextMenu
+        {
+            PlacementTarget = placementTarget,
+            Placement = PlacementMode.MousePoint
+        };
+
+        foreach (MenuItem menuItem in menuItems)
+        {
+            menu.Items.Add(menuItem);
+        }
+
+        menu.IsOpen = true;
+    }
+
+    private void CloseToolbarPopupsAndPendingClicks()
+    {
+        _colorButtonClickTimer.Stop();
+        _presetColorClickTimer.Stop();
+        _pendingPresetColorIndex = null;
+
+        _penButtonClickTimer.Stop();
+        _pendingPenButtonSingleClick = false;
+
+        _penWidthPresetClickTimer.Stop();
+        _pendingPenWidthPresetIndex = null;
+
+        ColorPopup.IsOpen = false;
+        PenWidthPopup.IsOpen = false;
+        RectangleSettingsPopup.IsOpen = false;
+        HotkeySettingsPopup.IsOpen = false;
     }
 
     private void OpenCurrentColorEditor()

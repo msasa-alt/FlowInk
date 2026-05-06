@@ -254,7 +254,8 @@
                     <Button x:Name="ColorButton"
                             Style="{StaticResource ToolbarButtonStyle}"
                             ToolTip="{x:Static res:Resources.ColorToolTip}"
-                            PreviewMouseLeftButtonDown="ColorButton_PreviewMouseLeftButtonDown">
+                            PreviewMouseLeftButtonDown="ColorButton_PreviewMouseLeftButtonDown"
+                            PreviewMouseRightButtonUp="ColorButton_PreviewMouseRightButtonUp">
                         <Grid Width="18" Height="18">
                             <Ellipse Fill="{StaticResource CheckerBrush}"
                                      Stroke="#AAFFFFFF"

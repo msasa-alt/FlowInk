@@ -361,4 +361,10 @@
   <data name="RestoreFill" xml:space="preserve">
     <value>塗りつぶしを復元</value>
   </data>
+  <data name="FontSettings" xml:space="preserve">
+    <value>フォント設定...</value>
+  </data>
+  <data name="ColorSettings" xml:space="preserve">
+    <value>色設定...</value>
+  </data>
 </root>
