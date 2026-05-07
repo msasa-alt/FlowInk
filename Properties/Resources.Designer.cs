@@ -160,7 +160,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   Drawing is OFF. Turn it ON using the toolbar button or the hotkey. に類似しているローカライズされた文字列を検索します。
+        ///   Drawing is OFF. Turn it ON using the toolbar button or the hotkey((0)). に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string ClickThroughOffToast {
             get {
@@ -214,7 +214,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   Color (Click to PresetColors, Double-click to edit current color) に類似しているローカライズされた文字列を検索します。
+        ///   Color (Left click to PresetColors, Right click to edit current color) に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string ColorToolTip {
             get {
@@ -602,7 +602,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   Click: Select / Double-click: Edit に類似しているローカライズされた文字列を検索します。
+        ///   Left click: Select / Rigth click: Edit に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string PenWidthPresetItemToolTipSuffix {
             get {
@@ -620,7 +620,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   Click: Select / Double-click: Edit に類似しているローカライズされた文字列を検索します。
+        ///   Left click: Select / Right click: Edit に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string PresetColorItemToolTipSuffix {
             get {

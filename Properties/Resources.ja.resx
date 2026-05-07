@@ -263,10 +263,10 @@
     <value>Win</value>
   </data>
   <data name="PresetColorItemToolTipSuffix" xml:space="preserve">
-    <value>クリック: 選択 / ダブルクリック: 編集</value>
+    <value>左クリック: 選択 / 右クリック: 編集</value>
   </data>
   <data name="PenWidthPresetItemToolTipSuffix" xml:space="preserve">
-    <value>クリック: 選択 / ダブルクリック: 編集</value>
+    <value>左クリック: 選択 /右クリック: 編集</value>
   </data>
   <data name="RectangleFilledToolTipFormat" xml:space="preserve">
     <value>四角形（塗りつぶしON {0}% / 右クリックで設定）</value>
@@ -308,13 +308,13 @@
     <value>テキスト（右クリックでフォント設定）</value>
   </data>
   <data name="ColorToolTip" xml:space="preserve">
-    <value>色（クリックでプリセット色、ダブルクリックで現在色を編集）</value>
+    <value>色（左クリックでプリセット色、右クリックで現在色を編集）</value>
   </data>
   <data name="SettingsToolTip" xml:space="preserve">
     <value>設定</value>
   </data>
   <data name="ClickThroughOffToast" xml:space="preserve">
-    <value>描画OFF。描画ONにするには、ツールバーのOFFボタンかホットキーを押してください。</value>
+    <value>描画OFF。描画ONにするには、ツールバーのOFFボタンかホットキー((0))を押してください。</value>
   </data>
   <data name="PenWidthDialogTitle" xml:space="preserve">
     <value>ペンの太さ</value>

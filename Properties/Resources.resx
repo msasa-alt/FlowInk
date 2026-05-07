@@ -263,10 +263,10 @@ It may already be in use by another application.</value>
     <value>Win</value>
   </data>
   <data name="PresetColorItemToolTipSuffix" xml:space="preserve">
-    <value>Click: Select / Double-click: Edit</value>
+    <value>Left click: Select / Right click: Edit</value>
   </data>
   <data name="PenWidthPresetItemToolTipSuffix" xml:space="preserve">
-    <value>Click: Select / Double-click: Edit</value>
+    <value>Left click: Select / Rigth click: Edit</value>
   </data>
   <data name="RectangleFilledToolTipFormat" xml:space="preserve">
     <value>Rectangle (Fill ON {0}% / Right-click for settings)</value>
@@ -308,13 +308,13 @@ It may already be in use by another application.</value>
     <value>Text (Right-click for font settings)</value>
   </data>
   <data name="ColorToolTip" xml:space="preserve">
-    <value>Color (Click to PresetColors, Double-click to edit current color)</value>
+    <value>Color (Left click to PresetColors, Right click to edit current color)</value>
   </data>
   <data name="SettingsToolTip" xml:space="preserve">
     <value>Settings</value>
   </data>
   <data name="ClickThroughOffToast" xml:space="preserve">
-    <value>Drawing is OFF. Turn it ON using the toolbar button or the hotkey.</value>
+    <value>Drawing is OFF. Turn it ON using the toolbar button or the hotkey((0)).</value>
   </data>
   <data name="PenWidthDialogTitle" xml:space="preserve">
     <value>Pen Width</value>
