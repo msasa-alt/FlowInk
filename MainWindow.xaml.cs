@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -2687,6 +2687,7 @@ public partial class MainWindow : Window
 
             button.ToolTip = $"{GetColorDisplayText(color)}  {SR.PresetColorItemToolTipSuffix}";
             button.PreviewMouseLeftButtonDown += PresetColorButton_PreviewMouseLeftButtonDown;
+            button.PreviewMouseRightButtonUp += PresetColorButton_PreviewMouseRightButtonUp;
 
             PresetColorGrid.Children.Add(button);
         }
@@ -2888,19 +2889,57 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (e.ClickCount >= 2)
+        _presetColorClickTimer.Stop();
+        _pendingPresetColorIndex = null;
+        e.Handled = true;
+
+        if (slot.Index < 0 || slot.Index >= _presetColors.Count)
         {
-            _presetColorClickTimer.Stop();
-            _pendingPresetColorIndex = null;
-            e.Handled = true;
-            EditPresetColor(slot.Index);
+            return;
+        }
+
+        ApplyPenColor(_presetColors[slot.Index], addToRecent: true);
+        ColorPopup.IsOpen = false;
+    }
+
+    private void PresetColorButton_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not Button button || button.Tag is not PresetColorSlot slot)
+        {
             return;
         }
 
         _presetColorClickTimer.Stop();
-        _pendingPresetColorIndex = slot.Index;
+        _pendingPresetColorIndex = null;
         e.Handled = true;
-        _presetColorClickTimer.Start();
+
+        if (slot.Index < 0 || slot.Index >= _presetColors.Count)
+        {
+            return;
+        }
+
+        ShowPresetColorContextMenu(button, slot.Index);
+    }
+
+    private void ShowPresetColorContextMenu(Button placementTarget, int presetIndex)
+    {
+        var editPresetColorItem = new MenuItem
+        {
+            Header = SR.EditPresetColor
+        };
+        editPresetColorItem.Click += (_, _) =>
+        {
+            ColorPopup.IsOpen = false;
+            EditPresetColor(presetIndex);
+        };
+
+        var menu = new ContextMenu
+        {
+            PlacementTarget = placementTarget,
+            Placement = PlacementMode.MousePoint
+        };
+        menu.Items.Add(editPresetColorItem);
+        menu.IsOpen = true;
     }
 
     private void EditPresetColor(int index)

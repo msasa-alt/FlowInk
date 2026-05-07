@@ -373,4 +373,7 @@
   <data name="EditPresetValue" xml:space="preserve">
     <value>プリセット値の変更...</value>
   </data>
+  <data name="EditPresetColor" xml:space="preserve">
+    <value>プリセットカラー変更...</value>
+  </data>
 </root>

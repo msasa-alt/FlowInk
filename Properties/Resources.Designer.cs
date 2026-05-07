@@ -313,6 +313,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   Edit preset color... に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string EditPresetColor {
+            get {
+                return ResourceManager.GetString("EditPresetColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Edit preset value... に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string EditPresetValue {

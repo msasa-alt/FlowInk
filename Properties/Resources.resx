@@ -373,4 +373,7 @@ It may already be in use by another application.</value>
   <data name="EditPresetValue" xml:space="preserve">
     <value>Edit preset value...</value>
   </data>
+  <data name="EditPresetColor" xml:space="preserve">
+    <value>Edit preset color...</value>
+  </data>
 </root>
