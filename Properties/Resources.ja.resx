@@ -200,7 +200,7 @@
     <value>プリセットカラー</value>
   </data>
   <data name="RecentColors" xml:space="preserve">
-    <value>最近使った色</value>
+    <value>現在の色</value>
   </data>
   <data name="Rectangle" xml:space="preserve">
     <value>四角</value>
