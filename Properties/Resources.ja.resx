@@ -148,7 +148,7 @@
     <value>現在: {0}</value>
   </data>
   <data name="Eraser" xml:space="preserve">
-    <value>消しゴム</value>
+    <value>消しゴム: 右クリックで消しゴム幅の変更</value>
   </data>
   <data name="Exit" xml:space="preserve">
     <value>終了</value>

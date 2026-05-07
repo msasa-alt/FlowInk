@@ -148,7 +148,7 @@
     <value>Current: {0}</value>
   </data>
   <data name="Eraser" xml:space="preserve">
-    <value>Eraser</value>
+    <value>Eraser:Right click to change eraser width.</value>
   </data>
   <data name="Exit" xml:space="preserve">
     <value>Exit</value>

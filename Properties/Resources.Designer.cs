@@ -331,7 +331,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   Eraser に類似しているローカライズされた文字列を検索します。
+        ///   Eraser:Right click to change eraser width. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Eraser {
             get {
