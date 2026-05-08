@@ -33,10 +33,6 @@ public partial class MainWindow : Window
     private bool _hasShownClickThroughTrayMessage;
     private readonly Forms.NotifyIcon _notifyIcon = new();
     private readonly DispatcherTimer _toastTimer = new();
-    private readonly DispatcherTimer _presetColorClickTimer = new();
-    private readonly DispatcherTimer _penButtonClickTimer = new();
-    private readonly DispatcherTimer _penWidthPresetClickTimer = new();
-    private readonly DispatcherTimer _eraserWidthPresetClickTimer = new();
     private readonly DispatcherTimer _clickThroughHoverTimer = new();
     private Forms.ToolStripMenuItem? _trayEnableClickThroughMenuItem;
     private Forms.ToolStripMenuItem? _trayDisableClickThroughMenuItem;
@@ -63,10 +59,6 @@ public partial class MainWindow : Window
     private List<double> _penWidthPresets = new();
     private List<double> _eraserWidthPresets = new();
 
-    private bool _pendingPenButtonSingleClick;
-    private int? _pendingPresetColorIndex;
-    private int? _pendingPenWidthPresetIndex;
-    private int? _pendingEraserWidthPresetIndex;
 
     private bool _isStraightLineDrawing;
     private Point _straightLineStartPoint;
@@ -779,10 +771,6 @@ public partial class MainWindow : Window
         UpdateCursor();
         InitializeNotifyIcon();
         InitializeToastTimer();
-        InitializePresetColorClickTimer();
-        InitializePenButtonClickTimer();
-        InitializePenWidthPresetClickTimer();
-        InitializeEraserWidthPresetClickTimer();
         InitializeClickThroughHoverTimer();
         InitializeHotkeySettingsControls();
 
@@ -822,8 +810,6 @@ public partial class MainWindow : Window
     private void MainWindow_Closed(object? sender, EventArgs e)
     {
         _toastTimer.Stop();
-        _presetColorClickTimer.Stop();
-        _eraserWidthPresetClickTimer.Stop();
         _clickThroughHoverTimer.Stop();
         EndToolbarDrag(saveSettings: false);
         _notifyIcon.Visible = false;
@@ -1281,8 +1267,6 @@ public partial class MainWindow : Window
                 break;
         }
 
-        _presetColorClickTimer.Stop();
-        _pendingPresetColorIndex = null;
         ColorPopup.IsOpen = false;
         _currentInteractionState = InteractionState.None;
     }
@@ -1665,29 +1649,6 @@ public partial class MainWindow : Window
         _toastTimer.Tick += ToastTimer_Tick;
     }
 
-    private void InitializePresetColorClickTimer()
-    {
-        _presetColorClickTimer.Interval = TimeSpan.FromMilliseconds(Forms.SystemInformation.DoubleClickTime + 50);
-        _presetColorClickTimer.Tick += PresetColorClickTimer_Tick;
-    }
-
-    private void InitializePenButtonClickTimer()
-    {
-        _penButtonClickTimer.Interval = TimeSpan.FromMilliseconds(Forms.SystemInformation.DoubleClickTime + 50);
-        _penButtonClickTimer.Tick += PenButtonClickTimer_Tick;
-    }
-
-    private void InitializePenWidthPresetClickTimer()
-    {
-        _penWidthPresetClickTimer.Interval = TimeSpan.FromMilliseconds(Forms.SystemInformation.DoubleClickTime + 50);
-        _penWidthPresetClickTimer.Tick += PenWidthPresetClickTimer_Tick;
-    }
-
-    private void InitializeEraserWidthPresetClickTimer()
-    {
-        _eraserWidthPresetClickTimer.Interval = TimeSpan.FromMilliseconds(Forms.SystemInformation.DoubleClickTime + 50);
-        _eraserWidthPresetClickTimer.Tick += EraserWidthPresetClickTimer_Tick;
-    }
 
     private void InitializeClickThroughHoverTimer()
     {
@@ -1784,70 +1745,6 @@ public partial class MainWindow : Window
         HideToastMessage();
     }
 
-    private void PresetColorClickTimer_Tick(object? sender, EventArgs e)
-    {
-        _presetColorClickTimer.Stop();
-
-        if (_pendingPresetColorIndex == null)
-        {
-            return;
-        }
-
-        int index = _pendingPresetColorIndex.Value;
-        _pendingPresetColorIndex = null;
-
-        if (index < 0 || index >= _presetColors.Count)
-        {
-            return;
-        }
-
-        ApplyPenColor(_presetColors[index], addToRecent: true);
-        ColorPopup.IsOpen = false;
-    }
-
-    private void PenButtonClickTimer_Tick(object? sender, EventArgs e)
-    {
-        _penButtonClickTimer.Stop();
-
-        if (!_pendingPenButtonSingleClick || _isClickThroughEnabled)
-        {
-            _pendingPenButtonSingleClick = false;
-            return;
-        }
-
-        _pendingPenButtonSingleClick = false;
-        ActivatePenTool();
-    }
-
-    private void PenWidthPresetClickTimer_Tick(object? sender, EventArgs e)
-    {
-        _penWidthPresetClickTimer.Stop();
-
-        if (_pendingPenWidthPresetIndex == null)
-        {
-            return;
-        }
-
-        int index = _pendingPenWidthPresetIndex.Value;
-        _pendingPenWidthPresetIndex = null;
-
-        ApplyPenWidthPreset(index);
-    }
-
-    private void EraserWidthPresetClickTimer_Tick(object? sender, EventArgs e)
-    {
-        _eraserWidthPresetClickTimer.Stop();
-
-        if (_pendingEraserWidthPresetIndex == null)
-        {
-            return;
-        }
-
-        int index = _pendingEraserWidthPresetIndex.Value;
-        _pendingEraserWidthPresetIndex = null;
-
-        ApplyEraserWidthPreset(index);
-    }
 
     private void TrayEnableClickThroughMenuItem_Click(object? sender, EventArgs e)
     {
@@ -2889,8 +2786,6 @@ public partial class MainWindow : Window
             return;
         }
 
-        _presetColorClickTimer.Stop();
-        _pendingPresetColorIndex = null;
         e.Handled = true;
 
         if (slot.Index < 0 || slot.Index >= _presetColors.Count)
@@ -2909,8 +2804,6 @@ public partial class MainWindow : Window
             return;
         }
 
-        _presetColorClickTimer.Stop();
-        _pendingPresetColorIndex = null;
         e.Handled = true;
 
         if (slot.Index < 0 || slot.Index >= _presetColors.Count)
@@ -2989,8 +2882,6 @@ public partial class MainWindow : Window
             return;
         }
 
-        _penWidthPresetClickTimer.Stop();
-        _pendingPenWidthPresetIndex = null;
         e.Handled = true;
 
         ApplyPenWidthPreset(index);
@@ -3003,8 +2894,6 @@ public partial class MainWindow : Window
             return;
         }
 
-        _penWidthPresetClickTimer.Stop();
-        _pendingPenWidthPresetIndex = null;
         e.Handled = true;
 
         if (index < 0 || index >= _penWidthPresets.Count)
@@ -3093,8 +2982,6 @@ public partial class MainWindow : Window
             return;
         }
 
-        _eraserWidthPresetClickTimer.Stop();
-        _pendingEraserWidthPresetIndex = null;
         e.Handled = true;
 
         ApplyEraserWidthPreset(index);
@@ -3107,8 +2994,6 @@ public partial class MainWindow : Window
             return;
         }
 
-        _eraserWidthPresetClickTimer.Stop();
-        _pendingEraserWidthPresetIndex = null;
         e.Handled = true;
 
         if (index < 0 || index >= _eraserWidthPresets.Count)
@@ -6108,10 +5993,8 @@ public partial class MainWindow : Window
             return;
         }
 
-        _penButtonClickTimer.Stop();
-        _pendingPenButtonSingleClick = true;
         e.Handled = true;
-        _penButtonClickTimer.Start();
+        ActivatePenTool();
     }
 
     private void PenButton_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
@@ -6121,8 +6004,6 @@ public partial class MainWindow : Window
             return;
         }
 
-        _penButtonClickTimer.Stop();
-        _pendingPenButtonSingleClick = false;
         e.Handled = true;
 
         ActivatePenTool();
@@ -6319,8 +6200,6 @@ public partial class MainWindow : Window
 
         e.Handled = true;
 
-        _presetColorClickTimer.Stop();
-        _pendingPresetColorIndex = null;
         PenWidthPopup.IsOpen = false;
         EraserWidthPopup.IsOpen = false;
         RectangleSettingsPopup.IsOpen = false;
@@ -6395,18 +6274,6 @@ public partial class MainWindow : Window
 
     private void CloseToolbarPopupsAndPendingClicks()
     {
-        _presetColorClickTimer.Stop();
-        _pendingPresetColorIndex = null;
-
-        _penButtonClickTimer.Stop();
-        _pendingPenButtonSingleClick = false;
-
-        _penWidthPresetClickTimer.Stop();
-        _pendingPenWidthPresetIndex = null;
-
-        _eraserWidthPresetClickTimer.Stop();
-        _pendingEraserWidthPresetIndex = null;
-
         ColorPopup.IsOpen = false;
         PenWidthPopup.IsOpen = false;
         EraserWidthPopup.IsOpen = false;
@@ -6416,9 +6283,6 @@ public partial class MainWindow : Window
 
     private void OpenCurrentColorEditor()
     {
-        _presetColorClickTimer.Stop();
-        _pendingPresetColorIndex = null;
-
         var dialog = new ColorPickerDialog(_currentPenColor, BuildCustomColors())
         {
             Owner = this
@@ -6548,14 +6412,6 @@ public partial class MainWindow : Window
         PenWidthPopup.IsOpen = false;
         EraserWidthPopup.IsOpen = false;
         RectangleSettingsPopup.IsOpen = false;
-        _presetColorClickTimer.Stop();
-        _pendingPresetColorIndex = null;
-        _penButtonClickTimer.Stop();
-        _penWidthPresetClickTimer.Stop();
-        _eraserWidthPresetClickTimer.Stop();
-        _pendingPenButtonSingleClick = false;
-        _pendingPenWidthPresetIndex = null;
-        _pendingEraserWidthPresetIndex = null;
 
         UpdateToolbarForCT();
         UpdateClickThroughButtonLabel();
