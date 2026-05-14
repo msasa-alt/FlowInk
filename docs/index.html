@@ -398,6 +398,52 @@
       font-size: 14px;
       line-height: 1.6;
     }
+    
+    .toolbar-examples {
+      margin-top: 34px;
+      padding-top: 30px;
+      border-top: 1px solid var(--line);
+    }
+
+    .toolbar-example-gallery {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      max-width: 980px;
+      margin: 22px auto 0;
+    }
+
+    .toolbar-example-shot {
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+    }
+
+    .toolbar-example-shot a {
+      display: block;
+      cursor: zoom-in;
+    }
+
+    .toolbar-example-shot img {
+      width: 100%;
+      height: 170px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: 10px;
+      background: var(--soft);
+    }
+
+    .toolbar-example-shot figcaption {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.4;
+    }
 
     .use-cases {
       display: grid;
@@ -517,10 +563,61 @@
         grid-template-columns: 1fr;
         max-width: 560px;
       }
+      .toolbar-example-gallery {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-width: 620px;
+      }
     }
 
     @media (max-width: 760px) {
       .features,
+
+      .toolbar-examples {
+      margin-top: 34px;
+      padding-top: 30px;
+      border-top: 1px solid var(--line);
+    }
+
+    .toolbar-example-gallery {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      max-width: 980px;
+      margin: 22px auto 0;
+    }
+
+    .toolbar-example-shot {
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+    }
+
+    .toolbar-example-shot a {
+      display: block;
+      cursor: zoom-in;
+    }
+
+    .toolbar-example-shot img {
+      width: 100%;
+      height: 170px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: 10px;
+      background: var(--soft);
+    }
+
+    .toolbar-example-shot figcaption {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.4;
+    }
+
       .use-cases {
         grid-template-columns: 1fr;
       }
@@ -565,6 +662,18 @@
 
       .tool-icon img {
         width: 38px;
+      }
+
+      .toolbar-example-gallery {
+        gap: 12px;
+      }
+
+      .toolbar-example-shot {
+        padding: 10px;
+      }
+
+      .toolbar-example-shot img {
+        height: 150px;
       }
     }
   </style>
@@ -650,7 +759,7 @@
     <section class="section">
       <h2>ツールバーの各ボタンの説明</h2>
       <p class="section-lead">
-        ツールバーの各ボタンをクリックしたときの機能をまとめています。
+        左クリックで主な操作を選択または実行します。右クリックで対応している設定・メニュー・プリセットを開きます。
       </p>
 
       <div class="toolbar-diagram-wrap">
@@ -666,7 +775,7 @@
               </div>
               <div class="tool-body">
                 <strong>描画ON/OFFボタン</strong>
-                <p>描画ON/OFFの切り替えができます。クリックすると背後のウィンドウを操作できるようにします。描画OFFにするとツールバーは畳まれます。Ctrl+Alt+Tキーを同時に押す事と同じ機能です。</p>
+                <p>左クリックで描画のオン／オフを切り替えます。描画がオフのときは、FlowInkの背後にあるウィンドウを操作できます。描画がオフになるとツールバーは折りたたまれます。これは Ctrl+Alt+T を押したときと同じ操作です。</p>
               </div>
             </div>
 
@@ -676,7 +785,7 @@
               </div>
               <div class="tool-body">
                 <strong>ペンボタン</strong>
-                <p>マウスの左ボタンを押してドラッグすると線を描画できます。Shiftキーを押しながらドラッグすると直線、Shift+Altキーで矢印を描画できます。ペンボタンにカーソルを合わせてマウスの右ボタンをクリックすると線幅のプリセットポップアップが開いて線幅を変更できます。また、プリセットの線をダブルクリックするとプリセットの線幅を変更できます。</p>
+                <p>マウスの左ボタンを押してドラッグすると線を描画できます。Shiftキーを押しながらドラッグすると直線、Shift+Altキーで矢印を描画できます。ペンボタンにカーソルを合わせてマウスの右ボタンをクリックすると線幅のプリセットポップアップが開いて線幅を変更できます。また、プリセットの線を右クリックするとプリセットの線幅を変更できます。</p>
               </div>
             </div>
 
@@ -706,7 +815,7 @@
               </div>
               <div class="tool-body">
                 <strong>テキストボタン</strong>
-                <p>キーボードからテキストが入力できます。Enterで文字列確定、Shift+Enterでテキストボックス内で改行できます。テキストボタンをダブルクリックするとフォントを変更できます。入力したテキストをクリックするとテキスト選択状態となり、ドラッグするとテキストを移動できます。また、テキスト選択状態でテキストにカーソルを当てて右クリックするとテキストの編集／削除ができます。</p>
+                <p>キーボードからテキストが入力できます。Enterで文字列確定、Shift+Enterでテキストボックス内で改行できます。テキストボタンを右クリックするとフォントを変更できます。入力したテキストをクリックするとテキスト選択状態となり、ドラッグするとテキストを移動できます。また、テキストにカーソルを当てて右クリックするとテキストの編集／削除ができます。</p>
               </div>
             </div>
 
@@ -716,7 +825,7 @@
               </div>
               <div class="tool-body">
                 <strong>消しゴムボタン</strong>
-                <p>マウスの左ボタンを押しっぱなしにすることで、描いた線／円／四角をカーソルで消せます。ただしテキストは消せません。</p>
+                <p>マウスの左ボタンを押しっぱなしにすることで、描いた線／円／四角をカーソルで消せます、ただしテキストは消せません。テキストボタンを右クリックすると消しゴム幅プリセットメニューが開き、消しゴム幅が変更できます。また、プリセットの消しゴム幅を右クリックするとプリセット値を変更できます。</p>
               </div>
             </div>
 
@@ -726,7 +835,7 @@
               </div>
               <div class="tool-body">
                 <strong>カラーボタン</strong>
-                <p>描画色を変更できます。マウスの左ボタンをクリックすると、色選択ポップアップが開きます。選択することで描画色を変更できます。Preset Colorsの各色タイルをダブルクリックすることでプリセットの色を変更できます。また、色ボタンをダブルクリックすると現在の色を変更できます。</p>
+                <p>描画色を変更できます。マウスの左ボタンをクリックすると、色選択ポップアップが開きます。選択することで描画色を変更できます。プリセットカラーの各色タイルを右クリックするとプリセットの色を変更できます。色ボタンを右クリックすると現在の色を変更できます。</p>
               </div>
             </div>
 
@@ -772,6 +881,76 @@
           </div>
         </div>
       </div>
+          <!--  Toolbar right-click gallery -->
+      <div class="toolbar-examples">
+        <h3>右クリックメニューと設定</h3>
+        <p class="section-lead">
+          ツールバーボタンを右クリックすると、ペン幅、消しゴム幅、図形、テキスト、色に関するプリセット、メニュー、設定を開けます。画像をクリックすると原寸大で表示できます。
+        </p>
+
+        <div class="toolbar-example-gallery">
+          <figure class="toolbar-example-shot">
+            <a href="images/01PenBtn_ja.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/01PenBtn_ja.png"
+                alt="Pen width preset popup opened from the pen button"
+              />
+            </a>
+            <figcaption>線幅プリセット値の変更</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/02RectBtn_ja.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/02RectBtn_ja.png"
+                alt="Right-click the rectangle button"
+              />
+            </a>
+            <figcaption>四角形の設定</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/03EllBtn_ja.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/03EllBtn_ja.png"
+                alt="Right-click the ellipse button"
+              />
+            </a>
+            <figcaption>円の設定</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/04TxtBtn_ja.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/04TxtBtn_ja.png"
+                alt="Right-click the text button"
+              />
+            </a>
+            <figcaption>テキストの設定</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/05EraserBtn_ja.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/05EraserBtn_ja.png"
+                alt="Right-click the eraser button"
+              />
+            </a>
+            <figcaption>消しゴム幅プリセット値の変更</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/06ColorBtn_ja.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/06ColorBtn_ja.png"
+                alt="Right-click the Color button"
+              />
+            </a>
+            <figcaption>現在色の変更</figcaption>
+          </figure>
+           </div>
+      </div>
+<!---->
     </section>
 
     
@@ -788,6 +967,7 @@
           <li>テキスト入力時にEnterで文字列確定。Shifet+Enterで改行できます</li>
           <li>テキスト入力時に Ctrl + マウスホイールの上下で文字サイズを拡大・縮小できます</li>
           <li>ツールバーの余白をつかむと移動できます。(余白にカーソルを合わせて左ボタンクリックでドラッグ)</li>
+          <li>図形や文字列上で右クリックすると、メニューが開き、選択(移動)や編集(文字列のみ)ができます。</li>
         </ul>
       </div>
     </section>
@@ -962,7 +1142,7 @@
       </p>
 
       <p style="color: var(--muted);">
-        📩 メール： dev.sasaya@gmail.com
+        📩 dev.sasaya@gmail.com, 𝕏 <a href="https://x.com/m338" target="_blank" rel="noopener noreferrer" style="color: var(--text);">@m338</a>
       </p>
 
       <div style="max-width:700px;margin:0 auto;text-align:left;color:var(--muted);line-height:1.8;">

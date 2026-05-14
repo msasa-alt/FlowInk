@@ -371,6 +371,52 @@
       line-height: 1.6;
     }
 
+    .toolbar-examples {
+      margin-top: 34px;
+      padding-top: 30px;
+      border-top: 1px solid var(--line);
+    }
+
+    .toolbar-example-gallery {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      max-width: 980px;
+      margin: 22px auto 0;
+    }
+
+    .toolbar-example-shot {
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+    }
+
+    .toolbar-example-shot a {
+      display: block;
+      cursor: zoom-in;
+    }
+
+    .toolbar-example-shot img {
+      width: 100%;
+      height: 170px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: 10px;
+      background: var(--soft);
+    }
+
+    .toolbar-example-shot figcaption {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.4;
+    }
+
     .use-cases {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -489,11 +535,63 @@
         grid-template-columns: 1fr;
         max-width: 560px;
       }
+
+      .toolbar-example-gallery {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-width: 620px;
+      }
     }
 
     @media (max-width: 760px) {
       .features,
-      .use-cases {
+  
+    .toolbar-examples {
+      margin-top: 34px;
+      padding-top: 30px;
+      border-top: 1px solid var(--line);
+    }
+
+    .toolbar-example-gallery {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      max-width: 980px;
+      margin: 22px auto 0;
+    }
+
+    .toolbar-example-shot {
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+    }
+
+    .toolbar-example-shot a {
+      display: block;
+      cursor: zoom-in;
+    }
+
+    .toolbar-example-shot img {
+      width: 100%;
+      height: 170px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: 10px;
+      background: var(--soft);
+    }
+
+    .toolbar-example-shot figcaption {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .use-cases {
         grid-template-columns: 1fr;
       }
 
@@ -537,6 +635,18 @@
 
       .tool-icon img {
         width: 38px;
+      }
+
+      .toolbar-example-gallery {
+        gap: 12px;
+      }
+
+      .toolbar-example-shot {
+        padding: 10px;
+      }
+
+      .toolbar-example-shot img {
+        height: 150px;
       }
     }
   </style>
@@ -623,7 +733,7 @@
     <section class="section">
       <h2>Toolbar buttons</h2>
       <p class="section-lead">
-        Here is what each toolbar button does.
+        Left-click selects or runs the main action. Right-click opens related settings, menus, or presets where available.
       </p>
 
       <div class="toolbar-diagram-wrap">
@@ -639,7 +749,7 @@
               </div>
               <div class="tool-body">
                 <strong>Drawing ON/OFF button</strong>
-                <p>Toggles drawing on or off. When drawing is off, you can interact with windows behind FlowInk. The toolbar is collapsed when drawing is off. This is the same action as pressing Ctrl+Alt+T.</p>
+                <p>Left-click to toggle drawing on or off. When drawing is off, you can interact with windows behind FlowInk. The toolbar is collapsed when drawing is off. This is the same action as pressing Ctrl+Alt+T.</p>
               </div>
             </div>
 
@@ -649,7 +759,7 @@
               </div>
               <div class="tool-body">
                 <strong>Pen button</strong>
-                <p>Drag with the left mouse button to draw. Hold Shift while dragging to draw a straight line, or Shift+Alt to draw an arrow. Right-click the pen button to open the pen width preset popup. Double-click a preset line to edit that preset width.</p>
+                <p>Left-click to select the pen tool. Drag with the left mouse button to draw. Hold Shift while dragging to draw a straight line, or Shift+Alt to draw an arrow. Right-click the pen button to open the pen width preset popup. Right-click a preset line to edit that preset width.</p>
               </div>
             </div>
 
@@ -679,7 +789,7 @@
               </div>
               <div class="tool-body">
                 <strong>Text button</strong>
-                <p>Enter text from the keyboard. Press Enter to confirm text, or Shift+Enter to insert a line break. Double-click the text button to change the font. Click existing text to select it, drag it to move it, and right-click selected text to edit or delete it.</p>
+                <p>Enter text from the keyboard. Press Enter to confirm text, or Shift+Enter to insert a line break. Right-click the text button to open the text settings menu. Use Font settings... to change the font. Click existing text to select it, drag it to move it, and right-click selected text to edit or delete it.</p>
               </div>
             </div>
 
@@ -689,7 +799,7 @@
               </div>
               <div class="tool-body">
                 <strong>Eraser button</strong>
-                <p>Hold the left mouse button and move the cursor over drawn lines, rectangles, or ellipses to erase them. Text is not erased by the eraser.</p>
+                <p>Hold the left mouse button and move the cursor over drawn lines, rectangles, or ellipses to erase them. Text is not erased by the eraser. Right-click to open the eraser width presets. In the preset popup, left-click a width to select it, or right-click a preset and choose EditPresetValue to edit it.</p>
               </div>
             </div>
 
@@ -699,7 +809,7 @@
               </div>
               <div class="tool-body">
                 <strong>Color button</strong>
-                <p>Change the drawing color. Left-click to open the color selection popup. Double-click a preset color tile to edit that preset. Double-click the color button to edit the current color.</p>
+                <p>Left-click to open the color selection popup. In the popup, left-click a color to select it, or right-click a color to edit that preset. Right-click the color button to open the color settings menu and edit the current color.</p>
               </div>
             </div>
 
@@ -745,6 +855,77 @@
           </div>
         </div>
       </div>
+    <!--  Toolbar right-click gallery -->
+      <div class="toolbar-examples">
+        <h3>Right-click menus and settings</h3>
+        <p class="section-lead">
+          Right-click toolbar buttons to quickly open presets, menus, and settings for pen width, eraser width, shapes, text, and color. Click any image to view it at full size.
+        </p>
+
+        <div class="toolbar-example-gallery">
+          <figure class="toolbar-example-shot">
+            <a href="images/01PenBtn.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/01PenBtn.png"
+                alt="Pen width preset popup opened from the pen button"
+              />
+            </a>
+            <figcaption>Pen width presets</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/02RectBtn.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/02RectBtn.png"
+                alt="Right-click the rectangle button"
+              />
+            </a>
+            <figcaption>Rectangle settings</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/03EllBtn.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/03EllBtn.png"
+                alt="Right-click the ellipse button"
+              />
+            </a>
+            <figcaption>Ellipse settings</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/04TxtBtn.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/04TxtBtn.png"
+                alt="Right-click the text button"
+              />
+            </a>
+            <figcaption>Text settings</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/05EraserBtn.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/05EraserBtn.png"
+                alt="Right-click the eraser button"
+              />
+            </a>
+            <figcaption>Eraser width presets</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/06ColorBtn.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/06ColorBtn.png"
+                alt="Right-click the Color button"
+              />
+            </a>
+            <figcaption>Color settings</figcaption>
+          </figure>
+           </div>
+      </div>
+<!---->
+
     </section>
 
     <section class="section">
@@ -760,6 +941,7 @@
           <li>While entering text, press Enter to confirm the text. Press Shift+Enter to insert a line break.</li>
           <li>While entering text, hold Ctrl and use the mouse wheel to increase or decrease the font size.</li>
           <li>Drag the empty area of the toolbar to move it.</li>
+          <li>Right-click a shape or text to open a menu. From the menu, you can select and move the item, or edit it if it is text.</li>
         </ul>
       </div>
     </section>
@@ -932,7 +1114,7 @@
       </p>
 
       <p style="color: var(--muted);">
-        📩 Email: dev.sasaya@gmail.com
+        📩 dev.sasaya@gmail.com, 𝕏 <a href="https://x.com/m338" target="_blank" rel="noopener noreferrer" style="color: var(--text);">@m338</a>
       </p>
 
       <div style="max-width:700px;margin:0 auto;text-align:left;color:var(--muted);line-height:1.8;">
