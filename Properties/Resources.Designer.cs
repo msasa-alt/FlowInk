@@ -160,7 +160,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   Drawing is OFF. Turn it ON using the toolbar button or the hotkey. に類似しているローカライズされた文字列を検索します。
+        ///   Drawing is OFF. Turn it ON using the toolbar button or the hotkey((0)). に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string ClickThroughOffToast {
             get {
@@ -205,7 +205,16 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   Color (Click to PresetColors, Double-click to edit current color) に類似しているローカライズされた文字列を検索します。
+        ///   Color settings... に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ColorSettings {
+            get {
+                return ResourceManager.GetString("ColorSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Color (Left click to PresetColors, Right click to edit current color) に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string ColorToolTip {
             get {
@@ -304,11 +313,38 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   Eraser に類似しているローカライズされた文字列を検索します。
+        ///   Edit preset color... に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string EditPresetColor {
+            get {
+                return ResourceManager.GetString("EditPresetColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Edit preset value... に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string EditPresetValue {
+            get {
+                return ResourceManager.GetString("EditPresetValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Eraser:Right click to change eraser width. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Eraser {
             get {
                 return ResourceManager.GetString("Eraser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Eraser width に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string EraserWidth {
+            get {
+                return ResourceManager.GetString("EraserWidth", resourceCulture);
             }
         }
         
@@ -340,6 +376,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   Font settings... に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string FontSettings {
+            get {
+                return ResourceManager.GetString("FontSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Font Size に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string FontSize {
@@ -358,7 +403,8 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   Failed to register the global hotkey {0}.\nIt may already be in use by another application. に類似しているローカライズされた文字列を検索します。
+        ///   Failed to register the global hotkey {0}.
+        ///It may already be in use by another application. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string GlobalHotkeyRegisterFailedFormat {
             get {
@@ -556,7 +602,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   Click: Select / Double-click: Edit に類似しているローカライズされた文字列を検索します。
+        ///   Left click: Select / Rigth click: Edit に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string PenWidthPresetItemToolTipSuffix {
             get {
@@ -574,7 +620,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   Click: Select / Double-click: Edit に類似しているローカライズされた文字列を検索します。
+        ///   Left click: Select / Right click: Edit に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string PresetColorItemToolTipSuffix {
             get {
@@ -700,7 +746,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   Text (Double-click for font settings) に類似しているローカライズされた文字列を検索します。
+        ///   Text (Right-click for font settings) に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string TextToolTip {
             get {

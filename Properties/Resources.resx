@@ -148,7 +148,7 @@
     <value>Current: {0}</value>
   </data>
   <data name="Eraser" xml:space="preserve">
-    <value>Eraser</value>
+    <value>Eraser:Right click to change eraser width.</value>
   </data>
   <data name="Exit" xml:space="preserve">
     <value>Exit</value>
@@ -163,7 +163,8 @@
     <value>Font Size</value>
   </data>
   <data name="GlobalHotkeyRegisterFailedFormat" xml:space="preserve">
-    <value>Failed to register the global hotkey {0}.\nIt may already be in use by another application.</value>
+    <value>Failed to register the global hotkey {0}.
+It may already be in use by another application.</value>
   </data>
   <data name="Hide" xml:space="preserve">
     <value>Hide</value>
@@ -262,10 +263,10 @@
     <value>Win</value>
   </data>
   <data name="PresetColorItemToolTipSuffix" xml:space="preserve">
-    <value>Click: Select / Double-click: Edit</value>
+    <value>Left click: Select / Right click: Edit</value>
   </data>
   <data name="PenWidthPresetItemToolTipSuffix" xml:space="preserve">
-    <value>Click: Select / Double-click: Edit</value>
+    <value>Left click: Select / Rigth click: Edit</value>
   </data>
   <data name="RectangleFilledToolTipFormat" xml:space="preserve">
     <value>Rectangle (Fill ON {0}% / Right-click for settings)</value>
@@ -304,16 +305,16 @@
     <value>Pen (Right-click: Pen width settings)</value>
   </data>
   <data name="TextToolTip" xml:space="preserve">
-    <value>Text (Double-click for font settings)</value>
+    <value>Text (Right-click for font settings)</value>
   </data>
   <data name="ColorToolTip" xml:space="preserve">
-    <value>Color (Click to PresetColors, Double-click to edit current color)</value>
+    <value>Color (Left click to PresetColors, Right click to edit current color)</value>
   </data>
   <data name="SettingsToolTip" xml:space="preserve">
     <value>Settings</value>
   </data>
   <data name="ClickThroughOffToast" xml:space="preserve">
-    <value>Drawing is OFF. Turn it ON using the toolbar button or the hotkey.</value>
+    <value>Drawing is OFF. Turn it ON using the toolbar button or the hotkey((0)).</value>
   </data>
   <data name="PenWidthDialogTitle" xml:space="preserve">
     <value>Pen Width</value>
@@ -359,5 +360,20 @@
   </data>
   <data name="RestoreFill" xml:space="preserve">
     <value>Restore Fill</value>
+  </data>
+  <data name="FontSettings" xml:space="preserve">
+    <value>Font settings...</value>
+  </data>
+  <data name="ColorSettings" xml:space="preserve">
+    <value>Color settings...</value>
+  </data>
+  <data name="EraserWidth" xml:space="preserve">
+    <value>Eraser width</value>
+  </data>
+  <data name="EditPresetValue" xml:space="preserve">
+    <value>Edit preset value...</value>
+  </data>
+  <data name="EditPresetColor" xml:space="preserve">
+    <value>Edit preset color...</value>
   </data>
 </root>
