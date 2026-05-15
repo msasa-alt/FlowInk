@@ -544,54 +544,7 @@
 
     @media (max-width: 760px) {
       .features,
-  
-    .toolbar-examples {
-      margin-top: 34px;
-      padding-top: 30px;
-      border-top: 1px solid var(--line);
-    }
-
-    .toolbar-example-gallery {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 16px;
-      max-width: 980px;
-      margin: 22px auto 0;
-    }
-
-    .toolbar-example-shot {
-      margin: 0;
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: #fff;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
-    }
-
-    .toolbar-example-shot a {
-      display: block;
-      cursor: zoom-in;
-    }
-
-    .toolbar-example-shot img {
-      width: 100%;
-      height: 170px;
-      object-fit: contain;
-      display: block;
-      margin: 0 auto;
-      border-radius: 10px;
-      background: var(--soft);
-    }
-
-    .toolbar-example-shot figcaption {
-      margin-top: 8px;
-      font-size: 13px;
-      color: var(--muted);
-      text-align: center;
-      line-height: 1.4;
-    }
-
-    .use-cases {
+      .use-cases {
         grid-template-columns: 1fr;
       }
 
@@ -943,6 +896,54 @@
           <li>Drag the empty area of the toolbar to move it.</li>
           <li>Right-click a shape or text to open a menu. From the menu, you can select and move the item, or edit it if it is text.</li>
         </ul>
+      </div>
+      <div class="toolbar-examples">
+        <h3>Other feature examples</h3>
+        <p class="section-lead">
+          Right-click a shape or text to open its context menu, or open the hotkey settings from the Settings button. Click any image to view it at full size.
+        </p>
+
+        <div class="toolbar-example-gallery">
+          <figure class="toolbar-example-shot">
+            <a href="images/01RightClickTheRect.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/01RightClickTheRect.png"
+                alt="Rectangle context menu opened by right-clicking a rectangle"
+              />
+            </a>
+            <figcaption>Rectangle context menu</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/02RightClickTheEll.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/02RightClickTheEll.png"
+                alt="Ellipse context menu opened by right-clicking an ellipse"
+              />
+            </a>
+            <figcaption>Ellipse context menu</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/03RightClickTheTxt.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/03RightClickTheTxt.png"
+                alt="Text context menu opened by right-clicking text"
+              />
+            </a>
+            <figcaption>Text context menu</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/04SettingDlg.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/04SettingDlg.png"
+                alt="Hotkey settings popup opened from the settings button"
+              />
+            </a>
+            <figcaption>Hotkey settings</figcaption>
+          </figure>
+        </div>
       </div>
     </section>
 
