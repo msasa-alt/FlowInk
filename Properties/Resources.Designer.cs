@@ -313,6 +313,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   Edit preset... に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string EditPenPreset {
+            get {
+                return ResourceManager.GetString("EditPenPreset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Edit preset color... に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string EditPresetColor {
@@ -539,6 +548,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   {0}% に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string OpacityValueFormat {
+            get {
+                return ResourceManager.GetString("OpacityValueFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Could not open the browser. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string OpenBrowserFailed {
@@ -553,6 +571,78 @@ namespace FlowInk.Properties {
         public static string Pen {
             get {
                 return ResourceManager.GetString("Pen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Change... に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string PenPresetChangeColor {
+            get {
+                return ResourceManager.GetString("PenPresetChangeColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Color に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string PenPresetColor {
+            get {
+                return ResourceManager.GetString("PenPresetColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Edit pen preset に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string PenPresetDialogTitle {
+            get {
+                return ResourceManager.GetString("PenPresetDialogTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Width: {0}px / Opacity: {1}% / Color: {2} に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string PenPresetItemToolTipFormat {
+            get {
+                return ResourceManager.GetString("PenPresetItemToolTipFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Opacity に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string PenPresetOpacity {
+            get {
+                return ResourceManager.GetString("PenPresetOpacity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Preview に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string PenPresetPreview {
+            get {
+                return ResourceManager.GetString("PenPresetPreview", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Pen presets に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string PenPresets {
+            get {
+                return ResourceManager.GetString("PenPresets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Width に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string PenPresetWidth {
+            get {
+                return ResourceManager.GetString("PenPresetWidth", resourceCulture);
             }
         }
         
