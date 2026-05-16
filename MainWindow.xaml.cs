@@ -2877,12 +2877,34 @@ public partial class MainWindow : Window
         Color effectiveColor = CreateColorWithOpacity(preset.Color, preset.OpacityPercent);
         double previewDiameter = GetPenPresetPreviewDiameter(preset.Width);
 
+        var checkerCircle = new WpfEllipse
+        {
+            Width = previewDiameter,
+            Height = previewDiameter,
+            Fill = (Brush)FindResource("CheckerBrush"),
+            Stroke = new SolidColorBrush(Color.FromArgb(170, 255, 255, 255)),
+            StrokeThickness = 1,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            IsHitTestVisible = false
+        };
+
         var previewCircle = new WpfEllipse
         {
             Width = previewDiameter,
             Height = previewDiameter,
             Fill = new SolidColorBrush(effectiveColor),
-            Stroke = new SolidColorBrush(Color.FromArgb(160, 255, 255, 255)),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            IsHitTestVisible = false
+        };
+
+        var outlineCircle = new WpfEllipse
+        {
+            Width = previewDiameter,
+            Height = previewDiameter,
+            Fill = Brushes.Transparent,
+            Stroke = new SolidColorBrush(Color.FromArgb(96, 0, 0, 0)),
             StrokeThickness = 1,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
@@ -2894,21 +2916,14 @@ public partial class MainWindow : Window
             Width = 28,
             Height = 24,
             HorizontalAlignment = HorizontalAlignment.Center,
-            ClipToBounds = true,
+            VerticalAlignment = VerticalAlignment.Center,
+            ClipToBounds = false,
             IsHitTestVisible = false
         };
 
-        circleHost.Children.Add(new WpfRectangle
-        {
-            Width = 28,
-            Height = 24,
-            Fill = (Brush)FindResource("CheckerBrush"),
-            RadiusX = 3,
-            RadiusY = 3,
-            Opacity = 0.45,
-            IsHitTestVisible = false
-        });
+        circleHost.Children.Add(checkerCircle);
         circleHost.Children.Add(previewCircle);
+        circleHost.Children.Add(outlineCircle);
 
         var opacityText = new TextBlock
         {
