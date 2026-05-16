@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Media;
+using Forms = System.Windows.Forms;
+using Drawing = System.Drawing;
 using SR = FlowInk.Properties.Resources;
 
 namespace FlowInk;
@@ -22,7 +24,7 @@ public partial class PenPresetDialog : Window
         _selectedBaseColor = Color.FromArgb(255, initialColor.R, initialColor.G, initialColor.B);
         SelectedWidth = NormalizeWidth(initialWidth);
         SelectedOpacityPercent = NormalizeOpacity(initialOpacityPercent);
-        CustomColors = customColors ?? Array.Empty<int>();
+        CustomColors = NormalizeCustomColors(customColors);
 
         if (initialColor.A != 255 && initialOpacityPercent == 100)
         {
@@ -80,6 +82,24 @@ public partial class PenPresetDialog : Window
         return NormalizeOpacity((int)Math.Round(color.A * 100.0 / 255.0));
     }
 
+    private static int[] NormalizeCustomColors(int[]? customColors)
+    {
+        int[] normalized = new int[16];
+
+        if (customColors is null)
+        {
+            return normalized;
+        }
+
+        int count = Math.Min(customColors.Length, normalized.Length);
+        for (int i = 0; i < count; i++)
+        {
+            normalized[i] = customColors[i] & 0x00FFFFFF;
+        }
+
+        return normalized;
+    }
+
     private static Color CreateColorWithOpacity(Color color, int opacityPercent)
     {
         byte alpha = (byte)Math.Round(255.0 * NormalizeOpacity(opacityPercent) / 100.0);
@@ -110,29 +130,22 @@ public partial class PenPresetDialog : Window
 
     private void ColorButton_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new ColorPickerDialog(CreateColorWithOpacity(_selectedBaseColor, SelectedOpacityPercent), CustomColors)
+        using var dialog = new Forms.ColorDialog
         {
-            Owner = this
+            AllowFullOpen = true,
+            AnyColor = true,
+            FullOpen = true,
+            Color = Drawing.Color.FromArgb(_selectedBaseColor.R, _selectedBaseColor.G, _selectedBaseColor.B),
+            CustomColors = NormalizeCustomColors(CustomColors)
         };
 
-        if (dialog.ShowDialog() != true)
+        if (dialog.ShowDialog() != Forms.DialogResult.OK)
         {
             return;
         }
 
-        CustomColors = dialog.CustomColors;
-        _selectedBaseColor = Color.FromArgb(255, dialog.SelectedColor.R, dialog.SelectedColor.G, dialog.SelectedColor.B);
-        SelectedOpacityPercent = GetOpacityPercent(dialog.SelectedColor);
-
-        _isUpdating = true;
-        try
-        {
-            OpacitySlider.Value = SelectedOpacityPercent;
-        }
-        finally
-        {
-            _isUpdating = false;
-        }
+        CustomColors = NormalizeCustomColors(dialog.CustomColors);
+        _selectedBaseColor = Color.FromArgb(255, dialog.Color.R, dialog.Color.G, dialog.Color.B);
 
         UpdatePreview();
     }
