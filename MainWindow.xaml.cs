@@ -2913,8 +2913,8 @@ public partial class MainWindow : Window
 
         var circleHost = new Grid
         {
-            Width = 28,
-            Height = 24,
+            Width = 34,
+            Height = 34,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
             ClipToBounds = false,
@@ -2946,16 +2946,18 @@ public partial class MainWindow : Window
     private static double GetPenPresetPreviewDiameter(double width)
     {
         double normalized = NormalizePenWidth(width);
-        double diameter = 6.0 + normalized * 1.8;
+        double diameter = normalized <= 10.0
+            ? 6.0 + normalized * 1.8
+            : 24.0 + (normalized - 10.0) * 0.4;
 
         if (diameter < 8.0)
         {
             return 8.0;
         }
 
-        if (diameter > 26.0)
+        if (diameter > 32.0)
         {
-            return 26.0;
+            return 32.0;
         }
 
         return diameter;
