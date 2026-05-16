@@ -756,7 +756,7 @@ public partial class MainWindow : Window
         UpdateShapeButtonToolTips();
         UpdateRectangleSettingsUi();
         _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
-        _penPresets = NormalizePenPresets(_penPresets, _penWidthPresets);
+        _penPresets = NormalizePenPresets(_penPresets);
         _eraserWidthPresets = NormalizeEraserWidthPresets(_eraserWidthPresets);
 
         BuildPresetColorButtons();
@@ -2184,7 +2184,7 @@ public partial class MainWindow : Window
             _customColorValues = NormalizeCustomColors(settings.CustomColors);
             _currentPenWidth = NormalizePenWidth(settings.PenWidth);
             _penWidthPresets = NormalizePenWidthPresets(settings.PenWidthPresets);
-            _penPresets = NormalizePenPresets(settings.PenPresets, _penWidthPresets);
+            _penPresets = NormalizePenPresets(settings.PenPresets);
             _currentEraserWidth = NormalizePenWidth(settings.EraserWidth);
             _eraserWidthPresets = NormalizeEraserWidthPresets(settings.EraserWidthPresets);
             _currentTextFontFamilyName = NormalizeTextFontFamilyName(settings.TextFontFamily);
@@ -2255,7 +2255,7 @@ public partial class MainWindow : Window
         string filePath = GetAppDataFilePath(AppSettingsFileName);
 
         _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
-        _penPresets = NormalizePenPresets(_penPresets, _penWidthPresets);
+        _penPresets = NormalizePenPresets(_penPresets);
         _eraserWidthPresets = NormalizeEraserWidthPresets(_eraserWidthPresets);
 
         var settings = new AppSettings
@@ -2355,6 +2355,25 @@ public partial class MainWindow : Window
             new() { Color = Color.FromArgb(255, 0, 191, 255), Width = 4.0, OpacityPercent = 80 },
             new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 6.0, OpacityPercent = 60 },
             new() { Color = Color.FromArgb(255, 50, 205, 50), Width = 6.0, OpacityPercent = 60 },
+            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 8.0, OpacityPercent = 60 },
+            new() { Color = Color.FromArgb(255, 0, 191, 255), Width = 8.0, OpacityPercent = 60 },
+            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 10.0, OpacityPercent = 40 },
+            new() { Color = Color.FromArgb(255, 50, 205, 50), Width = 10.0, OpacityPercent = 40 }
+        };
+    }
+
+    private static List<PenPreset> GetPreviousDefaultPenPresets()
+    {
+        return new List<PenPreset>
+        {
+            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 2.0, OpacityPercent = 100 },
+            new() { Color = Color.FromArgb(255, 0, 191, 255), Width = 2.0, OpacityPercent = 100 },
+            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 2.0, OpacityPercent = 100 },
+            new() { Color = Color.FromArgb(255, 50, 205, 50), Width = 2.0, OpacityPercent = 100 },
+            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 4.0, OpacityPercent = 80 },
+            new() { Color = Color.FromArgb(255, 0, 191, 255), Width = 4.0, OpacityPercent = 80 },
+            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 6.0, OpacityPercent = 60 },
+            new() { Color = Color.FromArgb(255, 50, 205, 50), Width = 6.0, OpacityPercent = 60 },
             new() { Color = Color.FromArgb(255, 255, 165, 0), Width = 8.0, OpacityPercent = 60 },
             new() { Color = Color.FromArgb(255, 255, 0, 255), Width = 8.0, OpacityPercent = 60 },
             new() { Color = Color.FromArgb(255, 255, 255, 255), Width = 10.0, OpacityPercent = 40 },
@@ -2362,7 +2381,7 @@ public partial class MainWindow : Window
         };
     }
 
-    private static List<PenPreset> NormalizePenPresets(List<PenPreset>? presets, List<double>? fallbackWidths)
+    private static List<PenPreset> NormalizePenPresets(List<PenPreset>? presets)
     {
         var normalized = new List<PenPreset>();
 
@@ -2379,18 +2398,19 @@ public partial class MainWindow : Window
             }
         }
 
-        if (normalized.Count == 0 && fallbackWidths != null && fallbackWidths.Count > 0)
+        if (normalized.Count == 0)
         {
-            List<Color> fallbackColors = GetDefaultPenPresetColors();
-            for (int i = 0; i < fallbackWidths.Count && normalized.Count < PenPresetCount; i++)
+            foreach (PenPreset defaultPreset in GetDefaultPenPresets())
             {
-                normalized.Add(NormalizePenPreset(new PenPreset
-                {
-                    Color = fallbackColors[i % fallbackColors.Count],
-                    Width = fallbackWidths[i],
-                    OpacityPercent = 100
-                }));
+                normalized.Add(NormalizePenPreset(defaultPreset));
             }
+
+            return normalized;
+        }
+
+        if (IsPreviousDefaultPenPresetSet(normalized))
+        {
+            return NormalizePenPresets(GetDefaultPenPresets());
         }
 
         foreach (PenPreset fallback in GetDefaultPenPresets())
@@ -2406,7 +2426,7 @@ public partial class MainWindow : Window
         return normalized;
     }
 
-    private static List<PenPreset> NormalizePenPresets(List<PenPresetSetting>? settings, List<double>? fallbackWidths)
+    private static List<PenPreset> NormalizePenPresets(List<PenPresetSetting>? settings)
     {
         var presets = new List<PenPreset>();
 
@@ -2451,7 +2471,34 @@ public partial class MainWindow : Window
             }
         }
 
-        return NormalizePenPresets(presets, fallbackWidths);
+        return NormalizePenPresets(presets);
+    }
+
+    private static bool IsPreviousDefaultPenPresetSet(List<PenPreset> presets)
+    {
+        if (presets.Count != PenPresetCount)
+        {
+            return false;
+        }
+
+        List<PenPreset> previousDefaults = GetPreviousDefaultPenPresets();
+
+        for (int i = 0; i < PenPresetCount; i++)
+        {
+            PenPreset preset = NormalizePenPreset(presets[i]);
+            PenPreset previousDefault = NormalizePenPreset(previousDefaults[i]);
+
+            if (preset.Color.R != previousDefault.Color.R
+                || preset.Color.G != previousDefault.Color.G
+                || preset.Color.B != previousDefault.Color.B
+                || Math.Abs(preset.Width - previousDefault.Width) > 0.001
+                || preset.OpacityPercent != previousDefault.OpacityPercent)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static PenPreset NormalizePenPreset(PenPreset preset)
@@ -2468,21 +2515,6 @@ public partial class MainWindow : Window
             Color = Color.FromArgb(255, preset.Color.R, preset.Color.G, preset.Color.B),
             Width = NormalizePenWidth(preset.Width),
             OpacityPercent = opacity
-        };
-    }
-
-    private static List<Color> GetDefaultPenPresetColors()
-    {
-        return new List<Color>
-        {
-            Color.FromArgb(255, 255, 0, 0),
-            Color.FromArgb(255, 0, 191, 255),
-            Color.FromArgb(255, 255, 255, 0),
-            Color.FromArgb(255, 50, 205, 50),
-            Color.FromArgb(255, 255, 165, 0),
-            Color.FromArgb(255, 255, 0, 255),
-            Color.FromArgb(255, 255, 255, 255),
-            Color.FromArgb(255, 0, 0, 0)
         };
     }
 
@@ -2636,7 +2668,7 @@ public partial class MainWindow : Window
     {
         var settings = new List<PenPresetSetting>();
 
-        foreach (PenPreset preset in NormalizePenPresets(presets, null))
+        foreach (PenPreset preset in NormalizePenPresets(presets))
         {
             settings.Add(new PenPresetSetting
             {
@@ -2826,7 +2858,7 @@ public partial class MainWindow : Window
 
     private void BuildPenPresetButtons()
     {
-        _penPresets = NormalizePenPresets(_penPresets, _penWidthPresets);
+        _penPresets = NormalizePenPresets(_penPresets);
 
         PenPresetGrid.Children.Clear();
 
@@ -3239,7 +3271,7 @@ public partial class MainWindow : Window
 
     private void EditPenPreset(int index)
     {
-        _penPresets = NormalizePenPresets(_penPresets, _penWidthPresets);
+        _penPresets = NormalizePenPresets(_penPresets);
 
         if (index < 0 || index >= PenPresetCount)
         {
@@ -3274,7 +3306,7 @@ public partial class MainWindow : Window
 
         var nextPresets = new List<PenPreset>(_penPresets);
         nextPresets[index] = updatedPreset;
-        _penPresets = NormalizePenPresets(nextPresets, _penWidthPresets);
+        _penPresets = NormalizePenPresets(nextPresets);
 
         ApplyPenPreset(updatedPreset, addToRecent: true);
         SaveAppSettings();
