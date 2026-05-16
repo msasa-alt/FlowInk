@@ -2348,21 +2348,24 @@ public partial class MainWindow : Window
         return new List<PenPreset>
         {
             new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 2.0, OpacityPercent = 100 },
-            new() { Color = Color.FromArgb(255, 0, 191, 255), Width = 2.0, OpacityPercent = 100 },
+            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 2.0, OpacityPercent = 100 },
+            new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 2.0, OpacityPercent = 100 },
             new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 2.0, OpacityPercent = 100 },
-            new() { Color = Color.FromArgb(255, 50, 205, 50), Width = 2.0, OpacityPercent = 100 },
-            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 4.0, OpacityPercent = 80 },
-            new() { Color = Color.FromArgb(255, 0, 191, 255), Width = 4.0, OpacityPercent = 80 },
-            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 6.0, OpacityPercent = 60 },
-            new() { Color = Color.FromArgb(255, 50, 205, 50), Width = 6.0, OpacityPercent = 60 },
-            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 8.0, OpacityPercent = 60 },
-            new() { Color = Color.FromArgb(255, 0, 191, 255), Width = 8.0, OpacityPercent = 60 },
-            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 10.0, OpacityPercent = 40 },
-            new() { Color = Color.FromArgb(255, 50, 205, 50), Width = 10.0, OpacityPercent = 40 },
-            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 15.0, OpacityPercent = 40 },
-            new() { Color = Color.FromArgb(255, 0, 191, 255), Width = 15.0, OpacityPercent = 40 },
-            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 20.0, OpacityPercent = 30 },
-            new() { Color = Color.FromArgb(255, 50, 205, 50), Width = 20.0, OpacityPercent = 30 }
+
+            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 4.0, OpacityPercent = 70 },
+            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 4.0, OpacityPercent = 70 },
+            new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 6.0, OpacityPercent = 70 },
+            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 6.0, OpacityPercent = 70 },
+
+            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 8.0, OpacityPercent = 50 },
+            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 8.0, OpacityPercent = 50 },
+            new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 10.0, OpacityPercent = 50 },
+            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 10.0, OpacityPercent = 50 },
+
+            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 15.0, OpacityPercent = 30 },
+            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 15.0, OpacityPercent = 30 },
+            new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 20.0, OpacityPercent = 30 },
+            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 20.0, OpacityPercent = 30 }
         };
     }
 

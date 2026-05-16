@@ -383,7 +383,8 @@
     <value>プリセットを編集...</value>
   </data>
   <data name="PenPresetItemToolTipFormat" xml:space="preserve">
-    <value>太さ: {0}px / 透明度: {1}% / 色: {2}</value>
+    <value>太さ: {0}px / 透明度: {1}% / 色: {2}
+右クリック：プリセット値の変更</value>
   </data>
   <data name="PenPresetDialogTitle" xml:space="preserve">
     <value>ペンプリセット編集</value>
