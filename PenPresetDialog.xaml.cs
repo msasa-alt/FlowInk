@@ -37,7 +37,7 @@ public partial class PenPresetDialog : Window
         try
         {
             WidthSlider.Value = SelectedWidth;
-            OpacitySlider.Value = SelectedOpacityPercent;
+            OpacitySlider.Value = GetTransparencyPercentFromOpacity(SelectedOpacityPercent);
         }
         finally
         {
@@ -82,6 +82,16 @@ public partial class PenPresetDialog : Window
         return NormalizeOpacity((int)Math.Round(color.A * 100.0 / 255.0));
     }
 
+    private static int GetTransparencyPercentFromOpacity(int opacityPercent)
+    {
+        return 100 - NormalizeOpacity(opacityPercent);
+    }
+
+    private static int GetOpacityPercentFromTransparency(int transparencyPercent)
+    {
+        return 100 - NormalizeOpacity(transparencyPercent);
+    }
+
     private static int[] NormalizeCustomColors(int[]? customColors)
     {
         int[] normalized = new int[16];
@@ -124,7 +134,8 @@ public partial class PenPresetDialog : Window
             return;
         }
 
-        SelectedOpacityPercent = NormalizeOpacity((int)Math.Round(OpacitySlider.Value));
+        int transparencyPercent = NormalizeOpacity((int)Math.Round(OpacitySlider.Value));
+        SelectedOpacityPercent = GetOpacityPercentFromTransparency(transparencyPercent);
         UpdatePreview();
     }
 
@@ -157,7 +168,8 @@ public partial class PenPresetDialog : Window
         SelectedColor = CreateColorWithOpacity(_selectedBaseColor, SelectedOpacityPercent);
 
         WidthValueTextBlock.Text = string.Format(SR.CurrentValueFormat, SelectedWidth.ToString("0.#"));
-        OpacityValueTextBlock.Text = string.Format(SR.OpacityValueFormat, SelectedOpacityPercent);
+        int transparencyPercent = GetTransparencyPercentFromOpacity(SelectedOpacityPercent);
+        OpacityValueTextBlock.Text = string.Format(SR.TransparencyFormat, transparencyPercent);
 
         ColorPreviewRectangle.Fill = new SolidColorBrush(SelectedColor);
         PreviewLine.Stroke = new SolidColorBrush(SelectedColor);
@@ -167,7 +179,8 @@ public partial class PenPresetDialog : Window
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
         SelectedWidth = NormalizeWidth(WidthSlider.Value);
-        SelectedOpacityPercent = NormalizeOpacity((int)Math.Round(OpacitySlider.Value));
+        int transparencyPercent = NormalizeOpacity((int)Math.Round(OpacitySlider.Value));
+        SelectedOpacityPercent = GetOpacityPercentFromTransparency(transparencyPercent);
         SelectedColor = CreateColorWithOpacity(_selectedBaseColor, SelectedOpacityPercent);
         DialogResult = true;
     }

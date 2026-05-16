@@ -602,7 +602,7 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
-        ///   Width: {0}px / Opacity: {1}% / Color: {2}
+        ///   Width: {0}px / Transparency: {1}% / Color: {2}
         ///Right-click:Edit preset value に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string PenPresetItemToolTipFormat {

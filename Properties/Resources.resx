@@ -383,7 +383,7 @@ It may already be in use by another application.</value>
     <value>Edit preset...</value>
   </data>
   <data name="PenPresetItemToolTipFormat" xml:space="preserve">
-    <value>Width: {0}px / Opacity: {1}% / Color: {2}
+    <value>Width: {0}px / Transparency: {1}% / Color: {2}
 Right-click:Edit preset value</value>
   </data>
   <data name="PenPresetDialogTitle" xml:space="preserve">
