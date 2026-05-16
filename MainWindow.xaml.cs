@@ -130,7 +130,7 @@ public partial class MainWindow : Window
     private const int MaxHistory = 200;
     private const int MaxCustomColors = 16;
     private const int PenWidthPresetCount = 5;
-    private const int PenPresetCount = 12;
+    private const int PenPresetCount = 16;
 
     private const string DefaultTextFontFamilyName = "Segoe UI";
     private const double DefaultTextFontSize = 28.0;
@@ -2358,7 +2358,11 @@ public partial class MainWindow : Window
             new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 8.0, OpacityPercent = 60 },
             new() { Color = Color.FromArgb(255, 0, 191, 255), Width = 8.0, OpacityPercent = 60 },
             new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 10.0, OpacityPercent = 40 },
-            new() { Color = Color.FromArgb(255, 50, 205, 50), Width = 10.0, OpacityPercent = 40 }
+            new() { Color = Color.FromArgb(255, 50, 205, 50), Width = 10.0, OpacityPercent = 40 },
+            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 15.0, OpacityPercent = 40 },
+            new() { Color = Color.FromArgb(255, 0, 191, 255), Width = 15.0, OpacityPercent = 40 },
+            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 20.0, OpacityPercent = 30 },
+            new() { Color = Color.FromArgb(255, 50, 205, 50), Width = 20.0, OpacityPercent = 30 }
         };
     }
 
@@ -2476,14 +2480,14 @@ public partial class MainWindow : Window
 
     private static bool IsPreviousDefaultPenPresetSet(List<PenPreset> presets)
     {
-        if (presets.Count != PenPresetCount)
+        List<PenPreset> previousDefaults = GetPreviousDefaultPenPresets();
+
+        if (presets.Count != previousDefaults.Count)
         {
             return false;
         }
 
-        List<PenPreset> previousDefaults = GetPreviousDefaultPenPresets();
-
-        for (int i = 0; i < PenPresetCount; i++)
+        for (int i = 0; i < previousDefaults.Count; i++)
         {
             PenPreset preset = NormalizePenPreset(presets[i]);
             PenPreset previousDefault = NormalizePenPreset(previousDefaults[i]);
