@@ -2925,32 +2925,10 @@ public partial class MainWindow : Window
         circleHost.Children.Add(previewCircle);
         circleHost.Children.Add(outlineCircle);
 
-        var opacityText = new TextBlock
-        {
-            Text = preset.OpacityPercent.ToString(),
-            Foreground = Brushes.White,
-            FontSize = 10,
-            FontWeight = FontWeights.SemiBold,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            TextAlignment = TextAlignment.Center,
-            Margin = new Thickness(0, 1, 0, 0),
-            IsHitTestVisible = false
-        };
-
-        var content = new StackPanel
-        {
-            Orientation = Orientation.Vertical,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Center,
-            IsHitTestVisible = false
-        };
-        content.Children.Add(circleHost);
-        content.Children.Add(opacityText);
-
         var button = new Button
         {
             Style = (Style)FindResource("PenPresetButtonStyle"),
-            Content = content,
+            Content = circleHost,
             Tag = index,
             ToolTip = string.Format(
                 SR.PenPresetItemToolTipFormat,
