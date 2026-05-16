@@ -38,10 +38,10 @@ https://msasa-alt.github.io/FlowInk/
 ## Screenshots
 
 ### Presentation example
-![FlowInk Presentation](https://msasa-alt.github.io/FlowInk/en/images//PresoWithFlowInk.png)
+![FlowInk Presentation](https://msasa-alt.github.io/FlowInk/en/images/PresoWithFlowInk.png)
 
 ### Trading chart example
-![FlowInk Chart](en/images/ChartWithFlowInk.png)
+![FlowInk Chart](https://msasa-alt.github.io/FlowInk/en/images/ChartWithFlowInk.png)
 
 ---
 
