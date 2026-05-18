@@ -2349,25 +2349,26 @@ public partial class MainWindow : Window
     {
         return new List<PenPreset>
         {
-            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 2.0, OpacityPercent = 100 },
-            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 2.0, OpacityPercent = 100 },
-            new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 2.0, OpacityPercent = 100 },
-            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 2.0, OpacityPercent = 100 },
+            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 1.0, OpacityPercent = 100 },
+            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 5.0, OpacityPercent = 70 },
+            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 11.0, OpacityPercent = 50 },
+            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 20.0, OpacityPercent = 30 },
 
-            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 4.0, OpacityPercent = 70 },
-            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 4.0, OpacityPercent = 70 },
-            new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 6.0, OpacityPercent = 70 },
-            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 6.0, OpacityPercent = 70 },
+            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 1.0, OpacityPercent = 100 },
+            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 5.0, OpacityPercent = 70 },
+            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 11.0, OpacityPercent = 50 },
+            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 20.0, OpacityPercent = 30 },
 
-            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 8.0, OpacityPercent = 50 },
-            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 8.0, OpacityPercent = 50 },
-            new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 10.0, OpacityPercent = 50 },
-            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 10.0, OpacityPercent = 50 },
-
-            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 15.0, OpacityPercent = 30 },
-            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 15.0, OpacityPercent = 30 },
+            new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 1.0, OpacityPercent = 100 },
+            new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 5.0, OpacityPercent = 70 },
+            new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 11.0, OpacityPercent = 50 },
             new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 20.0, OpacityPercent = 30 },
+
+            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 1.0, OpacityPercent = 100 },
+            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 5.0, OpacityPercent = 70 },
+            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 11.0, OpacityPercent = 50 },
             new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 20.0, OpacityPercent = 30 }
+
         };
     }
 
@@ -2529,7 +2530,7 @@ public partial class MainWindow : Window
 
     private static List<double> GetDefaultPenWidthPresets()
     {
-        return new List<double> { 1.0, 2.0, 4.0, 6.0 };
+        return new List<double> { 1.0, 2.0, 5.0, 11.0 };
     }
 
     private static List<double> GetDefaultEraserWidthPresets()
