@@ -74,7 +74,7 @@
                        Margin="0,0,0,6"/>
             <Slider x:Name="AlphaSlider"
                     Minimum="0"
-                    Maximum="255"
+                    Maximum="100"
                     TickFrequency="1"
                     IsSnapToTickEnabled="True"
                     ValueChanged="AlphaSlider_ValueChanged"/>

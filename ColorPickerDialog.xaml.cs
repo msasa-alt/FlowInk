@@ -22,7 +22,7 @@ public partial class ColorPickerDialog : Window
         _selectedColor = initialColor;
         _customColors = customColors != null ? (int[])customColors.Clone() : new int[16];
 
-        AlphaSlider.Value = initialColor.A;
+        AlphaSlider.Value = GetTransparencyPercent(initialColor);
         UpdatePreview();
     }
 
@@ -66,7 +66,7 @@ public partial class ColorPickerDialog : Window
         }
 
         _selectedColor = Color.FromArgb(
-            (byte)Math.Round(AlphaSlider.Value),
+            GetAlphaFromTransparencySlider(),
             _selectedColor.R,
             _selectedColor.G,
             _selectedColor.B);
@@ -77,7 +77,7 @@ public partial class ColorPickerDialog : Window
     private void OkButton_Click(object sender, RoutedEventArgs e)
     {
         _selectedColor = Color.FromArgb(
-            (byte)Math.Round(AlphaSlider.Value),
+            GetAlphaFromTransparencySlider(),
             _selectedColor.R,
             _selectedColor.G,
             _selectedColor.B);
@@ -90,7 +90,19 @@ public partial class ColorPickerDialog : Window
         PreviewBrush.Color = _selectedColor;
         ColorValueTextBlock.Text = $"#{_selectedColor.A:X2}{_selectedColor.R:X2}{_selectedColor.G:X2}{_selectedColor.B:X2}";
 
-        int alphaPercent = (int)Math.Round(_selectedColor.A * 100.0 / 255.0);
-        AlphaValueTextBlock.Text = string.Format(SR.TransparencyFormat, alphaPercent);
+        AlphaValueTextBlock.Text = string.Format(SR.TransparencyFormat, GetTransparencyPercent(_selectedColor));
+    }
+
+    private static int GetTransparencyPercent(Color color)
+    {
+        int opacityPercent = (int)Math.Round(color.A * 100.0 / 255.0);
+        return 100 - Math.Clamp(opacityPercent, 0, 100);
+    }
+
+    private byte GetAlphaFromTransparencySlider()
+    {
+        int transparencyPercent = Math.Clamp((int)Math.Round(AlphaSlider.Value), 0, 100);
+        int opacityPercent = 100 - transparencyPercent;
+        return (byte)Math.Round(255.0 * opacityPercent / 100.0);
     }
 }

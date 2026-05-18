@@ -376,4 +376,35 @@ It may already be in use by another application.</value>
   <data name="EditPresetColor" xml:space="preserve">
     <value>Edit preset color...</value>
   </data>
+  <data name="PenPresets" xml:space="preserve">
+    <value>Pen presets</value>
+  </data>
+  <data name="EditPenPreset" xml:space="preserve">
+    <value>Edit preset...</value>
+  </data>
+  <data name="PenPresetItemToolTipFormat" xml:space="preserve">
+    <value>Width: {0}px / Transparency: {1}% / Color: {2}
+Right-click:Edit preset value</value>
+  </data>
+  <data name="PenPresetDialogTitle" xml:space="preserve">
+    <value>Edit pen preset</value>
+  </data>
+  <data name="PenPresetColor" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="PenPresetChangeColor" xml:space="preserve">
+    <value>Change...</value>
+  </data>
+  <data name="PenPresetWidth" xml:space="preserve">
+    <value>Width</value>
+  </data>
+  <data name="PenPresetOpacity" xml:space="preserve">
+    <value>Opacity</value>
+  </data>
+  <data name="PenPresetPreview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="OpacityValueFormat" xml:space="preserve">
+    <value>{0}%</value>
+  </data>
 </root>
