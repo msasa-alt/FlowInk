@@ -702,6 +702,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   Pen width presets に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string PenWidthPresets {
+            get {
+                return ResourceManager.GetString("PenWidthPresets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Select pen width に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string PenWidthSelectLabel {

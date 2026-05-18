@@ -118,18 +118,9 @@
             <Setter Property="BorderThickness" Value="1"/>
         </Style>
 
-        <Style x:Key="PenWidthPresetButtonStyle" TargetType="Button">
-            <Setter Property="Width" Value="92"/>
-            <Setter Property="Height" Value="32"/>
-            <Setter Property="MinWidth" Value="0"/>
-            <Setter Property="Margin" Value="2"/>
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Background" Value="#FF2D2D2D"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#FF666666"/>
-            <Setter Property="BorderThickness" Value="1"/>
-        </Style>
+        <Style x:Key="PenWidthPresetButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource PenPresetButtonStyle}"/>
     </Window.Resources>
 
     <Grid>
@@ -190,6 +181,18 @@
                                            FontWeight="Bold"/>
 
                                 <UniformGrid x:Name="PenPresetGrid"
+                                             Columns="4"/>
+
+                                <Border Height="1"
+                                        Background="#FF555555"
+                                        Margin="0,8,0,8"/>
+
+                                <TextBlock Text="{x:Static res:Resources.PenWidthPresets}"
+                                           Foreground="White"
+                                           Margin="0,0,0,6"
+                                           FontWeight="Bold"/>
+
+                                <UniformGrid x:Name="PenWidthPresetGrid"
                                              Columns="4"/>
                             </StackPanel>
                         </Border>

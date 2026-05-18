@@ -407,4 +407,7 @@ Right-click:Edit preset value</value>
   <data name="OpacityValueFormat" xml:space="preserve">
     <value>{0}%</value>
   </data>
+  <data name="PenWidthPresets" xml:space="preserve">
+    <value>Pen width presets</value>
+  </data>
 </root>
