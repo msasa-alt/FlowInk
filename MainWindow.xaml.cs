@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -130,7 +130,7 @@ public partial class MainWindow : Window
     private const int MaxHistory = 200;
     private const int MaxCustomColors = 16;
     private const int PenWidthPresetCount = 4;
-    private const int EraserWidthPresetCount = 5;
+    private const int EraserWidthPresetCount = 4;
     private const int PenPresetCount = 16;
 
     private const string DefaultTextFontFamilyName = "Segoe UI";
@@ -2535,7 +2535,7 @@ public partial class MainWindow : Window
 
     private static List<double> GetDefaultEraserWidthPresets()
     {
-        return new List<double> { 1.0, 2.0, 4.0, 6.0, 10.0 };
+        return new List<double> { 1.0, 2.0, 4.0, 10.0 };
     }
 
     private static List<double> NormalizePenWidthPresets(List<double>? presets)
@@ -3092,6 +3092,8 @@ public partial class MainWindow : Window
         _eraserWidthPresets = NormalizeEraserWidthPresets(_eraserWidthPresets);
 
         EraserWidthPresetGrid.Children.Clear();
+        EraserWidthPresetGrid.Columns = EraserWidthPresetCount;
+        EraserWidthPresetGrid.Rows = 1;
 
         for (int i = 0; i < EraserWidthPresetCount; i++)
         {
@@ -3105,43 +3107,36 @@ public partial class MainWindow : Window
 
     private Button CreateEraserWidthPresetButton(int index, double width)
     {
-        var previewLine = new Border
+        double previewDiameter = GetPenPresetPreviewDiameter(width);
+
+        var previewCircle = new WpfEllipse
+        {
+            Width = previewDiameter,
+            Height = previewDiameter,
+            Fill = Brushes.White,
+            Stroke = new SolidColorBrush(Color.FromArgb(96, 0, 0, 0)),
+            StrokeThickness = 1,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            IsHitTestVisible = false
+        };
+
+        var circleHost = new Grid
         {
             Width = 34,
-            Height = Math.Max(2.0, width),
-            Background = Brushes.White,
-            CornerRadius = new CornerRadius(Math.Max(1.0, width / 2.0)),
-            HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Center
-        };
-
-        var widthText = new TextBlock
-        {
-            Text = FormatPenWidthText(width),
-            Foreground = Brushes.White,
-            FontSize = 11,
-            Margin = new Thickness(8, 0, 0, 0),
+            Height = 34,
+            HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
-            HorizontalAlignment = HorizontalAlignment.Right
+            ClipToBounds = false,
+            IsHitTestVisible = false
         };
 
-        var contentGrid = new Grid
-        {
-            Margin = new Thickness(8, 0, 8, 0)
-        };
-        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-        Grid.SetColumn(previewLine, 0);
-        Grid.SetColumn(widthText, 2);
-        contentGrid.Children.Add(previewLine);
-        contentGrid.Children.Add(widthText);
+        circleHost.Children.Add(previewCircle);
 
         var button = new Button
         {
             Style = (Style)FindResource("PenWidthPresetButtonStyle"),
-            Content = contentGrid,
+            Content = circleHost,
             Tag = index,
             ToolTip = $"{FormatPenWidthText(width)}  {SR.PenWidthPresetItemToolTipSuffix}"
         };
