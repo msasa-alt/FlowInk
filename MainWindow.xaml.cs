@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -129,7 +129,8 @@ public partial class MainWindow : Window
     private const int MaxRecentColors = 8;
     private const int MaxHistory = 200;
     private const int MaxCustomColors = 16;
-    private const int PenWidthPresetCount = 5;
+    private const int PenWidthPresetCount = 4;
+    private const int EraserWidthPresetCount = 4;
     private const int PenPresetCount = 16;
 
     private const string DefaultTextFontFamilyName = "Segoe UI";
@@ -762,6 +763,7 @@ public partial class MainWindow : Window
         BuildPresetColorButtons();
         BuildRecentColorButtons();
         BuildPenPresetButtons();
+        BuildPenWidthPresetButtons();
         BuildEraserWidthPresetButtons();
         UpdateToolbarForCT();
         UpdateClickThroughButtonLabel();
@@ -2347,25 +2349,26 @@ public partial class MainWindow : Window
     {
         return new List<PenPreset>
         {
-            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 2.0, OpacityPercent = 100 },
-            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 2.0, OpacityPercent = 100 },
-            new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 2.0, OpacityPercent = 100 },
-            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 2.0, OpacityPercent = 100 },
+            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 1.0, OpacityPercent = 100 },
+            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 5.0, OpacityPercent = 70 },
+            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 11.0, OpacityPercent = 50 },
+            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 20.0, OpacityPercent = 30 },
 
-            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 4.0, OpacityPercent = 70 },
-            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 4.0, OpacityPercent = 70 },
-            new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 6.0, OpacityPercent = 70 },
-            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 6.0, OpacityPercent = 70 },
+            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 1.0, OpacityPercent = 100 },
+            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 5.0, OpacityPercent = 70 },
+            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 11.0, OpacityPercent = 50 },
+            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 20.0, OpacityPercent = 30 },
 
-            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 8.0, OpacityPercent = 50 },
-            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 8.0, OpacityPercent = 50 },
-            new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 10.0, OpacityPercent = 50 },
-            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 10.0, OpacityPercent = 50 },
-
-            new() { Color = Color.FromArgb(255, 255, 0, 0), Width = 15.0, OpacityPercent = 30 },
-            new() { Color = Color.FromArgb(255, 0, 255, 0), Width = 15.0, OpacityPercent = 30 },
+            new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 1.0, OpacityPercent = 100 },
+            new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 5.0, OpacityPercent = 70 },
+            new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 11.0, OpacityPercent = 50 },
             new() { Color = Color.FromArgb(255, 0, 0, 255), Width = 20.0, OpacityPercent = 30 },
+
+            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 1.0, OpacityPercent = 100 },
+            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 5.0, OpacityPercent = 70 },
+            new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 11.0, OpacityPercent = 50 },
             new() { Color = Color.FromArgb(255, 255, 255, 0), Width = 20.0, OpacityPercent = 30 }
+
         };
     }
 
@@ -2527,12 +2530,12 @@ public partial class MainWindow : Window
 
     private static List<double> GetDefaultPenWidthPresets()
     {
-        return new List<double> { 1.0, 2.0, 4.0, 6.0, 10.0 };
+        return new List<double> { 1.0, 2.0, 5.0, 11.0 };
     }
 
     private static List<double> GetDefaultEraserWidthPresets()
     {
-        return new List<double>(GetDefaultPenWidthPresets());
+        return new List<double> { 1.0, 2.0, 4.0, 10.0 };
     }
 
     private static List<double> NormalizePenWidthPresets(List<double>? presets)
@@ -2596,7 +2599,7 @@ public partial class MainWindow : Window
 
                 normalized.Add(normalizedValue);
 
-                if (normalized.Count >= PenWidthPresetCount)
+                if (normalized.Count >= EraserWidthPresetCount)
                 {
                     break;
                 }
@@ -2614,7 +2617,7 @@ public partial class MainWindow : Window
 
             normalized.Add(normalizedFallback);
 
-            if (normalized.Count >= PenWidthPresetCount)
+            if (normalized.Count >= EraserWidthPresetCount)
             {
                 break;
             }
@@ -2985,13 +2988,114 @@ public partial class MainWindow : Window
         }
     }
 
+    private void BuildPenWidthPresetButtons()
+    {
+        _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
+
+        PenWidthPresetGrid.Children.Clear();
+        PenWidthPresetGrid.Columns = PenWidthPresetCount;
+        PenWidthPresetGrid.Rows = 1;
+
+        for (int i = 0; i < PenWidthPresetCount; i++)
+        {
+            double width = _penWidthPresets[i];
+            var button = CreatePenWidthPresetButton(i, width);
+            PenWidthPresetGrid.Children.Add(button);
+        }
+
+        UpdatePenWidthPresetButtonHighlight();
+    }
+
+    private Button CreatePenWidthPresetButton(int index, double width)
+    {
+        double previewDiameter = GetPenPresetPreviewDiameter(width);
+
+        var checkerCircle = new WpfEllipse
+        {
+            Width = previewDiameter,
+            Height = previewDiameter,
+            Fill = (Brush)FindResource("CheckerBrush"),
+            Stroke = new SolidColorBrush(Color.FromArgb(170, 255, 255, 255)),
+            StrokeThickness = 1,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            IsHitTestVisible = false
+        };
+
+        var previewCircle = new WpfEllipse
+        {
+            Width = previewDiameter,
+            Height = previewDiameter,
+            Fill = new SolidColorBrush(_currentPenColor),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            IsHitTestVisible = false
+        };
+
+        var outlineCircle = new WpfEllipse
+        {
+            Width = previewDiameter,
+            Height = previewDiameter,
+            Fill = Brushes.Transparent,
+            Stroke = new SolidColorBrush(Color.FromArgb(96, 0, 0, 0)),
+            StrokeThickness = 1,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            IsHitTestVisible = false
+        };
+
+        var circleHost = new Grid
+        {
+            Width = 34,
+            Height = 34,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            ClipToBounds = false,
+            IsHitTestVisible = false
+        };
+
+        circleHost.Children.Add(checkerCircle);
+        circleHost.Children.Add(previewCircle);
+        circleHost.Children.Add(outlineCircle);
+
+        var button = new Button
+        {
+            Style = (Style)FindResource("PenWidthPresetButtonStyle"),
+            Content = circleHost,
+            Tag = index,
+            ToolTip = $"{FormatPenWidthText(width)}  {SR.PenWidthPresetItemToolTipSuffix}"
+        };
+
+        button.PreviewMouseLeftButtonDown += PenWidthPresetButton_PreviewMouseLeftButtonDown;
+        button.PreviewMouseRightButtonUp += PenWidthPresetButton_PreviewMouseRightButtonUp;
+
+        return button;
+    }
+
+    private void UpdatePenWidthPresetButtonHighlight()
+    {
+        foreach (object child in PenWidthPresetGrid.Children)
+        {
+            if (child is not Button button || button.Tag is not int index || index < 0 || index >= _penWidthPresets.Count)
+            {
+                continue;
+            }
+
+            bool isSelected = ArePenWidthsEqual(_penWidthPresets[index], _currentPenWidth);
+            button.BorderBrush = isSelected ? Brushes.White : new SolidColorBrush(Color.FromRgb(102, 102, 102));
+            button.BorderThickness = isSelected ? new Thickness(2) : new Thickness(1);
+        }
+    }
+
     private void BuildEraserWidthPresetButtons()
     {
         _eraserWidthPresets = NormalizeEraserWidthPresets(_eraserWidthPresets);
 
         EraserWidthPresetGrid.Children.Clear();
+        EraserWidthPresetGrid.Columns = EraserWidthPresetCount;
+        EraserWidthPresetGrid.Rows = 1;
 
-        for (int i = 0; i < PenWidthPresetCount; i++)
+        for (int i = 0; i < EraserWidthPresetCount; i++)
         {
             double width = _eraserWidthPresets[i];
             var button = CreateEraserWidthPresetButton(i, width);
@@ -3003,43 +3107,36 @@ public partial class MainWindow : Window
 
     private Button CreateEraserWidthPresetButton(int index, double width)
     {
-        var previewLine = new Border
+        double previewDiameter = GetPenPresetPreviewDiameter(width);
+
+        var previewCircle = new WpfEllipse
+        {
+            Width = previewDiameter,
+            Height = previewDiameter,
+            Fill = Brushes.White,
+            Stroke = new SolidColorBrush(Color.FromArgb(96, 0, 0, 0)),
+            StrokeThickness = 1,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            IsHitTestVisible = false
+        };
+
+        var circleHost = new Grid
         {
             Width = 34,
-            Height = Math.Max(2.0, width),
-            Background = Brushes.White,
-            CornerRadius = new CornerRadius(Math.Max(1.0, width / 2.0)),
-            HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Center
-        };
-
-        var widthText = new TextBlock
-        {
-            Text = FormatPenWidthText(width),
-            Foreground = Brushes.White,
-            FontSize = 11,
-            Margin = new Thickness(8, 0, 0, 0),
+            Height = 34,
+            HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
-            HorizontalAlignment = HorizontalAlignment.Right
+            ClipToBounds = false,
+            IsHitTestVisible = false
         };
 
-        var contentGrid = new Grid
-        {
-            Margin = new Thickness(8, 0, 8, 0)
-        };
-        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-        Grid.SetColumn(previewLine, 0);
-        Grid.SetColumn(widthText, 2);
-        contentGrid.Children.Add(previewLine);
-        contentGrid.Children.Add(widthText);
+        circleHost.Children.Add(previewCircle);
 
         var button = new Button
         {
             Style = (Style)FindResource("PenWidthPresetButtonStyle"),
-            Content = contentGrid,
+            Content = circleHost,
             Tag = index,
             ToolTip = $"{FormatPenWidthText(width)}  {SR.PenWidthPresetItemToolTipSuffix}"
         };
@@ -3230,6 +3327,7 @@ public partial class MainWindow : Window
             RectangleSettingsPopup.IsOpen = false;
             HotkeySettingsPopup.IsOpen = false;
             BuildPenPresetButtons();
+            BuildPenWidthPresetButtons();
         });
     }
 
@@ -3268,6 +3366,7 @@ public partial class MainWindow : Window
         }
 
         UpdatePenPresetButtonHighlight();
+        BuildPenWidthPresetButtons();
         SaveAppSettings();
     }
 
@@ -3313,6 +3412,95 @@ public partial class MainWindow : Window
         ApplyPenPreset(updatedPreset, addToRecent: true);
         SaveAppSettings();
         BuildPenPresetButtons();
+        BuildPenWidthPresetButtons();
+        PenPresetPopup.IsOpen = false;
+    }
+
+    private void PenWidthPresetButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not Button button || button.Tag is not int index)
+        {
+            return;
+        }
+
+        e.Handled = true;
+        ApplyPenWidthPreset(index);
+    }
+
+    private void PenWidthPresetButton_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not Button button || button.Tag is not int index)
+        {
+            return;
+        }
+
+        e.Handled = true;
+
+        if (index < 0 || index >= _penWidthPresets.Count)
+        {
+            return;
+        }
+
+        ShowPenWidthPresetContextMenu(button, index);
+    }
+
+    private void ShowPenWidthPresetContextMenu(Button placementTarget, int index)
+    {
+        var editPresetValueItem = new MenuItem
+        {
+            Header = SR.EditPresetValue
+        };
+        editPresetValueItem.Click += (_, _) =>
+        {
+            PenPresetPopup.IsOpen = false;
+            EditPenWidthPreset(index);
+        };
+
+        ShowToolbarContextMenu(placementTarget, editPresetValueItem);
+    }
+
+    private void ApplyPenWidthPreset(int index)
+    {
+        if (index < 0 || index >= _penWidthPresets.Count)
+        {
+            return;
+        }
+
+        ActivatePenTool();
+        SelectPenWidth(_penWidthPresets[index]);
+        PenPresetPopup.IsOpen = false;
+    }
+
+    private void EditPenWidthPreset(int index)
+    {
+        _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
+
+        if (index < 0 || index >= PenWidthPresetCount)
+        {
+            return;
+        }
+
+        ActivatePenTool();
+
+        var dialog = new PenWidthDialog(_penWidthPresets[index], _currentPenColor)
+        {
+            Owner = this
+        };
+
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        double updated = NormalizePenWidth(dialog.SelectedWidth);
+
+        var nextPresets = new List<double>(_penWidthPresets);
+        nextPresets[index] = updated;
+        _penWidthPresets = NormalizePenWidthPresets(nextPresets);
+
+        SelectPenWidth(updated);
+        SaveAppSettings();
+        BuildPenWidthPresetButtons();
         PenPresetPopup.IsOpen = false;
     }
 
@@ -3387,7 +3575,7 @@ public partial class MainWindow : Window
     {
         _eraserWidthPresets = NormalizeEraserWidthPresets(_eraserWidthPresets);
 
-        if (index < 0 || index >= PenWidthPresetCount)
+        if (index < 0 || index >= EraserWidthPresetCount)
         {
             return;
         }
@@ -3461,6 +3649,7 @@ public partial class MainWindow : Window
 
         ColorButton.FontWeight = FontWeights.Bold;
         UpdatePenPresetButtonHighlight();
+        BuildPenWidthPresetButtons();
 
         if (_activeTextBox != null)
         {
@@ -6231,6 +6420,7 @@ public partial class MainWindow : Window
         _currentPenWidth = NormalizePenWidth(width);
         DrawingCanvas.DefaultDrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth);
         UpdatePenPresetButtonHighlight();
+        UpdatePenWidthPresetButtonHighlight();
         SaveAppSettings();
     }
 

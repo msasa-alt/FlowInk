@@ -407,4 +407,7 @@
   <data name="OpacityValueFormat" xml:space="preserve">
     <value>{0}%</value>
   </data>
+  <data name="PenWidthPresets" xml:space="preserve">
+    <value>線幅プリセット</value>
+  </data>
 </root>
