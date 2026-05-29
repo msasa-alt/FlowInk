@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -2728,6 +2728,16 @@ public partial class MainWindow : Window
         return NormalizeOpacityPercent((int)Math.Round(color.A * 100.0 / 255.0));
     }
 
+    private static int GetTransparencyPercentFromOpacity(int opacityPercent)
+    {
+        return 100 - NormalizeOpacityPercent(opacityPercent);
+    }
+
+    private static int GetTransparencyPercent(Color color)
+    {
+        return 100 - GetOpacityPercent(color);
+    }
+
     private static Color CreateColorWithOpacity(Color color, int opacityPercent)
     {
         byte alpha = (byte)Math.Round(255.0 * NormalizeOpacityPercent(opacityPercent) / 100.0);
@@ -2943,8 +2953,8 @@ public partial class MainWindow : Window
             ToolTip = string.Format(
                 SR.PenPresetItemToolTipFormat,
                 FormatPenWidthText(preset.Width),
-                preset.OpacityPercent,
-                GetColorDisplayText(effectiveColor))
+                GetTransparencyPercentFromOpacity(preset.OpacityPercent),
+                GetColorHexDisplayText(effectiveColor))
         };
 
         button.PreviewMouseLeftButtonDown += PenPresetButton_PreviewMouseLeftButtonDown;
@@ -3173,10 +3183,15 @@ public partial class MainWindow : Window
         };
     }
 
+    private static string GetColorHexDisplayText(Color color)
+    {
+        return $"#{color.A:X2}{color.R:X2}{color.G:X2}{color.B:X2}";
+    }
+
     private static string GetColorDisplayText(Color color)
     {
-        int alphaPercent = (int)Math.Round(color.A * 100.0 / 255.0);
-        return string.Format(SR.ColorDisplayWithAlphaFormat, color.A.ToString("X2"), color.R.ToString("X2"), color.G.ToString("X2"), color.B.ToString("X2"), alphaPercent);
+        int transparencyPercent = GetTransparencyPercent(color);
+        return string.Format(SR.ColorDisplayWithAlphaFormat, color.A.ToString("X2"), color.R.ToString("X2"), color.G.ToString("X2"), color.B.ToString("X2"), transparencyPercent);
     }
 
     private void PresetColorButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -3700,12 +3715,14 @@ public partial class MainWindow : Window
 
     private void UpdateShapeButtonToolTips()
     {
+        int rectangleFillTransparencyPercent = GetTransparencyPercentFromOpacity(_rectangleFillOpacityPercent);
+
         string rectangleText = _isRectangleFilled
-            ? string.Format(SR.RectangleFilledToolTipFormat, NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent))
+            ? string.Format(SR.RectangleFilledToolTipFormat, rectangleFillTransparencyPercent)
             : SR.RectangleNotFilledToolTip;
 
         string circleText = _isRectangleFilled
-            ? string.Format(SR.CircleFilledToolTipFormat, NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent))
+            ? string.Format(SR.CircleFilledToolTipFormat, rectangleFillTransparencyPercent)
             : SR.CircleNotFilledToolTip;
 
         RectangleButton.ToolTip = rectangleText;
@@ -3714,6 +3731,8 @@ public partial class MainWindow : Window
 
     private void UpdateRectangleSettingsUi()
     {
+        int rectangleFillTransparencyPercent = GetTransparencyPercentFromOpacity(_rectangleFillOpacityPercent);
+
         if (RectangleFillCheckBox != null)
         {
             RectangleFillCheckBox.IsChecked = _isRectangleFilled;
@@ -3721,13 +3740,13 @@ public partial class MainWindow : Window
 
         if (RectangleOpacitySlider != null)
         {
-            RectangleOpacitySlider.Value = NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent);
+            RectangleOpacitySlider.Value = rectangleFillTransparencyPercent;
             RectangleOpacitySlider.IsEnabled = _isRectangleFilled;
         }
 
         if (RectangleOpacityLabel != null)
         {
-            RectangleOpacityLabel.Text = string.Format(SR.TransparencyFormat, NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent));
+            RectangleOpacityLabel.Text = string.Format(SR.TransparencyFormat, rectangleFillTransparencyPercent);
             RectangleOpacityLabel.Opacity = _isRectangleFilled ? 1.0 : 0.55;
         }
     }
@@ -6602,7 +6621,8 @@ public partial class MainWindow : Window
 
     private void RectangleOpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        _rectangleFillOpacityPercent = NormalizeRectangleFillOpacity((int)Math.Round(e.NewValue));
+        int rectangleFillTransparencyPercent = NormalizeRectangleFillOpacity((int)Math.Round(e.NewValue));
+        _rectangleFillOpacityPercent = NormalizeRectangleFillOpacity(100 - rectangleFillTransparencyPercent);
         UpdateShapeButtonToolTips();
         UpdateRectangleSettingsUi();
         SaveAppSettings();
