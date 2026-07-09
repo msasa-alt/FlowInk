@@ -200,6 +200,7 @@
                     </Popup>
 
                     <Button x:Name="LineStyleButton"
+                            Visibility="Collapsed"
                             Style="{StaticResource ToolbarButtonStyle}"
                             ToolTip="{x:Static res:Resources.LineStyle}"
                             Click="LineStyleButton_Click">
