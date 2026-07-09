@@ -259,6 +259,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   Dotted に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string DottedLine {
+            get {
+                return ResourceManager.GetString("DottedLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Drawing is OFF. Press the OFF button or use the hotkey ({0}) to turn it ON. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string DrawingDisabledToast {
@@ -481,6 +490,15 @@ namespace FlowInk.Properties {
         public static string LightweightOverlayDrawingTool {
             get {
                 return ResourceManager.GetString("LightweightOverlayDrawingTool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Line style に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string LineStyle {
+            get {
+                return ResourceManager.GetString("LineStyle", resourceCulture);
             }
         }
         
@@ -833,6 +851,15 @@ namespace FlowInk.Properties {
         public static string Shape {
             get {
                 return ResourceManager.GetString("Shape", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Solid に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string SolidLine {
+            get {
+                return ResourceManager.GetString("SolidLine", resourceCulture);
             }
         }
         

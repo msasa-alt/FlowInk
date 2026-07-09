@@ -410,4 +410,13 @@
   <data name="PenWidthPresets" xml:space="preserve">
     <value>線幅プリセット</value>
   </data>
+  <data name="LineStyle" xml:space="preserve">
+    <value>線スタイル</value>
+  </data>
+  <data name="SolidLine" xml:space="preserve">
+    <value>実線</value>
+  </data>
+  <data name="DottedLine" xml:space="preserve">
+    <value>点線</value>
+  </data>
 </root>

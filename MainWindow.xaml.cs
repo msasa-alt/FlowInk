@@ -47,6 +47,7 @@ public partial class MainWindow : Window
 
     private Color _currentPenColor = Color.FromArgb(255, 255, 0, 0);
     private double _currentPenWidth = 4;
+    private LineStyleKind _currentLineStyle = LineStyleKind.Solid;
     private double _currentEraserWidth = 4;
     private string _currentTextFontFamilyName = DefaultTextFontFamilyName;
     private double _currentTextFontSize = DefaultTextFontSize;
@@ -486,16 +487,25 @@ public partial class MainWindow : Window
 
     private sealed class ShapeStrokeStyleEntry
     {
-        public ShapeStrokeStyleEntry(Stroke stroke, DrawingAttributes? beforeAttributes, DrawingAttributes? afterAttributes)
+        public ShapeStrokeStyleEntry(
+            Stroke stroke,
+            DrawingAttributes? beforeAttributes,
+            DrawingAttributes? afterAttributes,
+            LineStyleKind? beforeLineStyle,
+            LineStyleKind? afterLineStyle)
         {
             Stroke = stroke;
             BeforeAttributes = beforeAttributes?.Clone();
             AfterAttributes = afterAttributes?.Clone();
+            BeforeLineStyle = beforeLineStyle;
+            AfterLineStyle = afterLineStyle;
         }
 
         public Stroke Stroke { get; }
         public DrawingAttributes? BeforeAttributes { get; }
         public DrawingAttributes? AfterAttributes { get; }
+        public LineStyleKind? BeforeLineStyle { get; }
+        public LineStyleKind? AfterLineStyle { get; }
     }
 
     private sealed class ShapeMoveAction : IUndoableAction
@@ -586,6 +596,11 @@ public partial class MainWindow : Window
                 {
                     entry.Stroke.DrawingAttributes = entry.BeforeAttributes.Clone();
                 }
+
+                if (entry.Stroke is StyledStroke styledStroke && entry.BeforeLineStyle.HasValue)
+                {
+                    styledStroke.LineStyle = entry.BeforeLineStyle.Value;
+                }
             }
 
             window.UpdateShapeSelectionAdorner();
@@ -603,6 +618,11 @@ public partial class MainWindow : Window
                 if (entry.AfterAttributes != null)
                 {
                     entry.Stroke.DrawingAttributes = entry.AfterAttributes.Clone();
+                }
+
+                if (entry.Stroke is StyledStroke styledStroke && entry.AfterLineStyle.HasValue)
+                {
+                    styledStroke.LineStyle = entry.AfterLineStyle.Value;
                 }
             }
 
@@ -721,6 +741,7 @@ public partial class MainWindow : Window
         public List<string> RecentColors { get; set; } = new();
         public List<int> CustomColors { get; set; } = new();
         public double PenWidth { get; set; } = 4.0;
+        public string? LineStyle { get; set; }
         public List<double> PenWidthPresets { get; set; } = new();
         public List<PenPresetSetting> PenPresets { get; set; } = new();
         public double EraserWidth { get; set; } = 4.0;
@@ -764,11 +785,13 @@ public partial class MainWindow : Window
         BuildRecentColorButtons();
         BuildPenPresetButtons();
         BuildPenWidthPresetButtons();
+        BuildLineStyleButtons();
         BuildEraserWidthPresetButtons();
         UpdateToolbarForCT();
         UpdateClickThroughButtonLabel();
 
         ApplyPenColor(_currentPenColor, addToRecent: false);
+        ApplyLineStyleToCanvas();
         ApplyEraserWidthToCanvas();
         _isInitializing = false;
 
@@ -784,6 +807,7 @@ public partial class MainWindow : Window
         DrawingCanvas.PreviewMouseWheel += DrawingCanvas_PreviewMouseWheel;
         DrawingCanvas.LostMouseCapture += DrawingCanvas_LostMouseCapture;
         DrawingCanvas.Strokes.StrokesChanged += DrawingCanvas_StrokesChanged;
+        DrawingCanvas.LineStyleStrokeCollected += DrawingCanvas_LineStyleStrokeCollected;
 
         PreviewKeyDown += MainWindow_PreviewKeyDown;
 
@@ -888,7 +912,18 @@ public partial class MainWindow : Window
 
     private void DrawingCanvas_StrokesChanged(object? sender, StrokeCollectionChangedEventArgs e)
     {
-        if (_isApplyingHistory || _suppressStrokeHistory)
+        if (_isApplyingHistory || _suppressStrokeHistory || DrawingCanvas.IsReplacingCollectedStroke)
+        {
+            return;
+        }
+
+        // A non-solid freehand stroke is replaced by LineStyleInkCanvas after collection.
+        // Ignore the temporary standard Stroke; the replacement is recorded below.
+        if (_currentInteractionState == InteractionState.DrawingPen
+            && _currentLineStyle != LineStyleKind.Solid
+            && e.Added.Count == 1
+            && e.Removed.Count == 0
+            && e.Added[0] is not StyledStroke)
         {
             return;
         }
@@ -907,6 +942,17 @@ public partial class MainWindow : Window
         }
 
         PushHistory(new StrokeCollectionAction(ToStrokeList(e.Added), ToStrokeList(e.Removed)));
+    }
+
+    private void DrawingCanvas_LineStyleStrokeCollected(object? sender, LineStyleStrokeCollectedEventArgs e)
+    {
+        if (_isApplyingHistory || _suppressStrokeHistory)
+        {
+            return;
+        }
+
+        PushHistory(new StrokeCollectionAction(new[] { e.Stroke }, Array.Empty<Stroke>()));
+        _currentInteractionState = InteractionState.None;
     }
 
     private static void AccumulateStrokeDelta(
@@ -1811,7 +1857,7 @@ public partial class MainWindow : Window
     {
         foreach (var button in new[]
                  {
-                     PenButton, RectangleButton, CircleButton, TextButton, EraserButton, ColorButton,
+                     PenButton, LineStyleButton, RectangleButton, CircleButton, TextButton, EraserButton, ColorButton,
                      ClearButton, ClickThroughButton, SettingsButton, ExitButton
                  })
         {
@@ -2137,6 +2183,7 @@ public partial class MainWindow : Window
                 _recentColors = new List<Color>();
                 _customColorValues = new List<int>();
                 _currentPenWidth = 4.0;
+                _currentLineStyle = LineStyleKind.Solid;
                 _penWidthPresets = new List<double>(GetDefaultPenWidthPresets());
                 _penPresets = GetDefaultPenPresets();
                 _currentEraserWidth = 4.0;
@@ -2164,6 +2211,7 @@ public partial class MainWindow : Window
                 _recentColors = new List<Color>();
                 _customColorValues = new List<int>();
                 _currentPenWidth = 4.0;
+                _currentLineStyle = LineStyleKind.Solid;
                 _penWidthPresets = new List<double>(GetDefaultPenWidthPresets());
                 _penPresets = GetDefaultPenPresets();
                 _currentEraserWidth = 4.0;
@@ -2185,6 +2233,7 @@ public partial class MainWindow : Window
             _recentColors = ParseColorList(settings.RecentColors, new List<Color>());
             _customColorValues = NormalizeCustomColors(settings.CustomColors);
             _currentPenWidth = NormalizePenWidth(settings.PenWidth);
+            _currentLineStyle = ParseLineStyle(settings.LineStyle);
             _penWidthPresets = NormalizePenWidthPresets(settings.PenWidthPresets);
             _penPresets = NormalizePenPresets(settings.PenPresets);
             _currentEraserWidth = NormalizePenWidth(settings.EraserWidth);
@@ -2231,6 +2280,7 @@ public partial class MainWindow : Window
             _recentColors = new List<Color>();
             _customColorValues = new List<int>();
             _currentPenWidth = 4.0;
+            _currentLineStyle = LineStyleKind.Solid;
             _penWidthPresets = new List<double>(GetDefaultPenWidthPresets());
             _currentEraserWidth = 4.0;
             _eraserWidthPresets = new List<double>(GetDefaultEraserWidthPresets());
@@ -2266,6 +2316,7 @@ public partial class MainWindow : Window
             RecentColors = ToHexColorList(_recentColors),
             CustomColors = new List<int>(_customColorValues),
             PenWidth = NormalizePenWidth(_currentPenWidth),
+            LineStyle = _currentLineStyle.ToString(),
             PenWidthPresets = new List<double>(_penWidthPresets),
             PenPresets = ToPenPresetSettings(_penPresets),
             EraserWidth = NormalizePenWidth(_currentEraserWidth),
@@ -3338,6 +3389,7 @@ public partial class MainWindow : Window
         OpenPopupDeferred(PenPresetPopup, () =>
         {
             ColorPopup.IsOpen = false;
+            LineStylePopup.IsOpen = false;
             EraserWidthPopup.IsOpen = false;
             RectangleSettingsPopup.IsOpen = false;
             HotkeySettingsPopup.IsOpen = false;
@@ -3366,6 +3418,7 @@ public partial class MainWindow : Window
         _currentPenWidth = NormalizePenWidth(normalized.Width);
         _currentPenColor = effectiveColor;
         DrawingCanvas.DefaultDrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth);
+        DrawingCanvas.SyncDynamicRendererDrawingAttributes();
 
         if (CurrentColorPreviewEllipse != null)
         {
@@ -3619,6 +3672,172 @@ public partial class MainWindow : Window
         EraserWidthPopup.IsOpen = false;
     }
 
+
+    private void BuildLineStyleButtons()
+    {
+        if (LineStyleGrid == null)
+        {
+            return;
+        }
+
+        LineStyleGrid.Children.Clear();
+
+        foreach (LineStyleKind lineStyle in new[] { LineStyleKind.Solid, LineStyleKind.Dotted })
+        {
+            var preview = new TextBlock
+            {
+                Text = GetLineStylePreviewText(lineStyle),
+                FontSize = 14,
+                Foreground = Brushes.White,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            var label = new TextBlock
+            {
+                Text = GetLineStyleDisplayName(lineStyle),
+                Foreground = Brushes.White,
+                Margin = new Thickness(10, 0, 0, 0),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            var content = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(6, 2, 6, 2)
+            };
+            content.Children.Add(preview);
+            content.Children.Add(label);
+
+            var button = new Button
+            {
+                Tag = lineStyle,
+                Content = content,
+                MinWidth = 135,
+                Height = 32,
+                Margin = new Thickness(2),
+                Padding = new Thickness(4),
+                HorizontalContentAlignment = HorizontalAlignment.Left,
+                Background = lineStyle == _currentLineStyle
+                    ? _selectedButtonBackground
+                    : _normalButtonBackground,
+                Foreground = Brushes.White,
+                BorderBrush = Brushes.DimGray,
+                BorderThickness = new Thickness(1)
+            };
+            button.Click += LineStyleChoiceButton_Click;
+            LineStyleGrid.Children.Add(button);
+        }
+
+        UpdateLineStyleButton();
+    }
+
+    private void LineStyleButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_isClickThroughEnabled)
+        {
+            return;
+        }
+
+        e.Handled = true;
+        OpenLineStylePopup();
+    }
+
+    private void OpenLineStylePopup()
+    {
+        OpenPopupDeferred(LineStylePopup, () =>
+        {
+            ColorPopup.IsOpen = false;
+            PenPresetPopup.IsOpen = false;
+            EraserWidthPopup.IsOpen = false;
+            RectangleSettingsPopup.IsOpen = false;
+            HotkeySettingsPopup.IsOpen = false;
+            BuildLineStyleButtons();
+        });
+    }
+
+    private void LineStyleChoiceButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button button || button.Tag is not LineStyleKind lineStyle)
+        {
+            return;
+        }
+
+        ApplyLineStyle(lineStyle);
+    }
+
+    private void ApplyLineStyle(LineStyleKind lineStyle)
+    {
+        _currentLineStyle = lineStyle;
+        ApplyLineStyleToCanvas();
+        LineStylePopup.IsOpen = false;
+        SaveAppSettings();
+
+        // Do not remove and rebuild the clicked Button while its routed Click event is running.
+        Dispatcher.BeginInvoke(
+            new Action(BuildLineStyleButtons),
+            DispatcherPriority.Background);
+    }
+
+    private void ApplyLineStyleToCanvas()
+    {
+        DrawingCanvas.CurrentLineStyle = _currentLineStyle;
+        UpdateLineStyleButton();
+    }
+
+    private void UpdateLineStyleButton()
+    {
+        if (LineStyleButtonPreview != null)
+        {
+            LineStyleButtonPreview.StrokeDashArray = GetLineStylePreviewDashArray(_currentLineStyle);
+        }
+
+        if (LineStyleButton != null)
+        {
+            LineStyleButton.ToolTip = $"{SR.LineStyle}: {GetLineStyleDisplayName(_currentLineStyle)}";
+        }
+    }
+
+    private static DoubleCollection GetLineStylePreviewDashArray(LineStyleKind lineStyle)
+    {
+        return lineStyle switch
+        {
+            LineStyleKind.Dotted => new DoubleCollection { 0.1, 2.0 },
+            LineStyleKind.Dashed => new DoubleCollection { 3.0, 2.0 },
+            LineStyleKind.DashDot => new DoubleCollection { 3.0, 2.0, 0.1, 2.0 },
+            _ => new DoubleCollection()
+        };
+    }
+
+    private static string GetLineStylePreviewText(LineStyleKind lineStyle)
+    {
+        return lineStyle switch
+        {
+            LineStyleKind.Dotted => "• • • •",
+            LineStyleKind.Dashed => "━ ━ ━",
+            LineStyleKind.DashDot => "━ • ━ •",
+            _ => "━━━━"
+        };
+    }
+
+    private static string GetLineStyleDisplayName(LineStyleKind lineStyle)
+    {
+        return lineStyle switch
+        {
+            LineStyleKind.Dotted => SR.DottedLine,
+            LineStyleKind.Solid => SR.SolidLine,
+            _ => lineStyle.ToString()
+        };
+    }
+
+    private static LineStyleKind ParseLineStyle(string? value)
+    {
+        return Enum.TryParse(value, ignoreCase: true, out LineStyleKind parsed)
+            && Enum.IsDefined(parsed)
+            ? parsed
+            : LineStyleKind.Solid;
+    }
+
     private void ActivatePenTool()
     {
         FinalizeOrCancelCurrentOperation();
@@ -3656,6 +3875,7 @@ public partial class MainWindow : Window
     {
         _currentPenColor = color;
         DrawingCanvas.DefaultDrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth);
+        DrawingCanvas.SyncDynamicRendererDrawingAttributes();
 
         if (CurrentColorPreviewEllipse != null)
         {
@@ -3708,6 +3928,16 @@ public partial class MainWindow : Window
         };
     }
 
+
+
+    private Stroke CreateStyledStroke(StylusPointCollection stylusPoints)
+    {
+        return new StyledStroke(
+            stylusPoints,
+            CreatePenAttributes(_currentPenColor, _currentPenWidth),
+            _currentLineStyle);
+    }
+
     private void ApplyEraserWidthToCanvas()
     {
         DrawingCanvas.EraserShape = new EllipseStylusShape(_currentEraserWidth, _currentEraserWidth);
@@ -3757,6 +3987,7 @@ public partial class MainWindow : Window
         {
             RectangleSettingsPopup.PlacementTarget = placementTarget;
             PenPresetPopup.IsOpen = false;
+            LineStylePopup.IsOpen = false;
             EraserWidthPopup.IsOpen = false;
             ColorPopup.IsOpen = false;
             UpdateRectangleSettingsUi();
@@ -4192,12 +4423,7 @@ public partial class MainWindow : Window
             new StylusPoint(endPoint.X, endPoint.Y)
         };
 
-        var stroke = new Stroke(stylusPoints)
-        {
-            DrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth)
-        };
-
-        return stroke;
+        return CreateStyledStroke(stylusPoints);
     }
 
     private bool ShouldDrawArrowForCurrentGesture()
@@ -4228,12 +4454,7 @@ public partial class MainWindow : Window
             new StylusPoint(p2.X, p2.Y)
         };
 
-        var stroke = new Stroke(stylusPoints)
-        {
-            DrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth)
-        };
-
-        return stroke;
+        return CreateStyledStroke(stylusPoints);
     }
 
     private void UpdateRectanglePreview(Point startPoint, Point endPoint)
@@ -4411,10 +4632,7 @@ public partial class MainWindow : Window
             new StylusPoint(left, top)
         };
 
-        return new Stroke(stylusPoints)
-        {
-            DrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth)
-        };
+        return CreateStyledStroke(stylusPoints);
     }
 
 
@@ -4448,10 +4666,7 @@ public partial class MainWindow : Window
             stylusPoints.Add(new StylusPoint(x, y));
         }
 
-        return new Stroke(stylusPoints)
-        {
-            DrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth)
-        };
+        return CreateStyledStroke(stylusPoints);
     }
 
     private WpfShape CreateFilledEllipseShape(Point startPoint, Point endPoint)
@@ -5339,8 +5554,21 @@ public partial class MainWindow : Window
         {
             DrawingAttributes? beforeAttributes = stroke.DrawingAttributes.Clone();
             DrawingAttributes afterAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth);
+            LineStyleKind? beforeLineStyle = (stroke as StyledStroke)?.LineStyle;
+            LineStyleKind? afterLineStyle = stroke is StyledStroke ? _currentLineStyle : null;
+
             stroke.DrawingAttributes = afterAttributes.Clone();
-            outlineStyleEntries.Add(new ShapeStrokeStyleEntry(stroke, beforeAttributes, afterAttributes));
+            if (stroke is StyledStroke styledStroke)
+            {
+                styledStroke.LineStyle = _currentLineStyle;
+            }
+
+            outlineStyleEntries.Add(new ShapeStrokeStyleEntry(
+                stroke,
+                beforeAttributes,
+                afterAttributes,
+                beforeLineStyle,
+                afterLineStyle));
         }
 
         PushHistory(new ShapeStyleAction(
@@ -6438,6 +6666,7 @@ public partial class MainWindow : Window
     {
         _currentPenWidth = NormalizePenWidth(width);
         DrawingCanvas.DefaultDrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth);
+        DrawingCanvas.SyncDynamicRendererDrawingAttributes();
         UpdatePenPresetButtonHighlight();
         UpdatePenWidthPresetButtonHighlight();
         SaveAppSettings();
@@ -6828,6 +7057,7 @@ public partial class MainWindow : Window
     {
         ColorPopup.IsOpen = false;
         PenPresetPopup.IsOpen = false;
+        LineStylePopup.IsOpen = false;
         EraserWidthPopup.IsOpen = false;
         RectangleSettingsPopup.IsOpen = false;
         HotkeySettingsPopup.IsOpen = false;
@@ -6962,6 +7192,7 @@ public partial class MainWindow : Window
 
         ColorPopup.IsOpen = false;
         PenPresetPopup.IsOpen = false;
+        LineStylePopup.IsOpen = false;
         EraserWidthPopup.IsOpen = false;
         RectangleSettingsPopup.IsOpen = false;
 
