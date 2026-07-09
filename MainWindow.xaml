@@ -243,6 +243,26 @@
                         </Border>
                     </Popup>
 
+                    <Button x:Name="SelectButton"
+                            Style="{StaticResource ToolbarButtonStyle}"
+                            ToolTip="{x:Static res:Resources.Select}"
+                            Click="SelectButton_Click">
+                        <Viewbox Width="18"
+                                 Height="18"
+                                 Stretch="Uniform"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center">
+                            <Grid Width="20"
+                                  Height="20">
+                                <Path Data="M 3,1 L 3,16 L 7.2,12.4 L 10.4,19 L 13.1,17.7 L 9.9,11.4 L 15.6,11.4 Z"
+                                      Fill="White"
+                                      Stroke="#FF1A1A1A"
+                                      StrokeThickness="1"
+                                      StrokeLineJoin="Round"/>
+                            </Grid>
+                        </Viewbox>
+                    </Button>
+
                     <Button x:Name="RectangleButton"
                             Style="{StaticResource ToolbarButtonStyle}"
                             Content="▭"

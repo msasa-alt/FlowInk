@@ -174,6 +174,7 @@ public partial class MainWindow : Window
     private enum ToolMode
     {
         Pen,
+        Select,
         Rectangle,
         Circle,
         Text,
@@ -1857,7 +1858,7 @@ public partial class MainWindow : Window
     {
         foreach (var button in new[]
                  {
-                     PenButton, LineStyleButton, RectangleButton, CircleButton, TextButton, EraserButton, ColorButton,
+                     PenButton, LineStyleButton, SelectButton, RectangleButton, CircleButton, TextButton, EraserButton, ColorButton,
                      ClearButton, ClickThroughButton, SettingsButton, ExitButton
                  })
         {
@@ -4039,6 +4040,25 @@ public partial class MainWindow : Window
             }
         }
 
+        if (_currentTool == ToolMode.Select)
+        {
+            CommitActiveTextInput();
+            ClearSelectedTextElement();
+            DrawingCanvas.Focus();
+
+            if (TrySelectDrawableAtPoint(mousePoint))
+            {
+                BeginSelectedShapeDrag(mousePoint);
+            }
+            else
+            {
+                ClearSelectedShape();
+            }
+
+            e.Handled = true;
+            return;
+        }
+
         if (_currentTool == ToolMode.Pen && (Keyboard.Modifiers & ModifierKeys.Shift) == 0)
         {
             _currentInteractionState = InteractionState.DrawingPen;
@@ -4188,7 +4208,7 @@ public partial class MainWindow : Window
         CommitActiveTextInput();
 
         Point point = e.GetPosition(DrawingCanvas);
-        if (TrySelectShapeAtPoint(point))
+        if (TrySelectDrawableAtPoint(point))
         {
             ShowSelectedShapeContextMenu();
             e.Handled = true;
@@ -4386,6 +4406,8 @@ public partial class MainWindow : Window
             DrawingCanvas.Strokes.Add(finalStroke);
             return;
         }
+
+        RegisterStrokeSelectionGroup(finalStroke, arrowHeadStroke);
 
         ExecuteWithoutStrokeHistory(() =>
         {
@@ -4807,6 +4829,16 @@ public partial class MainWindow : Window
         GetOrCreateShapeOutlineGroupId(outlineStroke);
     }
 
+    private void RegisterStrokeSelectionGroup(params Stroke[] strokes)
+    {
+        int groupId = _nextShapeOutlineGroupId++;
+
+        foreach (Stroke stroke in strokes)
+        {
+            _shapeOutlineGroupIds[stroke] = groupId;
+        }
+    }
+
     private int GetOrCreateShapeOutlineGroupId(Stroke outlineStroke)
     {
         if (_shapeOutlineGroupIds.TryGetValue(outlineStroke, out int outlineGroupId))
@@ -4846,6 +4878,38 @@ public partial class MainWindow : Window
     {
         return _selectedFillShape != null || GetSelectedShapeOutlineStrokesSnapshot().Count > 0;
     }
+
+    private bool TrySelectDrawableAtPoint(Point point)
+    {
+        if (TrySelectShapeAtPoint(point))
+        {
+            return true;
+        }
+
+        Stroke? stroke = FindSelectableStrokeAtPoint(point);
+        if (stroke == null)
+        {
+            return false;
+        }
+
+        SelectShape(null, stroke);
+        return true;
+    }
+
+    private Stroke? FindSelectableStrokeAtPoint(Point point)
+    {
+        for (int i = DrawingCanvas.Strokes.Count - 1; i >= 0; i--)
+        {
+            Stroke stroke = DrawingCanvas.Strokes[i];
+            if (stroke.HitTest(point, GetStrokeHitTolerance(stroke)))
+            {
+                return stroke;
+            }
+        }
+
+        return null;
+    }
+
 
     private bool TrySelectShapeAtPoint(Point point)
     {
@@ -5280,7 +5344,7 @@ public partial class MainWindow : Window
         }
 
         Rect bounds = GetSelectedShapeBounds();
-        if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0)
+        if (bounds.IsEmpty)
         {
             ClearSelectedShape();
             return;
@@ -6731,13 +6795,15 @@ public partial class MainWindow : Window
         Button selectedButton = _currentTool switch
         {
             ToolMode.Pen => PenButton,
+            ToolMode.Select => SelectButton,
             ToolMode.Rectangle => RectangleButton,
             ToolMode.Circle => CircleButton,
             ToolMode.Text => TextButton,
-            _ => EraserButton
+            ToolMode.Eraser => EraserButton,
+            _ => PenButton
         };
 
-        SetButtonSelected(selectedButton, PenButton, RectangleButton, CircleButton, TextButton, EraserButton);
+        SetButtonSelected(selectedButton, PenButton, SelectButton, RectangleButton, CircleButton, TextButton, EraserButton);
     }
 
     private void UpdateCursor()
@@ -6753,6 +6819,7 @@ public partial class MainWindow : Window
             nextCursor = _currentTool switch
             {
                 ToolMode.Pen => _penCursor,
+                ToolMode.Select => Cursors.Arrow,
                 ToolMode.Rectangle => _penCursor,
                 ToolMode.Circle => _penCursor,
                 ToolMode.Text => Cursors.IBeam,
@@ -6789,6 +6856,31 @@ public partial class MainWindow : Window
         ActivatePenTool();
         OpenPenPresetPopup();
     }
+
+    private void SelectButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_isClickThroughEnabled)
+        {
+            return;
+        }
+
+        CloseToolbarPopupsAndPendingClicks();
+        FinalizeOrCancelCurrentOperation();
+        CommitActiveTextInput();
+        ClearSelectedTextElement();
+
+        _isStraightLineDrawing = false;
+        _isRectangleDrawing = false;
+        _isCircleDrawing = false;
+
+        _currentTool = ToolMode.Select;
+        DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
+        DrawingCanvas.Focus();
+
+        UpdateToolHighlight();
+        UpdateCursor();
+    }
+
 
     private void RectangleButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
