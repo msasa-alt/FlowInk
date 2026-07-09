@@ -881,7 +881,8 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (e.Key == Key.Delete && _currentTool == ToolMode.Text)
+        if (e.Key == Key.Delete
+            && (_currentTool == ToolMode.Text || _currentTool == ToolMode.Select))
         {
             if (DeleteSelectedTextElement())
             {
@@ -4024,6 +4025,30 @@ public partial class MainWindow : Window
         }
 
         Point mousePoint = e.GetPosition(DrawingCanvas);
+
+        if (_currentTool == ToolMode.Select)
+        {
+            Border? clickedTextElement = FindCommittedTextHost(e.OriginalSource);
+            if (clickedTextElement != null)
+            {
+                CommitActiveTextInput();
+                ClearSelectedShape();
+                DrawingCanvas.Focus();
+
+                if (ReferenceEquals(_selectedTextElement, clickedTextElement))
+                {
+                    BeginTextElementDrag(clickedTextElement, mousePoint);
+                }
+                else
+                {
+                    SelectTextElement(clickedTextElement);
+                }
+
+                e.Handled = true;
+                return;
+            }
+        }
+
         if (HasSelectedShape())
         {
             if (IsPointOnSelectedShape(mousePoint))
@@ -6126,6 +6151,31 @@ public partial class MainWindow : Window
         host.MouseRightButtonDown -= TextElement_MouseRightButtonDown;
     }
 
+    private void BeginTextElementDrag(Border host, Point mousePoint)
+    {
+        _draggingTextElement = host;
+        _isDraggingTextElement = true;
+        _textDragStartMousePoint = mousePoint;
+        _textDragStartElementPoint = new Point(
+            InkCanvas.GetLeft(host),
+            InkCanvas.GetTop(host));
+
+        if (double.IsNaN(_textDragStartElementPoint.X))
+        {
+            _textDragStartElementPoint.X = 0;
+        }
+
+        if (double.IsNaN(_textDragStartElementPoint.Y))
+        {
+            _textDragStartElementPoint.Y = 0;
+        }
+
+        _textDragCommittedStartPoint = _textDragStartElementPoint;
+        _currentInteractionState = InteractionState.MovingText;
+
+        host.CaptureMouse();
+    }
+
     private void TextElement_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (_isClickThroughEnabled || _currentTool != ToolMode.Text)
@@ -6157,33 +6207,14 @@ public partial class MainWindow : Window
             return;
         }
 
-        _draggingTextElement = host;
-        _isDraggingTextElement = true;
-        _textDragStartMousePoint = e.GetPosition(DrawingCanvas);
-        _textDragStartElementPoint = new Point(
-            InkCanvas.GetLeft(host),
-            InkCanvas.GetTop(host));
-
-        if (double.IsNaN(_textDragStartElementPoint.X))
-        {
-            _textDragStartElementPoint.X = 0;
-        }
-
-        if (double.IsNaN(_textDragStartElementPoint.Y))
-        {
-            _textDragStartElementPoint.Y = 0;
-        }
-
-        _textDragCommittedStartPoint = _textDragStartElementPoint;
-        _currentInteractionState = InteractionState.MovingText;
-
-        host.CaptureMouse();
+        BeginTextElementDrag(host, e.GetPosition(DrawingCanvas));
         e.Handled = true;
     }
 
     private void TextElement_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (_isClickThroughEnabled || _currentTool != ToolMode.Text)
+        if (_isClickThroughEnabled
+            || (_currentTool != ToolMode.Text && _currentTool != ToolMode.Select))
         {
             return;
         }
