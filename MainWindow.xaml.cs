@@ -109,6 +109,13 @@ public partial class MainWindow : Window
     private readonly Dictionary<Stroke, StylusPointCollection> _shapeDragStartOutlineStrokePoints = new();
     private readonly Dictionary<Border, Point> _selectionDragStartTextPositions = new();
 
+    private WpfRectangle? _rangeSelectionAdorner;
+    private bool _isRangeSelecting;
+    private bool _hasRangeSelectionDragMoved;
+    private bool _rangeSelectionAddsToExisting;
+    private Point _rangeSelectionStartPoint;
+    private const double RangeSelectionMinimumDragDistance = 3.0;
+
     private Border? _draggingTextElement;
     private bool _isDraggingTextElement;
 
@@ -198,7 +205,8 @@ public partial class MainWindow : Window
         Erasing,
         EditingText,
         MovingText,
-        MovingShape
+        MovingShape,
+        SelectingRange
     }
 
     private interface IUndoableAction
@@ -1349,6 +1357,10 @@ public partial class MainWindow : Window
 
             case InteractionState.MovingShape:
                 CancelSelectedShapeDrag();
+                break;
+
+            case InteractionState.SelectingRange:
+                CancelRangeSelection();
                 break;
 
             case InteractionState.Erasing:
@@ -4097,11 +4109,7 @@ public partial class MainWindow : Window
                 return;
             }
 
-            if (!isShiftPressed)
-            {
-                ClearAllSelectedObjects();
-            }
-
+            BeginRangeSelection(mousePoint, isShiftPressed);
             e.Handled = true;
             return;
         }
@@ -4291,6 +4299,13 @@ public partial class MainWindow : Window
 
     private void DrawingCanvas_PreviewMouseMove(object sender, MouseEventArgs e)
     {
+        if (_isRangeSelecting)
+        {
+            UpdateRangeSelection(e.GetPosition(DrawingCanvas));
+            e.Handled = true;
+            return;
+        }
+
         if (_isDraggingSelectedShape)
         {
             UpdateSelectedShapeDrag(e.GetPosition(DrawingCanvas));
@@ -4332,6 +4347,13 @@ public partial class MainWindow : Window
 
     private void DrawingCanvas_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
+        if (_isRangeSelecting)
+        {
+            CompleteRangeSelection(e.GetPosition(DrawingCanvas));
+            e.Handled = true;
+            return;
+        }
+
         if (_isDraggingSelectedShape)
         {
             EndSelectedShapeDrag();
@@ -4409,6 +4431,11 @@ public partial class MainWindow : Window
 
     private void DrawingCanvas_LostMouseCapture(object sender, MouseEventArgs e)
     {
+        if (_isRangeSelecting)
+        {
+            CancelRangeSelection();
+        }
+
         if (_isDraggingSelectedShape)
         {
             CancelSelectedShapeDrag();
@@ -4961,6 +4988,265 @@ public partial class MainWindow : Window
         ClearSelectedTextElement();
     }
 
+    private void BeginRangeSelection(Point startPoint, bool addToExisting)
+    {
+        _isRangeSelecting = true;
+        _hasRangeSelectionDragMoved = false;
+        _rangeSelectionAddsToExisting = addToExisting;
+        _rangeSelectionStartPoint = startPoint;
+        _currentInteractionState = InteractionState.SelectingRange;
+
+        RemoveRangeSelectionAdorner();
+
+        if (DrawingCanvas.IsMouseCaptured)
+        {
+            DrawingCanvas.ReleaseMouseCapture();
+        }
+
+        DrawingCanvas.CaptureMouse();
+    }
+
+    private void UpdateRangeSelection(Point currentPoint)
+    {
+        if (!_isRangeSelecting)
+        {
+            return;
+        }
+
+        Rect bounds = CreateNormalizedRect(_rangeSelectionStartPoint, currentPoint);
+        if (bounds.Width >= RangeSelectionMinimumDragDistance || bounds.Height >= RangeSelectionMinimumDragDistance)
+        {
+            _hasRangeSelectionDragMoved = true;
+        }
+
+        if (!_hasRangeSelectionDragMoved)
+        {
+            return;
+        }
+
+        UpdateRangeSelectionAdorner(bounds);
+    }
+
+    private void CompleteRangeSelection(Point endPoint)
+    {
+        if (!_isRangeSelecting)
+        {
+            return;
+        }
+
+        Rect bounds = CreateNormalizedRect(_rangeSelectionStartPoint, endPoint);
+        bool shouldSelectRange = _hasRangeSelectionDragMoved
+            && bounds.Width >= RangeSelectionMinimumDragDistance
+            && bounds.Height >= RangeSelectionMinimumDragDistance;
+
+        bool addToExisting = _rangeSelectionAddsToExisting;
+
+        _isRangeSelecting = false;
+        _hasRangeSelectionDragMoved = false;
+        _rangeSelectionAddsToExisting = false;
+        _currentInteractionState = InteractionState.None;
+
+        if (DrawingCanvas.IsMouseCaptured)
+        {
+            DrawingCanvas.ReleaseMouseCapture();
+        }
+
+        RemoveRangeSelectionAdorner();
+
+        if (!shouldSelectRange)
+        {
+            if (!addToExisting)
+            {
+                ClearAllSelectedObjects();
+            }
+
+            return;
+        }
+
+        if (!addToExisting)
+        {
+            ClearAllSelectedObjects();
+        }
+
+        AddObjectsInsideSelectionRange(bounds);
+        UpdateShapeSelectionAdorner();
+    }
+
+    private void CancelRangeSelection()
+    {
+        if (!_isRangeSelecting)
+        {
+            return;
+        }
+
+        _isRangeSelecting = false;
+        _hasRangeSelectionDragMoved = false;
+        _rangeSelectionAddsToExisting = false;
+
+        if (_currentInteractionState == InteractionState.SelectingRange)
+        {
+            _currentInteractionState = InteractionState.None;
+        }
+
+        if (DrawingCanvas.IsMouseCaptured)
+        {
+            DrawingCanvas.ReleaseMouseCapture();
+        }
+
+        RemoveRangeSelectionAdorner();
+    }
+
+    private void UpdateRangeSelectionAdorner(Rect bounds)
+    {
+        if (_rangeSelectionAdorner == null)
+        {
+            _rangeSelectionAdorner = new WpfRectangle
+            {
+                Fill = new SolidColorBrush(Color.FromArgb(24, 0, 191, 255)),
+                Stroke = Brushes.DeepSkyBlue,
+                StrokeThickness = 1.0,
+                StrokeDashArray = new DoubleCollection { 4.0, 3.0 },
+                IsHitTestVisible = false
+            };
+        }
+
+        _rangeSelectionAdorner.Width = Math.Max(1.0, bounds.Width);
+        _rangeSelectionAdorner.Height = Math.Max(1.0, bounds.Height);
+        InkCanvas.SetLeft(_rangeSelectionAdorner, bounds.Left);
+        InkCanvas.SetTop(_rangeSelectionAdorner, bounds.Top);
+
+        if (DrawingCanvas.Children.Contains(_rangeSelectionAdorner))
+        {
+            DrawingCanvas.Children.Remove(_rangeSelectionAdorner);
+        }
+
+        DrawingCanvas.Children.Add(_rangeSelectionAdorner);
+    }
+
+    private void RemoveRangeSelectionAdorner()
+    {
+        if (_rangeSelectionAdorner == null)
+        {
+            return;
+        }
+
+        RemoveCanvasElementIfPresent(_rangeSelectionAdorner);
+        _rangeSelectionAdorner = null;
+    }
+
+    private void AddObjectsInsideSelectionRange(Rect selectionBounds)
+    {
+        foreach (WpfShape fillShape in GetFillShapesInsideRange(selectionBounds))
+        {
+            AddDrawableSelection(new DrawableSelectionCandidate(fillShape, FindOutlineStrokesForFillShape(fillShape)));
+        }
+
+        foreach (Stroke stroke in GetStrokesInsideRange(selectionBounds))
+        {
+            WpfShape? pairedFillShape = null;
+            if (_outlineStrokeFilledShapes.TryGetValue(stroke, out WpfShape? registeredFill)
+                && DrawingCanvas.Children.Contains(registeredFill))
+            {
+                pairedFillShape = registeredFill;
+            }
+
+            List<Stroke> outlineStrokes = pairedFillShape != null
+                ? FindOutlineStrokesForFillShape(pairedFillShape)
+                : FindOutlineStrokesInSameShape(stroke);
+
+            AddDrawableSelection(new DrawableSelectionCandidate(pairedFillShape, outlineStrokes));
+        }
+
+        foreach (Border textElement in GetTextElementsInsideRange(selectionBounds))
+        {
+            AddTextElementToSelection(textElement);
+        }
+    }
+
+    private List<WpfShape> GetFillShapesInsideRange(Rect selectionBounds)
+    {
+        var result = new List<WpfShape>();
+
+        foreach (UIElement child in DrawingCanvas.Children)
+        {
+            if (ReferenceEquals(child, _shapeSelectionAdorner)
+                || ReferenceEquals(child, _rangeSelectionAdorner))
+            {
+                continue;
+            }
+
+            if (child is WpfShape shape
+                && shape.Fill != null
+                && shape.StrokeThickness == 0
+                && IsRectInsideRect(selectionBounds, GetShapeBounds(shape)))
+            {
+                result.Add(shape);
+            }
+        }
+
+        return result;
+    }
+
+    private List<Stroke> GetStrokesInsideRange(Rect selectionBounds)
+    {
+        var result = new List<Stroke>();
+
+        foreach (Stroke stroke in DrawingCanvas.Strokes)
+        {
+            Rect strokeBounds = GetStrokeBounds(stroke);
+            if (strokeBounds.IsEmpty)
+            {
+                continue;
+            }
+
+            double visibleMargin = Math.Max(stroke.DrawingAttributes.Width, stroke.DrawingAttributes.Height) / 2.0;
+            strokeBounds.Inflate(visibleMargin, visibleMargin);
+
+            if (IsRectInsideRect(selectionBounds, strokeBounds))
+            {
+                AddStrokeReferenceIfMissing(result, stroke);
+            }
+        }
+
+        return result;
+    }
+
+    private List<Border> GetTextElementsInsideRange(Rect selectionBounds)
+    {
+        var result = new List<Border>();
+
+        foreach (Border textElement in _textElements)
+        {
+            if (IsRectInsideRect(selectionBounds, GetTextElementBounds(textElement)))
+            {
+                result.Add(textElement);
+            }
+        }
+
+        return result;
+    }
+
+    private static Rect CreateNormalizedRect(Point first, Point second)
+    {
+        double left = Math.Min(first.X, second.X);
+        double top = Math.Min(first.Y, second.Y);
+        double right = Math.Max(first.X, second.X);
+        double bottom = Math.Max(first.Y, second.Y);
+
+        return new Rect(left, top, Math.Max(0.0, right - left), Math.Max(0.0, bottom - top));
+    }
+
+    private static bool IsRectInsideRect(Rect outer, Rect inner)
+    {
+        if (outer.IsEmpty || inner.IsEmpty)
+        {
+            return false;
+        }
+
+        return outer.Contains(inner.TopLeft)
+            && outer.Contains(inner.BottomRight);
+    }
+
     private DrawableSelectionCandidate? FindDrawableSelectionAtPoint(Point point)
     {
         WpfShape? fillShape = FindFillShapeAtPoint(point);
@@ -5095,7 +5381,8 @@ public partial class MainWindow : Window
         for (int i = DrawingCanvas.Children.Count - 1; i >= 0; i--)
         {
             UIElement child = DrawingCanvas.Children[i];
-            if (ReferenceEquals(child, _shapeSelectionAdorner))
+            if (ReferenceEquals(child, _shapeSelectionAdorner)
+                || ReferenceEquals(child, _rangeSelectionAdorner))
             {
                 continue;
             }
@@ -7200,7 +7487,8 @@ public partial class MainWindow : Window
                 continue;
             }
 
-            if (ReferenceEquals(child, _shapeSelectionAdorner))
+            if (ReferenceEquals(child, _shapeSelectionAdorner)
+                || ReferenceEquals(child, _rangeSelectionAdorner))
             {
                 continue;
             }
@@ -7268,6 +7556,25 @@ public partial class MainWindow : Window
         }
 
         return new Point(left, top);
+    }
+
+    private static Rect GetTextElementBounds(Border host)
+    {
+        Point position = GetTextElementPosition(host);
+        double width = host.ActualWidth > 0.0 ? host.ActualWidth : host.RenderSize.Width;
+        double height = host.ActualHeight > 0.0 ? host.ActualHeight : host.RenderSize.Height;
+
+        if (width <= 0.0)
+        {
+            width = Math.Max(1.0, host.DesiredSize.Width);
+        }
+
+        if (height <= 0.0)
+        {
+            height = Math.Max(1.0, host.DesiredSize.Height);
+        }
+
+        return new Rect(position.X, position.Y, width, height);
     }
 
     private void SetTextElementPosition(Border host, Point point)
