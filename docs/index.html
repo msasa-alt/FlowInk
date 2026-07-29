@@ -489,6 +489,20 @@
       text-align: center;
     }
 
+    .feature-video {
+      max-width: 960px;
+      margin: 28px auto 0;
+    }
+
+    .feature-video video {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+      background: #000;
+    }
+
     .use-case {
       padding: 20px;
       border-radius: var(--radius);
@@ -731,6 +745,20 @@
           </a>
           <figcaption>チャート分析</figcaption>
         </figure>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>描画オブジェクトの選択・編集</h2>
+      <p class="section-lead">
+        描画した線や図形、テキストを選択して、移動または削除できます。
+      </p>
+
+      <div class="feature-video">
+        <video controls preload="metadata" playsinline aria-label="描画オブジェクトを選択・移動・削除する操作の紹介動画">
+          <source src="videos/Flowink_video01.mp4" type="video/mp4">
+          お使いのブラウザは動画の再生に対応していません。
+        </video>
       </div>
     </section>
 

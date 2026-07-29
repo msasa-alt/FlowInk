@@ -461,6 +461,20 @@
       text-align: center;
     }
 
+    .feature-video {
+      max-width: 960px;
+      margin: 28px auto 0;
+    }
+
+    .feature-video video {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+      background: #000;
+    }
+
     .use-case {
       padding: 20px;
       border-radius: var(--radius);
@@ -704,6 +718,20 @@
           </a>
           <figcaption>Chart analysis</figcaption>
         </figure>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Select and edit drawn objects</h2>
+      <p class="section-lead">
+        Select drawn lines, shapes, and text, then move or delete them.
+      </p>
+
+      <div class="feature-video">
+        <video controls preload="metadata" playsinline aria-label="Video showing how to select, move, and delete drawn objects">
+          <source src="../videos/Flowink_video01.mp4" type="video/mp4">
+          Your browser does not support video playback.
+        </video>
       </div>
     </section>
 
