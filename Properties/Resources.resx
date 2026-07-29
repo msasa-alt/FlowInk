@@ -410,4 +410,13 @@ Right-click:Edit preset value</value>
   <data name="PenWidthPresets" xml:space="preserve">
     <value>Pen width presets</value>
   </data>
+  <data name="LineStyle" xml:space="preserve">
+    <value>Line style</value>
+  </data>
+  <data name="SolidLine" xml:space="preserve">
+    <value>Solid</value>
+  </data>
+  <data name="DottedLine" xml:space="preserve">
+    <value>Dotted</value>
+  </data>
 </root>

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -47,6 +47,7 @@ public partial class MainWindow : Window
 
     private Color _currentPenColor = Color.FromArgb(255, 255, 0, 0);
     private double _currentPenWidth = 4;
+    private LineStyleKind _currentLineStyle = LineStyleKind.Solid;
     private double _currentEraserWidth = 4;
     private string _currentTextFontFamilyName = DefaultTextFontFamilyName;
     private double _currentTextFontSize = DefaultTextFontSize;
@@ -81,6 +82,7 @@ public partial class MainWindow : Window
     private Point _activeTextStartPoint;
     private readonly List<Border> _textElements = new();
     private Border? _selectedTextElement;
+    private readonly List<Border> _selectedTextElements = new();
 
     private readonly UndoHistoryManager<IUndoableAction, MainWindow> _history;
     private bool _isApplyingHistory;
@@ -96,20 +98,26 @@ public partial class MainWindow : Window
     private readonly Dictionary<Stroke, int> _shapeOutlineGroupIds = new();
     private int _nextShapeOutlineGroupId = 1;
     private WpfShape? _selectedFillShape;
+    private readonly List<WpfShape> _selectedFillShapes = new();
     private Stroke? _selectedShapeOutlineStroke;
     private readonly List<Stroke> _selectedShapeOutlineStrokes = new();
     private WpfRectangle? _shapeSelectionAdorner;
     private bool _isDraggingSelectedShape;
     private bool _hasSelectedShapeDragMoved;
     private Point _shapeDragStartMousePoint;
-    private Rect? _shapeDragStartFillBounds;
+    private readonly Dictionary<WpfShape, Rect> _shapeDragStartFillBounds = new();
     private readonly Dictionary<Stroke, StylusPointCollection> _shapeDragStartOutlineStrokePoints = new();
-    private Point _textDragCommittedStartPoint;
+    private readonly Dictionary<Border, Point> _selectionDragStartTextPositions = new();
+
+    private WpfRectangle? _rangeSelectionAdorner;
+    private bool _isRangeSelecting;
+    private bool _hasRangeSelectionDragMoved;
+    private bool _rangeSelectionAddsToExisting;
+    private Point _rangeSelectionStartPoint;
+    private const double RangeSelectionMinimumDragDistance = 3.0;
 
     private Border? _draggingTextElement;
     private bool _isDraggingTextElement;
-    private Point _textDragStartMousePoint;
-    private Point _textDragStartElementPoint;
 
     private bool _isToolbarDragging;
     private Point _toolbarDragStartMousePoint;
@@ -173,6 +181,7 @@ public partial class MainWindow : Window
     private enum ToolMode
     {
         Pen,
+        Select,
         Rectangle,
         Circle,
         Text,
@@ -196,7 +205,8 @@ public partial class MainWindow : Window
         Erasing,
         EditingText,
         MovingText,
-        MovingShape
+        MovingShape,
+        SelectingRange
     }
 
     private interface IUndoableAction
@@ -470,6 +480,18 @@ public partial class MainWindow : Window
         public double Tolerance { get; }
     }
 
+    private sealed class DrawableSelectionCandidate
+    {
+        public DrawableSelectionCandidate(WpfShape? fillShape, IEnumerable<Stroke> outlineStrokes)
+        {
+            FillShape = fillShape;
+            OutlineStrokes = new List<Stroke>(outlineStrokes);
+        }
+
+        public WpfShape? FillShape { get; }
+        public List<Stroke> OutlineStrokes { get; }
+    }
+
     private sealed class ShapeStrokeMoveEntry
     {
         public ShapeStrokeMoveEntry(Stroke stroke, StylusPointCollection? beforePoints, StylusPointCollection? afterPoints)
@@ -486,16 +508,25 @@ public partial class MainWindow : Window
 
     private sealed class ShapeStrokeStyleEntry
     {
-        public ShapeStrokeStyleEntry(Stroke stroke, DrawingAttributes? beforeAttributes, DrawingAttributes? afterAttributes)
+        public ShapeStrokeStyleEntry(
+            Stroke stroke,
+            DrawingAttributes? beforeAttributes,
+            DrawingAttributes? afterAttributes,
+            LineStyleKind? beforeLineStyle,
+            LineStyleKind? afterLineStyle)
         {
             Stroke = stroke;
             BeforeAttributes = beforeAttributes?.Clone();
             AfterAttributes = afterAttributes?.Clone();
+            BeforeLineStyle = beforeLineStyle;
+            AfterLineStyle = afterLineStyle;
         }
 
         public Stroke Stroke { get; }
         public DrawingAttributes? BeforeAttributes { get; }
         public DrawingAttributes? AfterAttributes { get; }
+        public LineStyleKind? BeforeLineStyle { get; }
+        public LineStyleKind? AfterLineStyle { get; }
     }
 
     private sealed class ShapeMoveAction : IUndoableAction
@@ -586,6 +617,11 @@ public partial class MainWindow : Window
                 {
                     entry.Stroke.DrawingAttributes = entry.BeforeAttributes.Clone();
                 }
+
+                if (entry.Stroke is StyledStroke styledStroke && entry.BeforeLineStyle.HasValue)
+                {
+                    styledStroke.LineStyle = entry.BeforeLineStyle.Value;
+                }
             }
 
             window.UpdateShapeSelectionAdorner();
@@ -603,6 +639,11 @@ public partial class MainWindow : Window
                 if (entry.AfterAttributes != null)
                 {
                     entry.Stroke.DrawingAttributes = entry.AfterAttributes.Clone();
+                }
+
+                if (entry.Stroke is StyledStroke styledStroke && entry.AfterLineStyle.HasValue)
+                {
+                    styledStroke.LineStyle = entry.AfterLineStyle.Value;
                 }
             }
 
@@ -721,6 +762,7 @@ public partial class MainWindow : Window
         public List<string> RecentColors { get; set; } = new();
         public List<int> CustomColors { get; set; } = new();
         public double PenWidth { get; set; } = 4.0;
+        public string? LineStyle { get; set; }
         public List<double> PenWidthPresets { get; set; } = new();
         public List<PenPresetSetting> PenPresets { get; set; } = new();
         public double EraserWidth { get; set; } = 4.0;
@@ -764,11 +806,13 @@ public partial class MainWindow : Window
         BuildRecentColorButtons();
         BuildPenPresetButtons();
         BuildPenWidthPresetButtons();
+        BuildLineStyleButtons();
         BuildEraserWidthPresetButtons();
         UpdateToolbarForCT();
         UpdateClickThroughButtonLabel();
 
         ApplyPenColor(_currentPenColor, addToRecent: false);
+        ApplyLineStyleToCanvas();
         ApplyEraserWidthToCanvas();
         _isInitializing = false;
 
@@ -784,6 +828,7 @@ public partial class MainWindow : Window
         DrawingCanvas.PreviewMouseWheel += DrawingCanvas_PreviewMouseWheel;
         DrawingCanvas.LostMouseCapture += DrawingCanvas_LostMouseCapture;
         DrawingCanvas.Strokes.StrokesChanged += DrawingCanvas_StrokesChanged;
+        DrawingCanvas.LineStyleStrokeCollected += DrawingCanvas_LineStyleStrokeCollected;
 
         PreviewKeyDown += MainWindow_PreviewKeyDown;
 
@@ -850,6 +895,16 @@ public partial class MainWindow : Window
             return;
         }
 
+        if (e.Key == Key.Delete && _currentTool == ToolMode.Select)
+        {
+            if (DeleteSelectedObjects())
+            {
+                e.Handled = true;
+            }
+
+            return;
+        }
+
         if (e.Key == Key.Delete && DeleteSelectedShape())
         {
             e.Handled = true;
@@ -888,7 +943,18 @@ public partial class MainWindow : Window
 
     private void DrawingCanvas_StrokesChanged(object? sender, StrokeCollectionChangedEventArgs e)
     {
-        if (_isApplyingHistory || _suppressStrokeHistory)
+        if (_isApplyingHistory || _suppressStrokeHistory || DrawingCanvas.IsReplacingCollectedStroke)
+        {
+            return;
+        }
+
+        // A non-solid freehand stroke is replaced by LineStyleInkCanvas after collection.
+        // Ignore the temporary standard Stroke; the replacement is recorded below.
+        if (_currentInteractionState == InteractionState.DrawingPen
+            && _currentLineStyle != LineStyleKind.Solid
+            && e.Added.Count == 1
+            && e.Removed.Count == 0
+            && e.Added[0] is not StyledStroke)
         {
             return;
         }
@@ -907,6 +973,17 @@ public partial class MainWindow : Window
         }
 
         PushHistory(new StrokeCollectionAction(ToStrokeList(e.Added), ToStrokeList(e.Removed)));
+    }
+
+    private void DrawingCanvas_LineStyleStrokeCollected(object? sender, LineStyleStrokeCollectedEventArgs e)
+    {
+        if (_isApplyingHistory || _suppressStrokeHistory)
+        {
+            return;
+        }
+
+        PushHistory(new StrokeCollectionAction(new[] { e.Stroke }, Array.Empty<Stroke>()));
+        _currentInteractionState = InteractionState.None;
     }
 
     private static void AccumulateStrokeDelta(
@@ -1280,6 +1357,10 @@ public partial class MainWindow : Window
 
             case InteractionState.MovingShape:
                 CancelSelectedShapeDrag();
+                break;
+
+            case InteractionState.SelectingRange:
+                CancelRangeSelection();
                 break;
 
             case InteractionState.Erasing:
@@ -1811,7 +1892,7 @@ public partial class MainWindow : Window
     {
         foreach (var button in new[]
                  {
-                     PenButton, RectangleButton, CircleButton, TextButton, EraserButton, ColorButton,
+                     PenButton, LineStyleButton, SelectButton, RectangleButton, CircleButton, TextButton, EraserButton, ColorButton,
                      ClearButton, ClickThroughButton, SettingsButton, ExitButton
                  })
         {
@@ -2137,6 +2218,7 @@ public partial class MainWindow : Window
                 _recentColors = new List<Color>();
                 _customColorValues = new List<int>();
                 _currentPenWidth = 4.0;
+                _currentLineStyle = LineStyleKind.Solid;
                 _penWidthPresets = new List<double>(GetDefaultPenWidthPresets());
                 _penPresets = GetDefaultPenPresets();
                 _currentEraserWidth = 4.0;
@@ -2164,6 +2246,7 @@ public partial class MainWindow : Window
                 _recentColors = new List<Color>();
                 _customColorValues = new List<int>();
                 _currentPenWidth = 4.0;
+                _currentLineStyle = LineStyleKind.Solid;
                 _penWidthPresets = new List<double>(GetDefaultPenWidthPresets());
                 _penPresets = GetDefaultPenPresets();
                 _currentEraserWidth = 4.0;
@@ -2185,6 +2268,7 @@ public partial class MainWindow : Window
             _recentColors = ParseColorList(settings.RecentColors, new List<Color>());
             _customColorValues = NormalizeCustomColors(settings.CustomColors);
             _currentPenWidth = NormalizePenWidth(settings.PenWidth);
+            _currentLineStyle = ParseLineStyle(settings.LineStyle);
             _penWidthPresets = NormalizePenWidthPresets(settings.PenWidthPresets);
             _penPresets = NormalizePenPresets(settings.PenPresets);
             _currentEraserWidth = NormalizePenWidth(settings.EraserWidth);
@@ -2231,6 +2315,7 @@ public partial class MainWindow : Window
             _recentColors = new List<Color>();
             _customColorValues = new List<int>();
             _currentPenWidth = 4.0;
+            _currentLineStyle = LineStyleKind.Solid;
             _penWidthPresets = new List<double>(GetDefaultPenWidthPresets());
             _currentEraserWidth = 4.0;
             _eraserWidthPresets = new List<double>(GetDefaultEraserWidthPresets());
@@ -2266,6 +2351,7 @@ public partial class MainWindow : Window
             RecentColors = ToHexColorList(_recentColors),
             CustomColors = new List<int>(_customColorValues),
             PenWidth = NormalizePenWidth(_currentPenWidth),
+            LineStyle = _currentLineStyle.ToString(),
             PenWidthPresets = new List<double>(_penWidthPresets),
             PenPresets = ToPenPresetSettings(_penPresets),
             EraserWidth = NormalizePenWidth(_currentEraserWidth),
@@ -2728,6 +2814,16 @@ public partial class MainWindow : Window
         return NormalizeOpacityPercent((int)Math.Round(color.A * 100.0 / 255.0));
     }
 
+    private static int GetTransparencyPercentFromOpacity(int opacityPercent)
+    {
+        return 100 - NormalizeOpacityPercent(opacityPercent);
+    }
+
+    private static int GetTransparencyPercent(Color color)
+    {
+        return 100 - GetOpacityPercent(color);
+    }
+
     private static Color CreateColorWithOpacity(Color color, int opacityPercent)
     {
         byte alpha = (byte)Math.Round(255.0 * NormalizeOpacityPercent(opacityPercent) / 100.0);
@@ -2943,8 +3039,8 @@ public partial class MainWindow : Window
             ToolTip = string.Format(
                 SR.PenPresetItemToolTipFormat,
                 FormatPenWidthText(preset.Width),
-                preset.OpacityPercent,
-                GetColorDisplayText(effectiveColor))
+                GetTransparencyPercentFromOpacity(preset.OpacityPercent),
+                GetColorHexDisplayText(effectiveColor))
         };
 
         button.PreviewMouseLeftButtonDown += PenPresetButton_PreviewMouseLeftButtonDown;
@@ -3173,10 +3269,15 @@ public partial class MainWindow : Window
         };
     }
 
+    private static string GetColorHexDisplayText(Color color)
+    {
+        return $"#{color.A:X2}{color.R:X2}{color.G:X2}{color.B:X2}";
+    }
+
     private static string GetColorDisplayText(Color color)
     {
-        int alphaPercent = (int)Math.Round(color.A * 100.0 / 255.0);
-        return string.Format(SR.ColorDisplayWithAlphaFormat, color.A.ToString("X2"), color.R.ToString("X2"), color.G.ToString("X2"), color.B.ToString("X2"), alphaPercent);
+        int transparencyPercent = GetTransparencyPercent(color);
+        return string.Format(SR.ColorDisplayWithAlphaFormat, color.A.ToString("X2"), color.R.ToString("X2"), color.G.ToString("X2"), color.B.ToString("X2"), transparencyPercent);
     }
 
     private void PresetColorButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -3323,6 +3424,7 @@ public partial class MainWindow : Window
         OpenPopupDeferred(PenPresetPopup, () =>
         {
             ColorPopup.IsOpen = false;
+            LineStylePopup.IsOpen = false;
             EraserWidthPopup.IsOpen = false;
             RectangleSettingsPopup.IsOpen = false;
             HotkeySettingsPopup.IsOpen = false;
@@ -3351,6 +3453,7 @@ public partial class MainWindow : Window
         _currentPenWidth = NormalizePenWidth(normalized.Width);
         _currentPenColor = effectiveColor;
         DrawingCanvas.DefaultDrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth);
+        DrawingCanvas.SyncDynamicRendererDrawingAttributes();
 
         if (CurrentColorPreviewEllipse != null)
         {
@@ -3604,6 +3707,172 @@ public partial class MainWindow : Window
         EraserWidthPopup.IsOpen = false;
     }
 
+
+    private void BuildLineStyleButtons()
+    {
+        if (LineStyleGrid == null)
+        {
+            return;
+        }
+
+        LineStyleGrid.Children.Clear();
+
+        foreach (LineStyleKind lineStyle in new[] { LineStyleKind.Solid, LineStyleKind.Dotted })
+        {
+            var preview = new TextBlock
+            {
+                Text = GetLineStylePreviewText(lineStyle),
+                FontSize = 14,
+                Foreground = Brushes.White,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            var label = new TextBlock
+            {
+                Text = GetLineStyleDisplayName(lineStyle),
+                Foreground = Brushes.White,
+                Margin = new Thickness(10, 0, 0, 0),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            var content = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(6, 2, 6, 2)
+            };
+            content.Children.Add(preview);
+            content.Children.Add(label);
+
+            var button = new Button
+            {
+                Tag = lineStyle,
+                Content = content,
+                MinWidth = 135,
+                Height = 32,
+                Margin = new Thickness(2),
+                Padding = new Thickness(4),
+                HorizontalContentAlignment = HorizontalAlignment.Left,
+                Background = lineStyle == _currentLineStyle
+                    ? _selectedButtonBackground
+                    : _normalButtonBackground,
+                Foreground = Brushes.White,
+                BorderBrush = Brushes.DimGray,
+                BorderThickness = new Thickness(1)
+            };
+            button.Click += LineStyleChoiceButton_Click;
+            LineStyleGrid.Children.Add(button);
+        }
+
+        UpdateLineStyleButton();
+    }
+
+    private void LineStyleButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_isClickThroughEnabled)
+        {
+            return;
+        }
+
+        e.Handled = true;
+        OpenLineStylePopup();
+    }
+
+    private void OpenLineStylePopup()
+    {
+        OpenPopupDeferred(LineStylePopup, () =>
+        {
+            ColorPopup.IsOpen = false;
+            PenPresetPopup.IsOpen = false;
+            EraserWidthPopup.IsOpen = false;
+            RectangleSettingsPopup.IsOpen = false;
+            HotkeySettingsPopup.IsOpen = false;
+            BuildLineStyleButtons();
+        });
+    }
+
+    private void LineStyleChoiceButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button button || button.Tag is not LineStyleKind lineStyle)
+        {
+            return;
+        }
+
+        ApplyLineStyle(lineStyle);
+    }
+
+    private void ApplyLineStyle(LineStyleKind lineStyle)
+    {
+        _currentLineStyle = lineStyle;
+        ApplyLineStyleToCanvas();
+        LineStylePopup.IsOpen = false;
+        SaveAppSettings();
+
+        // Do not remove and rebuild the clicked Button while its routed Click event is running.
+        Dispatcher.BeginInvoke(
+            new Action(BuildLineStyleButtons),
+            DispatcherPriority.Background);
+    }
+
+    private void ApplyLineStyleToCanvas()
+    {
+        DrawingCanvas.CurrentLineStyle = _currentLineStyle;
+        UpdateLineStyleButton();
+    }
+
+    private void UpdateLineStyleButton()
+    {
+        if (LineStyleButtonPreview != null)
+        {
+            LineStyleButtonPreview.StrokeDashArray = GetLineStylePreviewDashArray(_currentLineStyle);
+        }
+
+        if (LineStyleButton != null)
+        {
+            LineStyleButton.ToolTip = $"{SR.LineStyle}: {GetLineStyleDisplayName(_currentLineStyle)}";
+        }
+    }
+
+    private static DoubleCollection GetLineStylePreviewDashArray(LineStyleKind lineStyle)
+    {
+        return lineStyle switch
+        {
+            LineStyleKind.Dotted => new DoubleCollection { 0.1, 2.0 },
+            LineStyleKind.Dashed => new DoubleCollection { 3.0, 2.0 },
+            LineStyleKind.DashDot => new DoubleCollection { 3.0, 2.0, 0.1, 2.0 },
+            _ => new DoubleCollection()
+        };
+    }
+
+    private static string GetLineStylePreviewText(LineStyleKind lineStyle)
+    {
+        return lineStyle switch
+        {
+            LineStyleKind.Dotted => "• • • •",
+            LineStyleKind.Dashed => "━ ━ ━",
+            LineStyleKind.DashDot => "━ • ━ •",
+            _ => "━━━━"
+        };
+    }
+
+    private static string GetLineStyleDisplayName(LineStyleKind lineStyle)
+    {
+        return lineStyle switch
+        {
+            LineStyleKind.Dotted => SR.DottedLine,
+            LineStyleKind.Solid => SR.SolidLine,
+            _ => lineStyle.ToString()
+        };
+    }
+
+    private static LineStyleKind ParseLineStyle(string? value)
+    {
+        return Enum.TryParse(value, ignoreCase: true, out LineStyleKind parsed)
+            && Enum.IsDefined(parsed)
+            ? parsed
+            : LineStyleKind.Solid;
+    }
+
     private void ActivatePenTool()
     {
         FinalizeOrCancelCurrentOperation();
@@ -3641,6 +3910,7 @@ public partial class MainWindow : Window
     {
         _currentPenColor = color;
         DrawingCanvas.DefaultDrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth);
+        DrawingCanvas.SyncDynamicRendererDrawingAttributes();
 
         if (CurrentColorPreviewEllipse != null)
         {
@@ -3693,6 +3963,16 @@ public partial class MainWindow : Window
         };
     }
 
+
+
+    private Stroke CreateStyledStroke(StylusPointCollection stylusPoints)
+    {
+        return new StyledStroke(
+            stylusPoints,
+            CreatePenAttributes(_currentPenColor, _currentPenWidth),
+            _currentLineStyle);
+    }
+
     private void ApplyEraserWidthToCanvas()
     {
         DrawingCanvas.EraserShape = new EllipseStylusShape(_currentEraserWidth, _currentEraserWidth);
@@ -3700,12 +3980,14 @@ public partial class MainWindow : Window
 
     private void UpdateShapeButtonToolTips()
     {
+        int rectangleFillTransparencyPercent = GetTransparencyPercentFromOpacity(_rectangleFillOpacityPercent);
+
         string rectangleText = _isRectangleFilled
-            ? string.Format(SR.RectangleFilledToolTipFormat, NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent))
+            ? string.Format(SR.RectangleFilledToolTipFormat, rectangleFillTransparencyPercent)
             : SR.RectangleNotFilledToolTip;
 
         string circleText = _isRectangleFilled
-            ? string.Format(SR.CircleFilledToolTipFormat, NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent))
+            ? string.Format(SR.CircleFilledToolTipFormat, rectangleFillTransparencyPercent)
             : SR.CircleNotFilledToolTip;
 
         RectangleButton.ToolTip = rectangleText;
@@ -3714,6 +3996,8 @@ public partial class MainWindow : Window
 
     private void UpdateRectangleSettingsUi()
     {
+        int rectangleFillTransparencyPercent = GetTransparencyPercentFromOpacity(_rectangleFillOpacityPercent);
+
         if (RectangleFillCheckBox != null)
         {
             RectangleFillCheckBox.IsChecked = _isRectangleFilled;
@@ -3721,13 +4005,13 @@ public partial class MainWindow : Window
 
         if (RectangleOpacitySlider != null)
         {
-            RectangleOpacitySlider.Value = NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent);
+            RectangleOpacitySlider.Value = rectangleFillTransparencyPercent;
             RectangleOpacitySlider.IsEnabled = _isRectangleFilled;
         }
 
         if (RectangleOpacityLabel != null)
         {
-            RectangleOpacityLabel.Text = string.Format(SR.TransparencyFormat, NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent));
+            RectangleOpacityLabel.Text = string.Format(SR.TransparencyFormat, rectangleFillTransparencyPercent);
             RectangleOpacityLabel.Opacity = _isRectangleFilled ? 1.0 : 0.55;
         }
     }
@@ -3738,6 +4022,7 @@ public partial class MainWindow : Window
         {
             RectangleSettingsPopup.PlacementTarget = placementTarget;
             PenPresetPopup.IsOpen = false;
+            LineStylePopup.IsOpen = false;
             EraserWidthPopup.IsOpen = false;
             ColorPopup.IsOpen = false;
             UpdateRectangleSettingsUi();
@@ -3773,6 +4058,62 @@ public partial class MainWindow : Window
         }
 
         Point mousePoint = e.GetPosition(DrawingCanvas);
+
+        if (_currentTool == ToolMode.Select)
+        {
+            bool isShiftPressed = (Keyboard.Modifiers & ModifierKeys.Shift) != 0;
+            Border? clickedTextElement = FindCommittedTextHost(e.OriginalSource);
+
+            CommitActiveTextInput();
+            DrawingCanvas.Focus();
+
+            if (clickedTextElement != null)
+            {
+                if (isShiftPressed)
+                {
+                    ToggleTextElementSelection(clickedTextElement);
+                }
+                else if (IsTextElementSelected(clickedTextElement))
+                {
+                    BeginTextElementDrag(clickedTextElement, mousePoint);
+                }
+                else
+                {
+                    ClearAllSelectedObjects();
+                    AddTextElementToSelection(clickedTextElement);
+                }
+
+                e.Handled = true;
+                return;
+            }
+
+            DrawableSelectionCandidate? candidate = FindDrawableSelectionAtPoint(mousePoint);
+            if (candidate != null)
+            {
+                if (isShiftPressed)
+                {
+                    ToggleDrawableSelection(candidate);
+                }
+                else
+                {
+                    if (!IsDrawableSelectionSelected(candidate))
+                    {
+                        ClearAllSelectedObjects();
+                        AddDrawableSelection(candidate);
+                    }
+
+                    BeginSelectedShapeDrag(mousePoint);
+                }
+
+                e.Handled = true;
+                return;
+            }
+
+            BeginRangeSelection(mousePoint, isShiftPressed);
+            e.Handled = true;
+            return;
+        }
+
         if (HasSelectedShape())
         {
             if (IsPointOnSelectedShape(mousePoint))
@@ -3938,18 +4279,33 @@ public partial class MainWindow : Window
         CommitActiveTextInput();
 
         Point point = e.GetPosition(DrawingCanvas);
-        if (TrySelectShapeAtPoint(point))
+        DrawableSelectionCandidate? candidate = FindDrawableSelectionAtPoint(point);
+
+        if (candidate != null)
         {
+            if (!IsDrawableSelectionSelected(candidate))
+            {
+                ClearAllSelectedObjects();
+                AddDrawableSelection(candidate);
+            }
+
             ShowSelectedShapeContextMenu();
             e.Handled = true;
             return;
         }
 
-        ClearSelectedShape();
+        ClearAllSelectedObjects();
     }
 
     private void DrawingCanvas_PreviewMouseMove(object sender, MouseEventArgs e)
     {
+        if (_isRangeSelecting)
+        {
+            UpdateRangeSelection(e.GetPosition(DrawingCanvas));
+            e.Handled = true;
+            return;
+        }
+
         if (_isDraggingSelectedShape)
         {
             UpdateSelectedShapeDrag(e.GetPosition(DrawingCanvas));
@@ -3991,6 +4347,13 @@ public partial class MainWindow : Window
 
     private void DrawingCanvas_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
+        if (_isRangeSelecting)
+        {
+            CompleteRangeSelection(e.GetPosition(DrawingCanvas));
+            e.Handled = true;
+            return;
+        }
+
         if (_isDraggingSelectedShape)
         {
             EndSelectedShapeDrag();
@@ -4068,6 +4431,11 @@ public partial class MainWindow : Window
 
     private void DrawingCanvas_LostMouseCapture(object sender, MouseEventArgs e)
     {
+        if (_isRangeSelecting)
+        {
+            CancelRangeSelection();
+        }
+
         if (_isDraggingSelectedShape)
         {
             CancelSelectedShapeDrag();
@@ -4137,6 +4505,8 @@ public partial class MainWindow : Window
             return;
         }
 
+        RegisterStrokeSelectionGroup(finalStroke, arrowHeadStroke);
+
         ExecuteWithoutStrokeHistory(() =>
         {
             DrawingCanvas.Strokes.Add(finalStroke);
@@ -4173,12 +4543,7 @@ public partial class MainWindow : Window
             new StylusPoint(endPoint.X, endPoint.Y)
         };
 
-        var stroke = new Stroke(stylusPoints)
-        {
-            DrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth)
-        };
-
-        return stroke;
+        return CreateStyledStroke(stylusPoints);
     }
 
     private bool ShouldDrawArrowForCurrentGesture()
@@ -4209,12 +4574,7 @@ public partial class MainWindow : Window
             new StylusPoint(p2.X, p2.Y)
         };
 
-        var stroke = new Stroke(stylusPoints)
-        {
-            DrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth)
-        };
-
-        return stroke;
+        return CreateStyledStroke(stylusPoints);
     }
 
     private void UpdateRectanglePreview(Point startPoint, Point endPoint)
@@ -4392,10 +4752,7 @@ public partial class MainWindow : Window
             new StylusPoint(left, top)
         };
 
-        return new Stroke(stylusPoints)
-        {
-            DrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth)
-        };
+        return CreateStyledStroke(stylusPoints);
     }
 
 
@@ -4429,10 +4786,7 @@ public partial class MainWindow : Window
             stylusPoints.Add(new StylusPoint(x, y));
         }
 
-        return new Stroke(stylusPoints)
-        {
-            DrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth)
-        };
+        return CreateStyledStroke(stylusPoints);
     }
 
     private WpfShape CreateFilledEllipseShape(Point startPoint, Point endPoint)
@@ -4573,6 +4927,16 @@ public partial class MainWindow : Window
         GetOrCreateShapeOutlineGroupId(outlineStroke);
     }
 
+    private void RegisterStrokeSelectionGroup(params Stroke[] strokes)
+    {
+        int groupId = _nextShapeOutlineGroupId++;
+
+        foreach (Stroke stroke in strokes)
+        {
+            _shapeOutlineGroupIds[stroke] = groupId;
+        }
+    }
+
     private int GetOrCreateShapeOutlineGroupId(Stroke outlineStroke)
     {
         if (_shapeOutlineGroupIds.TryGetValue(outlineStroke, out int outlineGroupId))
@@ -4610,41 +4974,415 @@ public partial class MainWindow : Window
 
     private bool HasSelectedShape()
     {
-        return _selectedFillShape != null || GetSelectedShapeOutlineStrokesSnapshot().Count > 0;
+        return GetSelectedFillShapesSnapshot().Count > 0
+            || GetSelectedShapeOutlineStrokesSnapshot().Count > 0;
     }
 
-    private bool TrySelectShapeAtPoint(Point point)
+
+
+
+
+    private void ClearAllSelectedObjects()
     {
-        WpfShape? fillShape = FindFillShapeAtPoint(point);
-        if (fillShape != null)
+        ClearSelectedShape();
+        ClearSelectedTextElement();
+    }
+
+    private void BeginRangeSelection(Point startPoint, bool addToExisting)
+    {
+        _isRangeSelecting = true;
+        _hasRangeSelectionDragMoved = false;
+        _rangeSelectionAddsToExisting = addToExisting;
+        _rangeSelectionStartPoint = startPoint;
+        _currentInteractionState = InteractionState.SelectingRange;
+
+        RemoveRangeSelectionAdorner();
+
+        if (DrawingCanvas.IsMouseCaptured)
         {
-            SelectShape(fillShape, null);
-            return true;
+            DrawingCanvas.ReleaseMouseCapture();
         }
 
-        Stroke? stroke = FindShapeOutlineStrokeAtPoint(point);
-        if (stroke == null)
+        DrawingCanvas.CaptureMouse();
+    }
+
+    private void UpdateRangeSelection(Point currentPoint)
+    {
+        if (!_isRangeSelecting)
+        {
+            return;
+        }
+
+        Rect bounds = CreateNormalizedRect(_rangeSelectionStartPoint, currentPoint);
+        if (bounds.Width >= RangeSelectionMinimumDragDistance || bounds.Height >= RangeSelectionMinimumDragDistance)
+        {
+            _hasRangeSelectionDragMoved = true;
+        }
+
+        if (!_hasRangeSelectionDragMoved)
+        {
+            return;
+        }
+
+        UpdateRangeSelectionAdorner(bounds);
+    }
+
+    private void CompleteRangeSelection(Point endPoint)
+    {
+        if (!_isRangeSelecting)
+        {
+            return;
+        }
+
+        Rect bounds = CreateNormalizedRect(_rangeSelectionStartPoint, endPoint);
+        bool shouldSelectRange = _hasRangeSelectionDragMoved
+            && bounds.Width >= RangeSelectionMinimumDragDistance
+            && bounds.Height >= RangeSelectionMinimumDragDistance;
+
+        bool addToExisting = _rangeSelectionAddsToExisting;
+
+        _isRangeSelecting = false;
+        _hasRangeSelectionDragMoved = false;
+        _rangeSelectionAddsToExisting = false;
+        _currentInteractionState = InteractionState.None;
+
+        if (DrawingCanvas.IsMouseCaptured)
+        {
+            DrawingCanvas.ReleaseMouseCapture();
+        }
+
+        RemoveRangeSelectionAdorner();
+
+        if (!shouldSelectRange)
+        {
+            if (!addToExisting)
+            {
+                ClearAllSelectedObjects();
+            }
+
+            return;
+        }
+
+        if (!addToExisting)
+        {
+            ClearAllSelectedObjects();
+        }
+
+        AddObjectsInsideSelectionRange(bounds);
+        UpdateShapeSelectionAdorner();
+    }
+
+    private void CancelRangeSelection()
+    {
+        if (!_isRangeSelecting)
+        {
+            return;
+        }
+
+        _isRangeSelecting = false;
+        _hasRangeSelectionDragMoved = false;
+        _rangeSelectionAddsToExisting = false;
+
+        if (_currentInteractionState == InteractionState.SelectingRange)
+        {
+            _currentInteractionState = InteractionState.None;
+        }
+
+        if (DrawingCanvas.IsMouseCaptured)
+        {
+            DrawingCanvas.ReleaseMouseCapture();
+        }
+
+        RemoveRangeSelectionAdorner();
+    }
+
+    private void UpdateRangeSelectionAdorner(Rect bounds)
+    {
+        if (_rangeSelectionAdorner == null)
+        {
+            _rangeSelectionAdorner = new WpfRectangle
+            {
+                Fill = new SolidColorBrush(Color.FromArgb(24, 0, 191, 255)),
+                Stroke = Brushes.DeepSkyBlue,
+                StrokeThickness = 1.0,
+                StrokeDashArray = new DoubleCollection { 4.0, 3.0 },
+                IsHitTestVisible = false
+            };
+        }
+
+        _rangeSelectionAdorner.Width = Math.Max(1.0, bounds.Width);
+        _rangeSelectionAdorner.Height = Math.Max(1.0, bounds.Height);
+        InkCanvas.SetLeft(_rangeSelectionAdorner, bounds.Left);
+        InkCanvas.SetTop(_rangeSelectionAdorner, bounds.Top);
+
+        if (DrawingCanvas.Children.Contains(_rangeSelectionAdorner))
+        {
+            DrawingCanvas.Children.Remove(_rangeSelectionAdorner);
+        }
+
+        DrawingCanvas.Children.Add(_rangeSelectionAdorner);
+    }
+
+    private void RemoveRangeSelectionAdorner()
+    {
+        if (_rangeSelectionAdorner == null)
+        {
+            return;
+        }
+
+        RemoveCanvasElementIfPresent(_rangeSelectionAdorner);
+        _rangeSelectionAdorner = null;
+    }
+
+    private void AddObjectsInsideSelectionRange(Rect selectionBounds)
+    {
+        foreach (WpfShape fillShape in GetFillShapesInsideRange(selectionBounds))
+        {
+            AddDrawableSelection(new DrawableSelectionCandidate(fillShape, FindOutlineStrokesForFillShape(fillShape)));
+        }
+
+        foreach (Stroke stroke in GetStrokesInsideRange(selectionBounds))
+        {
+            WpfShape? pairedFillShape = null;
+            if (_outlineStrokeFilledShapes.TryGetValue(stroke, out WpfShape? registeredFill)
+                && DrawingCanvas.Children.Contains(registeredFill))
+            {
+                pairedFillShape = registeredFill;
+            }
+
+            List<Stroke> outlineStrokes = pairedFillShape != null
+                ? FindOutlineStrokesForFillShape(pairedFillShape)
+                : FindOutlineStrokesInSameShape(stroke);
+
+            AddDrawableSelection(new DrawableSelectionCandidate(pairedFillShape, outlineStrokes));
+        }
+
+        foreach (Border textElement in GetTextElementsInsideRange(selectionBounds))
+        {
+            AddTextElementToSelection(textElement);
+        }
+    }
+
+    private List<WpfShape> GetFillShapesInsideRange(Rect selectionBounds)
+    {
+        var result = new List<WpfShape>();
+
+        foreach (UIElement child in DrawingCanvas.Children)
+        {
+            if (ReferenceEquals(child, _shapeSelectionAdorner)
+                || ReferenceEquals(child, _rangeSelectionAdorner))
+            {
+                continue;
+            }
+
+            if (child is WpfShape shape
+                && shape.Fill != null
+                && shape.StrokeThickness == 0
+                && IsRectInsideRect(selectionBounds, GetShapeBounds(shape)))
+            {
+                result.Add(shape);
+            }
+        }
+
+        return result;
+    }
+
+    private List<Stroke> GetStrokesInsideRange(Rect selectionBounds)
+    {
+        var result = new List<Stroke>();
+
+        foreach (Stroke stroke in DrawingCanvas.Strokes)
+        {
+            Rect strokeBounds = GetStrokeBounds(stroke);
+            if (strokeBounds.IsEmpty)
+            {
+                continue;
+            }
+
+            double visibleMargin = Math.Max(stroke.DrawingAttributes.Width, stroke.DrawingAttributes.Height) / 2.0;
+            strokeBounds.Inflate(visibleMargin, visibleMargin);
+
+            if (IsRectInsideRect(selectionBounds, strokeBounds))
+            {
+                AddStrokeReferenceIfMissing(result, stroke);
+            }
+        }
+
+        return result;
+    }
+
+    private List<Border> GetTextElementsInsideRange(Rect selectionBounds)
+    {
+        var result = new List<Border>();
+
+        foreach (Border textElement in _textElements)
+        {
+            if (IsRectInsideRect(selectionBounds, GetTextElementBounds(textElement)))
+            {
+                result.Add(textElement);
+            }
+        }
+
+        return result;
+    }
+
+    private static Rect CreateNormalizedRect(Point first, Point second)
+    {
+        double left = Math.Min(first.X, second.X);
+        double top = Math.Min(first.Y, second.Y);
+        double right = Math.Max(first.X, second.X);
+        double bottom = Math.Max(first.Y, second.Y);
+
+        return new Rect(left, top, Math.Max(0.0, right - left), Math.Max(0.0, bottom - top));
+    }
+
+    private static bool IsRectInsideRect(Rect outer, Rect inner)
+    {
+        if (outer.IsEmpty || inner.IsEmpty)
         {
             return false;
         }
 
-        WpfShape? pairedFillShape = null;
-        if (_outlineStrokeFilledShapes.TryGetValue(stroke, out WpfShape? registeredFill)
-            && DrawingCanvas.Children.Contains(registeredFill))
+        return outer.Contains(inner.TopLeft)
+            && outer.Contains(inner.BottomRight);
+    }
+
+    private DrawableSelectionCandidate? FindDrawableSelectionAtPoint(Point point)
+    {
+        WpfShape? fillShape = FindFillShapeAtPoint(point);
+        if (fillShape != null)
         {
-            pairedFillShape = registeredFill;
+            return new DrawableSelectionCandidate(fillShape, FindOutlineStrokesForFillShape(fillShape));
         }
 
-        SelectShape(pairedFillShape, stroke);
-        return true;
+        Stroke? shapeStroke = FindShapeOutlineStrokeAtPoint(point);
+        if (shapeStroke != null)
+        {
+            WpfShape? pairedFillShape = null;
+            if (_outlineStrokeFilledShapes.TryGetValue(shapeStroke, out WpfShape? registeredFill)
+                && DrawingCanvas.Children.Contains(registeredFill))
+            {
+                pairedFillShape = registeredFill;
+            }
+
+            List<Stroke> outlineStrokes = pairedFillShape != null
+                ? FindOutlineStrokesForFillShape(pairedFillShape)
+                : FindOutlineStrokesInSameShape(shapeStroke);
+
+            return new DrawableSelectionCandidate(pairedFillShape, outlineStrokes);
+        }
+
+        Stroke? stroke = FindSelectableStrokeAtPoint(point);
+        if (stroke == null)
+        {
+            return null;
+        }
+
+        return new DrawableSelectionCandidate(null, FindOutlineStrokesInSameShape(stroke));
     }
+
+    private bool IsDrawableSelectionSelected(DrawableSelectionCandidate candidate)
+    {
+        if (candidate.FillShape != null && ContainsShapeReference(_selectedFillShapes, candidate.FillShape))
+        {
+            return true;
+        }
+
+        foreach (Stroke stroke in candidate.OutlineStrokes)
+        {
+            if (ContainsStrokeReference(_selectedShapeOutlineStrokes, stroke))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void AddDrawableSelection(DrawableSelectionCandidate candidate)
+    {
+        if (candidate.FillShape != null
+            && DrawingCanvas.Children.Contains(candidate.FillShape)
+            && !ContainsShapeReference(_selectedFillShapes, candidate.FillShape))
+        {
+            _selectedFillShapes.Add(candidate.FillShape);
+            _selectedFillShape = candidate.FillShape;
+        }
+
+        foreach (Stroke stroke in candidate.OutlineStrokes)
+        {
+            AddSelectedShapeOutlineStroke(stroke);
+        }
+
+        _selectedShapeOutlineStroke = _selectedShapeOutlineStrokes.Count > 0
+            ? _selectedShapeOutlineStrokes[0]
+            : null;
+
+        UpdateShapeSelectionAdorner();
+    }
+
+    private void RemoveDrawableSelection(DrawableSelectionCandidate candidate)
+    {
+        if (candidate.FillShape != null)
+        {
+            RemoveShapeReference(_selectedFillShapes, candidate.FillShape);
+        }
+
+        foreach (Stroke stroke in candidate.OutlineStrokes)
+        {
+            RemoveStrokeReference(_selectedShapeOutlineStrokes, stroke);
+        }
+
+        _selectedFillShape = _selectedFillShapes.Count > 0
+            ? _selectedFillShapes[_selectedFillShapes.Count - 1]
+            : null;
+        _selectedShapeOutlineStroke = _selectedShapeOutlineStrokes.Count > 0
+            ? _selectedShapeOutlineStrokes[0]
+            : null;
+
+        UpdateShapeSelectionAdorner();
+    }
+
+    private void ToggleDrawableSelection(DrawableSelectionCandidate candidate)
+    {
+        if (IsDrawableSelectionSelected(candidate))
+        {
+            RemoveDrawableSelection(candidate);
+        }
+        else
+        {
+            AddDrawableSelection(candidate);
+        }
+    }
+
+
+
+
+
+    private Stroke? FindSelectableStrokeAtPoint(Point point)
+    {
+        for (int i = DrawingCanvas.Strokes.Count - 1; i >= 0; i--)
+        {
+            Stroke stroke = DrawingCanvas.Strokes[i];
+            if (stroke.HitTest(point, GetStrokeHitTolerance(stroke)))
+            {
+                return stroke;
+            }
+        }
+
+        return null;
+    }
+
+
+
 
     private WpfShape? FindFillShapeAtPoint(Point point)
     {
         for (int i = DrawingCanvas.Children.Count - 1; i >= 0; i--)
         {
             UIElement child = DrawingCanvas.Children[i];
-            if (ReferenceEquals(child, _shapeSelectionAdorner))
+            if (ReferenceEquals(child, _shapeSelectionAdorner)
+                || ReferenceEquals(child, _rangeSelectionAdorner))
             {
                 continue;
             }
@@ -4938,44 +5676,7 @@ public partial class MainWindow : Window
         return Math.Max(4.0, (width / 2.0) + 4.0);
     }
 
-    private void SelectShape(WpfShape? fillShape, Stroke? outlineStroke)
-    {
-        if (fillShape != null && !DrawingCanvas.Children.Contains(fillShape))
-        {
-            fillShape = null;
-        }
 
-        _selectedFillShape = fillShape;
-        _selectedShapeOutlineStrokes.Clear();
-        _shapeDragStartOutlineStrokePoints.Clear();
-
-        if (outlineStroke != null && DrawingCanvas.Strokes.Contains(outlineStroke))
-        {
-            if (fillShape == null)
-            {
-                foreach (Stroke stroke in FindOutlineStrokesInSameShape(outlineStroke))
-                {
-                    AddSelectedShapeOutlineStroke(stroke);
-                }
-            }
-            else
-            {
-                AddSelectedShapeOutlineStroke(outlineStroke);
-            }
-        }
-
-        if (fillShape != null)
-        {
-            foreach (Stroke stroke in FindOutlineStrokesForFillShape(fillShape))
-            {
-                AddSelectedShapeOutlineStroke(stroke);
-            }
-        }
-
-        _selectedShapeOutlineStroke = _selectedShapeOutlineStrokes.Count > 0 ? _selectedShapeOutlineStrokes[0] : null;
-        ClearSelectedTextElement();
-        UpdateShapeSelectionAdorner();
-    }
 
     private void AddSelectedShapeOutlineStroke(Stroke stroke)
     {
@@ -4983,6 +5684,23 @@ public partial class MainWindow : Window
         {
             AddStrokeReferenceIfMissing(_selectedShapeOutlineStrokes, stroke);
         }
+    }
+
+    private List<WpfShape> GetSelectedFillShapesSnapshot()
+    {
+        for (int i = _selectedFillShapes.Count - 1; i >= 0; i--)
+        {
+            if (!DrawingCanvas.Children.Contains(_selectedFillShapes[i]))
+            {
+                _selectedFillShapes.RemoveAt(i);
+            }
+        }
+
+        _selectedFillShape = _selectedFillShapes.Count > 0
+            ? _selectedFillShapes[_selectedFillShapes.Count - 1]
+            : null;
+
+        return new List<WpfShape>(_selectedFillShapes);
     }
 
     private List<Stroke> GetSelectedShapeOutlineStrokesSnapshot()
@@ -4995,7 +5713,10 @@ public partial class MainWindow : Window
             }
         }
 
-        _selectedShapeOutlineStroke = _selectedShapeOutlineStrokes.Count > 0 ? _selectedShapeOutlineStrokes[0] : null;
+        _selectedShapeOutlineStroke = _selectedShapeOutlineStrokes.Count > 0
+            ? _selectedShapeOutlineStrokes[0]
+            : null;
+
         return new List<Stroke>(_selectedShapeOutlineStrokes);
     }
 
@@ -5020,15 +5741,50 @@ public partial class MainWindow : Window
         return false;
     }
 
+    private static void RemoveStrokeReference(List<Stroke> strokes, Stroke target)
+    {
+        for (int i = strokes.Count - 1; i >= 0; i--)
+        {
+            if (ReferenceEquals(strokes[i], target))
+            {
+                strokes.RemoveAt(i);
+            }
+        }
+    }
+
+    private static bool ContainsShapeReference(List<WpfShape> shapes, WpfShape target)
+    {
+        foreach (WpfShape shape in shapes)
+        {
+            if (ReferenceEquals(shape, target))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static void RemoveShapeReference(List<WpfShape> shapes, WpfShape target)
+    {
+        for (int i = shapes.Count - 1; i >= 0; i--)
+        {
+            if (ReferenceEquals(shapes[i], target))
+            {
+                shapes.RemoveAt(i);
+            }
+        }
+    }
+
     private void ClearSelectedShape()
     {
         _selectedFillShape = null;
+        _selectedFillShapes.Clear();
         _selectedShapeOutlineStroke = null;
         _selectedShapeOutlineStrokes.Clear();
         _isDraggingSelectedShape = false;
         _hasSelectedShapeDragMoved = false;
-        _shapeDragStartFillBounds = null;
-        _shapeDragStartOutlineStrokePoints.Clear();
+        ClearSelectionDragStartState();
 
         if (_shapeSelectionAdorner != null)
         {
@@ -5041,14 +5797,24 @@ public partial class MainWindow : Window
     {
         if (!HasSelectedShape())
         {
-            ClearSelectedShape();
+            if (_shapeSelectionAdorner != null)
+            {
+                RemoveCanvasElementIfPresent(_shapeSelectionAdorner);
+                _shapeSelectionAdorner = null;
+            }
+
             return;
         }
 
         Rect bounds = GetSelectedShapeBounds();
-        if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0)
+        if (bounds.IsEmpty)
         {
-            ClearSelectedShape();
+            if (_shapeSelectionAdorner != null)
+            {
+                RemoveCanvasElementIfPresent(_shapeSelectionAdorner);
+                _shapeSelectionAdorner = null;
+            }
+
             return;
         }
 
@@ -5095,9 +5861,10 @@ public partial class MainWindow : Window
     {
         Rect? bounds = null;
 
-        if (_selectedFillShape != null && DrawingCanvas.Children.Contains(_selectedFillShape))
+        foreach (WpfShape fillShape in GetSelectedFillShapesSnapshot())
         {
-            bounds = GetShapeBounds(_selectedFillShape);
+            Rect fillBounds = GetShapeBounds(fillShape);
+            bounds = bounds.HasValue ? Rect.Union(bounds.Value, fillBounds) : fillBounds;
         }
 
         foreach (Stroke stroke in GetSelectedShapeOutlineStrokesSnapshot())
@@ -5111,9 +5878,12 @@ public partial class MainWindow : Window
 
     private bool IsPointOnSelectedShape(Point point)
     {
-        if (_selectedFillShape != null && IsPointInsideVisibleFillShape(_selectedFillShape, point))
+        foreach (WpfShape fillShape in GetSelectedFillShapesSnapshot())
         {
-            return true;
+            if (IsPointInsideVisibleFillShape(fillShape, point))
+            {
+                return true;
+            }
         }
 
         foreach (Stroke stroke in GetSelectedShapeOutlineStrokesSnapshot())
@@ -5137,9 +5907,21 @@ public partial class MainWindow : Window
         _isDraggingSelectedShape = true;
         _hasSelectedShapeDragMoved = false;
         _currentInteractionState = InteractionState.MovingShape;
+        CaptureSelectionDragStart(point);
+        DrawingCanvas.CaptureMouse();
+    }
+
+    private void CaptureSelectionDragStart(Point point)
+    {
         _shapeDragStartMousePoint = point;
-        _shapeDragStartFillBounds = _selectedFillShape != null ? GetShapeBounds(_selectedFillShape) : null;
+        _shapeDragStartFillBounds.Clear();
         _shapeDragStartOutlineStrokePoints.Clear();
+        _selectionDragStartTextPositions.Clear();
+
+        foreach (WpfShape fillShape in GetSelectedFillShapesSnapshot())
+        {
+            _shapeDragStartFillBounds[fillShape] = GetShapeBounds(fillShape);
+        }
 
         foreach (Stroke stroke in GetSelectedShapeOutlineStrokesSnapshot())
         {
@@ -5150,26 +5932,31 @@ public partial class MainWindow : Window
             }
         }
 
-        DrawingCanvas.CaptureMouse();
+        foreach (Border textElement in GetSelectedTextElementsSnapshot())
+        {
+            _selectionDragStartTextPositions[textElement] = GetTextElementPosition(textElement);
+        }
     }
 
-    private void UpdateSelectedShapeDrag(Point point)
+    private void ApplySelectionDrag(Point point)
     {
-        if (!_isDraggingSelectedShape)
-        {
-            return;
-        }
-
         Vector offset = point - _shapeDragStartMousePoint;
         if (Math.Abs(offset.X) > 0.1 || Math.Abs(offset.Y) > 0.1)
         {
             _hasSelectedShapeDragMoved = true;
         }
 
-        if (_selectedFillShape != null && _shapeDragStartFillBounds.HasValue)
+        foreach (KeyValuePair<WpfShape, Rect> pair in _shapeDragStartFillBounds)
         {
-            Rect start = _shapeDragStartFillBounds.Value;
-            SetShapeBounds(_selectedFillShape, new Rect(start.Left + offset.X, start.Top + offset.Y, start.Width, start.Height));
+            if (!DrawingCanvas.Children.Contains(pair.Key))
+            {
+                continue;
+            }
+
+            Rect start = pair.Value;
+            SetShapeBounds(
+                pair.Key,
+                new Rect(start.Left + offset.X, start.Top + offset.Y, start.Width, start.Height));
         }
 
         foreach (KeyValuePair<Stroke, StylusPointCollection> pair in _shapeDragStartOutlineStrokePoints)
@@ -5180,7 +5967,137 @@ public partial class MainWindow : Window
             }
         }
 
+        foreach (KeyValuePair<Border, Point> pair in _selectionDragStartTextPositions)
+        {
+            if (_textElements.Contains(pair.Key))
+            {
+                SetTextElementPosition(
+                    pair.Key,
+                    new Point(pair.Value.X + offset.X, pair.Value.Y + offset.Y));
+            }
+        }
+
         UpdateShapeSelectionAdorner();
+    }
+
+    private List<IUndoableAction> CreateSelectionMoveActions()
+    {
+        var actions = new List<IUndoableAction>();
+
+        foreach (KeyValuePair<WpfShape, Rect> pair in _shapeDragStartFillBounds)
+        {
+            if (!DrawingCanvas.Children.Contains(pair.Key))
+            {
+                continue;
+            }
+
+            Rect afterBounds = GetShapeBounds(pair.Key);
+            if (!AreRectsClose(pair.Value, afterBounds, 0.1))
+            {
+                actions.Add(new ShapeMoveAction(
+                    pair.Key,
+                    pair.Value,
+                    afterBounds,
+                    Array.Empty<ShapeStrokeMoveEntry>()));
+            }
+        }
+
+        var strokeMoveEntries = new List<ShapeStrokeMoveEntry>();
+        foreach (KeyValuePair<Stroke, StylusPointCollection> pair in _shapeDragStartOutlineStrokePoints)
+        {
+            if (!DrawingCanvas.Strokes.Contains(pair.Key))
+            {
+                continue;
+            }
+
+            strokeMoveEntries.Add(new ShapeStrokeMoveEntry(
+                pair.Key,
+                pair.Value,
+                CloneStylusPoints(pair.Key.StylusPoints)));
+        }
+
+        if (strokeMoveEntries.Count > 0 && _hasSelectedShapeDragMoved)
+        {
+            actions.Add(new ShapeMoveAction(
+                null,
+                null,
+                null,
+                strokeMoveEntries));
+        }
+
+        foreach (KeyValuePair<Border, Point> pair in _selectionDragStartTextPositions)
+        {
+            if (!_textElements.Contains(pair.Key))
+            {
+                continue;
+            }
+
+            Point afterPoint = GetTextElementPosition(pair.Key);
+            if (!ArePointsClose(pair.Value, afterPoint))
+            {
+                actions.Add(new TextMoveAction(pair.Key, pair.Value, afterPoint));
+            }
+        }
+
+        return actions;
+    }
+
+    private void RestoreSelectionDragStart()
+    {
+        foreach (KeyValuePair<WpfShape, Rect> pair in _shapeDragStartFillBounds)
+        {
+            if (DrawingCanvas.Children.Contains(pair.Key))
+            {
+                SetShapeBounds(pair.Key, pair.Value);
+            }
+        }
+
+        foreach (KeyValuePair<Stroke, StylusPointCollection> pair in _shapeDragStartOutlineStrokePoints)
+        {
+            if (DrawingCanvas.Strokes.Contains(pair.Key))
+            {
+                SetStrokeStylusPoints(pair.Key, pair.Value);
+            }
+        }
+
+        foreach (KeyValuePair<Border, Point> pair in _selectionDragStartTextPositions)
+        {
+            if (_textElements.Contains(pair.Key))
+            {
+                SetTextElementPosition(pair.Key, pair.Value);
+            }
+        }
+
+        UpdateShapeSelectionAdorner();
+    }
+
+    private void ClearSelectionDragStartState()
+    {
+        _shapeDragStartFillBounds.Clear();
+        _shapeDragStartOutlineStrokePoints.Clear();
+        _selectionDragStartTextPositions.Clear();
+    }
+
+    private void PushSelectionMoveHistory(List<IUndoableAction> actions)
+    {
+        if (actions.Count == 0)
+        {
+            return;
+        }
+
+        PushHistory(actions.Count == 1
+            ? actions[0]
+            : new CompositeAction(actions));
+    }
+
+    private void UpdateSelectedShapeDrag(Point point)
+    {
+        if (!_isDraggingSelectedShape)
+        {
+            return;
+        }
+
+        ApplySelectionDrag(point);
     }
 
     private void EndSelectedShapeDrag()
@@ -5190,26 +6107,11 @@ public partial class MainWindow : Window
             return;
         }
 
-        WpfShape? fillShape = _selectedFillShape;
-        Rect? beforeFillBounds = _shapeDragStartFillBounds;
-        Rect? afterFillBounds = fillShape != null ? GetShapeBounds(fillShape) : null;
-        var strokeMoveEntries = new List<ShapeStrokeMoveEntry>();
-
-        foreach (KeyValuePair<Stroke, StylusPointCollection> pair in _shapeDragStartOutlineStrokePoints)
-        {
-            if (DrawingCanvas.Strokes.Contains(pair.Key))
-            {
-                strokeMoveEntries.Add(new ShapeStrokeMoveEntry(
-                    pair.Key,
-                    pair.Value,
-                    CloneStylusPoints(pair.Key.StylusPoints)));
-            }
-        }
+        List<IUndoableAction> actions = CreateSelectionMoveActions();
 
         _isDraggingSelectedShape = false;
         _currentInteractionState = InteractionState.None;
-        _shapeDragStartFillBounds = null;
-        _shapeDragStartOutlineStrokePoints.Clear();
+        ClearSelectionDragStartState();
 
         if (DrawingCanvas.IsMouseCaptured)
         {
@@ -5218,11 +6120,7 @@ public partial class MainWindow : Window
 
         if (_hasSelectedShapeDragMoved)
         {
-            PushHistory(new ShapeMoveAction(
-                fillShape,
-                beforeFillBounds,
-                afterFillBounds,
-                strokeMoveEntries));
+            PushSelectionMoveHistory(actions);
         }
 
         _hasSelectedShapeDragMoved = false;
@@ -5236,24 +6134,17 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (_selectedFillShape != null && _shapeDragStartFillBounds.HasValue)
-        {
-            SetShapeBounds(_selectedFillShape, _shapeDragStartFillBounds.Value);
-        }
-
-        foreach (KeyValuePair<Stroke, StylusPointCollection> pair in _shapeDragStartOutlineStrokePoints)
-        {
-            if (DrawingCanvas.Strokes.Contains(pair.Key))
-            {
-                SetStrokeStylusPoints(pair.Key, pair.Value);
-            }
-        }
+        RestoreSelectionDragStart();
 
         _isDraggingSelectedShape = false;
         _hasSelectedShapeDragMoved = false;
         _currentInteractionState = InteractionState.None;
-        _shapeDragStartFillBounds = null;
-        _shapeDragStartOutlineStrokePoints.Clear();
+        ClearSelectionDragStartState();
+
+        if (DrawingCanvas.IsMouseCaptured)
+        {
+            DrawingCanvas.ReleaseMouseCapture();
+        }
 
         UpdateShapeSelectionAdorner();
     }
@@ -5285,7 +6176,17 @@ public partial class MainWindow : Window
         restoreFillItem.Click += (_, _) => RestoreSelectedShapeFill();
 
         var deleteItem = new MenuItem { Header = SR.Delete };
-        deleteItem.Click += (_, _) => DeleteSelectedShape();
+        deleteItem.Click += (_, _) =>
+        {
+            if (_currentTool == ToolMode.Select)
+            {
+                DeleteSelectedObjects();
+            }
+            else
+            {
+                DeleteSelectedShape();
+            }
+        };
 
         var menu = new ContextMenu
         {
@@ -5301,34 +6202,63 @@ public partial class MainWindow : Window
 
     private bool ApplyCurrentStyleToSelectedShape()
     {
-        if (!HasSelectedShape())
+        List<WpfShape> fillShapes = GetSelectedFillShapesSnapshot();
+        List<Stroke> outlineStrokes = GetSelectedShapeOutlineStrokesSnapshot();
+
+        if (fillShapes.Count == 0 && outlineStrokes.Count == 0)
         {
             return false;
         }
 
-        Brush? beforeFill = _selectedFillShape?.Fill;
-        Brush? afterFill = null;
-        var outlineStyleEntries = new List<ShapeStrokeStyleEntry>();
+        var actions = new List<IUndoableAction>();
 
-        if (_selectedFillShape != null)
+        foreach (WpfShape fillShape in fillShapes)
         {
-            afterFill = CreateShapeFillBrush();
-            _selectedFillShape.Fill = CloneBrush(afterFill);
+            Brush? beforeFill = fillShape.Fill;
+            Brush? afterFill = CreateShapeFillBrush();
+            fillShape.Fill = CloneBrush(afterFill);
+
+            actions.Add(new ShapeStyleAction(
+                fillShape,
+                beforeFill,
+                afterFill,
+                Array.Empty<ShapeStrokeStyleEntry>()));
         }
 
-        foreach (Stroke stroke in GetSelectedShapeOutlineStrokesSnapshot())
+        var outlineStyleEntries = new List<ShapeStrokeStyleEntry>();
+        foreach (Stroke stroke in outlineStrokes)
         {
             DrawingAttributes? beforeAttributes = stroke.DrawingAttributes.Clone();
             DrawingAttributes afterAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth);
+            LineStyleKind? beforeLineStyle = (stroke as StyledStroke)?.LineStyle;
+            LineStyleKind? afterLineStyle = stroke is StyledStroke ? _currentLineStyle : null;
+
             stroke.DrawingAttributes = afterAttributes.Clone();
-            outlineStyleEntries.Add(new ShapeStrokeStyleEntry(stroke, beforeAttributes, afterAttributes));
+            if (stroke is StyledStroke styledStroke)
+            {
+                styledStroke.LineStyle = _currentLineStyle;
+            }
+
+            outlineStyleEntries.Add(new ShapeStrokeStyleEntry(
+                stroke,
+                beforeAttributes,
+                afterAttributes,
+                beforeLineStyle,
+                afterLineStyle));
         }
 
-        PushHistory(new ShapeStyleAction(
-            _selectedFillShape,
-            beforeFill,
-            afterFill,
-            outlineStyleEntries));
+        if (outlineStyleEntries.Count > 0)
+        {
+            actions.Add(new ShapeStyleAction(
+                null,
+                null,
+                null,
+                outlineStyleEntries));
+        }
+
+        PushHistory(actions.Count == 1
+            ? actions[0]
+            : new CompositeAction(actions));
 
         UpdateShapeSelectionAdorner();
         return true;
@@ -5336,22 +6266,42 @@ public partial class MainWindow : Window
 
     private bool CanRestoreSelectedShapeFill()
     {
-        return _selectedFillShape != null
-            && DrawingCanvas.Children.Contains(_selectedFillShape)
-            && _selectedFillShape.Clip != null;
+        foreach (WpfShape fillShape in GetSelectedFillShapesSnapshot())
+        {
+            if (fillShape.Clip != null)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private bool RestoreSelectedShapeFill()
     {
-        if (!CanRestoreSelectedShapeFill() || _selectedFillShape == null)
+        var actions = new List<IUndoableAction>();
+
+        foreach (WpfShape fillShape in GetSelectedFillShapesSnapshot())
+        {
+            if (fillShape.Clip == null)
+            {
+                continue;
+            }
+
+            Geometry? beforeClip = CloneGeometry(fillShape.Clip);
+            fillShape.Clip = null;
+            actions.Add(new ShapeClipChangeAction(fillShape, beforeClip, null));
+        }
+
+        if (actions.Count == 0)
         {
             return false;
         }
 
-        Geometry? beforeClip = CloneGeometry(_selectedFillShape.Clip);
-        _selectedFillShape.Clip = null;
+        PushHistory(actions.Count == 1
+            ? actions[0]
+            : new CompositeAction(actions));
 
-        PushHistory(new ShapeClipChangeAction(_selectedFillShape, beforeClip, null));
         UpdateShapeSelectionAdorner();
         return true;
     }
@@ -5359,34 +6309,36 @@ public partial class MainWindow : Window
 
     private bool DeleteSelectedShape()
     {
-        if (!HasSelectedShape())
+        List<WpfShape> fillShapes = GetSelectedFillShapesSnapshot();
+        List<Stroke> outlineStrokes = GetSelectedShapeOutlineStrokesSnapshot();
+
+        if (fillShapes.Count == 0 && outlineStrokes.Count == 0)
         {
             return false;
         }
 
-        WpfShape? fillShape = _selectedFillShape;
-        List<Stroke> outlineStrokes = GetSelectedShapeOutlineStrokesSnapshot();
         var actions = new List<IUndoableAction>();
 
-        if (fillShape != null && DrawingCanvas.Children.Contains(fillShape))
+        foreach (WpfShape fillShape in fillShapes)
         {
-            actions.Add(new CanvasElementRemoveAction(fillShape, DrawingCanvas.Children.IndexOf(fillShape)));
+            if (DrawingCanvas.Children.Contains(fillShape))
+            {
+                actions.Add(new CanvasElementRemoveAction(
+                    fillShape,
+                    DrawingCanvas.Children.IndexOf(fillShape)));
+            }
         }
 
         if (outlineStrokes.Count > 0)
         {
-            actions.Add(new StrokeCollectionAction(Array.Empty<Stroke>(), outlineStrokes));
-        }
-
-        if (actions.Count == 0)
-        {
-            ClearSelectedShape();
-            return false;
+            actions.Add(new StrokeCollectionAction(
+                Array.Empty<Stroke>(),
+                outlineStrokes));
         }
 
         ExecuteWithoutStrokeHistory(() =>
         {
-            if (fillShape != null)
+            foreach (WpfShape fillShape in fillShapes)
             {
                 RemoveCanvasElementIfPresent(fillShape);
             }
@@ -5397,8 +6349,75 @@ public partial class MainWindow : Window
             }
         });
 
-        PushHistory(actions.Count == 1 ? actions[0] : new CompositeAction(actions));
+        PushHistory(actions.Count == 1
+            ? actions[0]
+            : new CompositeAction(actions));
+
         ClearSelectedShape();
+        return true;
+    }
+
+    private bool DeleteSelectedObjects()
+    {
+        List<WpfShape> fillShapes = GetSelectedFillShapesSnapshot();
+        List<Stroke> outlineStrokes = GetSelectedShapeOutlineStrokesSnapshot();
+        List<Border> textElements = GetSelectedTextElementsSnapshot();
+
+        if (fillShapes.Count == 0 && outlineStrokes.Count == 0 && textElements.Count == 0)
+        {
+            return false;
+        }
+
+        var actions = new List<IUndoableAction>();
+
+        foreach (WpfShape fillShape in fillShapes)
+        {
+            if (DrawingCanvas.Children.Contains(fillShape))
+            {
+                actions.Add(new CanvasElementRemoveAction(
+                    fillShape,
+                    DrawingCanvas.Children.IndexOf(fillShape)));
+            }
+        }
+
+        if (outlineStrokes.Count > 0)
+        {
+            actions.Add(new StrokeCollectionAction(
+                Array.Empty<Stroke>(),
+                outlineStrokes));
+        }
+
+        foreach (Border textElement in textElements)
+        {
+            actions.Add(new TextRemoveAction(
+                textElement,
+                GetCommittedTextElementIndex(textElement)));
+        }
+
+        ClearAllSelectedObjects();
+
+        ExecuteWithoutStrokeHistory(() =>
+        {
+            foreach (WpfShape fillShape in fillShapes)
+            {
+                RemoveCanvasElementIfPresent(fillShape);
+            }
+
+            foreach (Stroke stroke in outlineStrokes)
+            {
+                RemoveStrokeIfPresent(stroke);
+            }
+        });
+
+        foreach (Border textElement in textElements)
+        {
+            RemoveCommittedTextElement(textElement);
+        }
+
+        PushHistory(actions.Count == 1
+            ? actions[0]
+            : new CompositeAction(actions));
+
         return true;
     }
 
@@ -5815,6 +6834,22 @@ public partial class MainWindow : Window
         host.MouseRightButtonDown -= TextElement_MouseRightButtonDown;
     }
 
+    private void BeginTextElementDrag(Border host, Point mousePoint)
+    {
+        if (!IsTextElementSelected(host))
+        {
+            ClearAllSelectedObjects();
+            AddTextElementToSelection(host);
+        }
+
+        _draggingTextElement = host;
+        _isDraggingTextElement = true;
+        _hasSelectedShapeDragMoved = false;
+        _currentInteractionState = InteractionState.MovingText;
+        CaptureSelectionDragStart(mousePoint);
+        host.CaptureMouse();
+    }
+
     private void TextElement_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (_isClickThroughEnabled || _currentTool != ToolMode.Text)
@@ -5839,40 +6874,21 @@ public partial class MainWindow : Window
             CommitActiveTextInput();
         }
 
-        if (!ReferenceEquals(_selectedTextElement, host))
+        if (!IsTextElementSelected(host))
         {
             SelectTextElement(host);
             e.Handled = true;
             return;
         }
 
-        _draggingTextElement = host;
-        _isDraggingTextElement = true;
-        _textDragStartMousePoint = e.GetPosition(DrawingCanvas);
-        _textDragStartElementPoint = new Point(
-            InkCanvas.GetLeft(host),
-            InkCanvas.GetTop(host));
-
-        if (double.IsNaN(_textDragStartElementPoint.X))
-        {
-            _textDragStartElementPoint.X = 0;
-        }
-
-        if (double.IsNaN(_textDragStartElementPoint.Y))
-        {
-            _textDragStartElementPoint.Y = 0;
-        }
-
-        _textDragCommittedStartPoint = _textDragStartElementPoint;
-        _currentInteractionState = InteractionState.MovingText;
-
-        host.CaptureMouse();
+        BeginTextElementDrag(host, e.GetPosition(DrawingCanvas));
         e.Handled = true;
     }
 
     private void TextElement_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (_isClickThroughEnabled || _currentTool != ToolMode.Text)
+        if (_isClickThroughEnabled
+            || (_currentTool != ToolMode.Text && _currentTool != ToolMode.Select))
         {
             return;
         }
@@ -5887,7 +6903,18 @@ public partial class MainWindow : Window
             CommitActiveTextInput();
         }
 
-        SelectTextElement(host);
+        if (_currentTool == ToolMode.Select)
+        {
+            if (!IsTextElementSelected(host))
+            {
+                ClearAllSelectedObjects();
+                AddTextElementToSelection(host);
+            }
+        }
+        else
+        {
+            SelectTextElement(host);
+        }
 
         var menu = new ContextMenu();
 
@@ -5897,7 +6924,17 @@ public partial class MainWindow : Window
         };
         selectItem.Click += (_, _) =>
         {
-            SelectTextElement(host);
+            if (_currentTool == ToolMode.Select)
+            {
+                if (!IsTextElementSelected(host))
+                {
+                    AddTextElementToSelection(host);
+                }
+            }
+            else
+            {
+                SelectTextElement(host);
+            }
         };
 
         var editItem = new MenuItem
@@ -5915,7 +6952,11 @@ public partial class MainWindow : Window
         };
         deleteItem.Click += (_, _) =>
         {
-            if (ReferenceEquals(_selectedTextElement, host))
+            if (_currentTool == ToolMode.Select)
+            {
+                DeleteSelectedObjects();
+            }
+            else if (IsTextElementSelected(host))
             {
                 DeleteSelectedTextElement();
             }
@@ -5942,15 +6983,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        Point currentMousePoint = e.GetPosition(DrawingCanvas);
-        Vector delta = currentMousePoint - _textDragStartMousePoint;
-
-        double newLeft = _textDragStartElementPoint.X + delta.X;
-        double newTop = _textDragStartElementPoint.Y + delta.Y;
-
-        InkCanvas.SetLeft(_draggingTextElement, newLeft);
-        InkCanvas.SetTop(_draggingTextElement, newTop);
-
+        ApplySelectionDrag(e.GetPosition(DrawingCanvas));
         e.Handled = true;
     }
 
@@ -5966,59 +6999,91 @@ public partial class MainWindow : Window
             return;
         }
 
-        Point endPoint = GetTextElementPosition(host);
+        CompleteTextElementDrag();
+        e.Handled = true;
+    }
 
-        host.ReleaseMouseCapture();
-        EndTextElementDrag();
-        SelectTextElement(host);
-
-        if (!ArePointsClose(_textDragCommittedStartPoint, endPoint))
+    private void CompleteTextElementDrag()
+    {
+        if (!_isDraggingTextElement)
         {
-            PushHistory(new TextMoveAction(host, _textDragCommittedStartPoint, endPoint));
+            return;
         }
 
-        e.Handled = true;
+        Border? capturedHost = _draggingTextElement;
+        List<IUndoableAction> actions = CreateSelectionMoveActions();
+        bool hasMoved = _hasSelectedShapeDragMoved;
+
+        _draggingTextElement = null;
+        _isDraggingTextElement = false;
+        _hasSelectedShapeDragMoved = false;
+
+        if (_currentInteractionState == InteractionState.MovingText)
+        {
+            _currentInteractionState = InteractionState.None;
+        }
+
+        ClearSelectionDragStartState();
+
+        if (capturedHost != null && capturedHost.IsMouseCaptured)
+        {
+            capturedHost.ReleaseMouseCapture();
+        }
+
+        if (hasMoved)
+        {
+            PushSelectionMoveHistory(actions);
+        }
+
+        UpdateShapeSelectionAdorner();
     }
 
     private void TextElement_LostMouseCapture(object sender, MouseEventArgs e)
     {
-        if (sender is Border host && host == _draggingTextElement)
+        if (_isDraggingTextElement
+            && sender is Border host
+            && ReferenceEquals(host, _draggingTextElement))
         {
-            EndTextElementDrag();
+            CancelTextElementDrag();
         }
     }
 
     private void CancelTextElementDrag()
     {
-        if (_draggingTextElement != null)
+        if (!_isDraggingTextElement)
         {
-            SetTextElementPosition(_draggingTextElement, _textDragCommittedStartPoint);
-            SelectTextElement(_draggingTextElement);
+            return;
         }
 
+        RestoreSelectionDragStart();
         EndTextElementDrag();
     }
 
     private void EndTextElementDrag()
     {
-        if (_draggingTextElement != null && _draggingTextElement.IsMouseCaptured)
-        {
-            _draggingTextElement.ReleaseMouseCapture();
-        }
+        Border? capturedHost = _draggingTextElement;
 
         _draggingTextElement = null;
         _isDraggingTextElement = false;
+        _hasSelectedShapeDragMoved = false;
 
         if (_currentInteractionState == InteractionState.MovingText)
         {
             _currentInteractionState = InteractionState.None;
+        }
+
+        ClearSelectionDragStartState();
+
+        if (capturedHost != null && capturedHost.IsMouseCaptured)
+        {
+            capturedHost.ReleaseMouseCapture();
         }
     }
 
     private void BeginTextEdit(Border host)
     {
         CancelActiveTextInput();
-        ClearSelectedTextElement();
+        ClearAllSelectedObjects();
         EndTextElementDrag();
 
         if (host.Child is not TextBlock textBlock)
@@ -6131,40 +7196,123 @@ public partial class MainWindow : Window
 
     private void SelectTextElement(Border host)
     {
-        if (ReferenceEquals(_selectedTextElement, host))
+        ClearAllSelectedObjects();
+        AddTextElementToSelection(host);
+    }
+
+    private bool IsTextElementSelected(Border host)
+    {
+        foreach (Border selected in _selectedTextElements)
         {
-            UpdateSelectedTextVisual(host, true);
+            if (ReferenceEquals(selected, host))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void AddTextElementToSelection(Border host)
+    {
+        if (!_textElements.Contains(host))
+        {
             return;
         }
 
-        ClearSelectedTextElement();
+        if (!IsTextElementSelected(host))
+        {
+            _selectedTextElements.Add(host);
+        }
 
         _selectedTextElement = host;
         UpdateSelectedTextVisual(host, true);
     }
 
+    private void RemoveTextElementFromSelection(Border host)
+    {
+        for (int i = _selectedTextElements.Count - 1; i >= 0; i--)
+        {
+            if (ReferenceEquals(_selectedTextElements[i], host))
+            {
+                _selectedTextElements.RemoveAt(i);
+            }
+        }
+
+        UpdateSelectedTextVisual(host, false);
+
+        _selectedTextElement = _selectedTextElements.Count > 0
+            ? _selectedTextElements[_selectedTextElements.Count - 1]
+            : null;
+    }
+
+    private void ToggleTextElementSelection(Border host)
+    {
+        if (IsTextElementSelected(host))
+        {
+            RemoveTextElementFromSelection(host);
+        }
+        else
+        {
+            AddTextElementToSelection(host);
+        }
+    }
+
+    private List<Border> GetSelectedTextElementsSnapshot()
+    {
+        for (int i = _selectedTextElements.Count - 1; i >= 0; i--)
+        {
+            if (!_textElements.Contains(_selectedTextElements[i]))
+            {
+                _selectedTextElements.RemoveAt(i);
+            }
+        }
+
+        _selectedTextElement = _selectedTextElements.Count > 0
+            ? _selectedTextElements[_selectedTextElements.Count - 1]
+            : null;
+
+        return new List<Border>(_selectedTextElements);
+    }
+
     private void ClearSelectedTextElement()
     {
-        if (_selectedTextElement != null)
+        foreach (Border host in new List<Border>(_selectedTextElements))
         {
-            UpdateSelectedTextVisual(_selectedTextElement, false);
-            _selectedTextElement = null;
+            UpdateSelectedTextVisual(host, false);
         }
+
+        _selectedTextElements.Clear();
+        _selectedTextElement = null;
     }
 
     private bool DeleteSelectedTextElement()
     {
-        if (_selectedTextElement == null)
+        List<Border> targets = GetSelectedTextElementsSnapshot();
+        if (targets.Count == 0)
         {
             return false;
         }
 
-        Border target = _selectedTextElement;
-        int index = GetCommittedTextElementIndex(target);
+        var actions = new List<IUndoableAction>();
+        foreach (Border target in targets)
+        {
+            actions.Add(new TextRemoveAction(
+                target,
+                GetCommittedTextElementIndex(target)));
+        }
 
         ClearSelectedTextElement();
-        RemoveCommittedTextElement(target);
-        PushHistory(new TextRemoveAction(target, index));
+
+        foreach (Border target in targets)
+        {
+            RemoveCommittedTextElement(target);
+        }
+
+        PushHistory(actions.Count == 1
+            ? actions[0]
+            : new CompositeAction(actions));
+
         return true;
     }
 
@@ -6258,14 +7406,14 @@ public partial class MainWindow : Window
 
     private void RemoveCommittedTextElement(Border host)
     {
-        if (_draggingTextElement == host)
+        if (ReferenceEquals(_draggingTextElement, host))
         {
             EndTextElementDrag();
         }
 
-        if (ReferenceEquals(_selectedTextElement, host))
+        if (IsTextElementSelected(host))
         {
-            ClearSelectedTextElement();
+            RemoveTextElementFromSelection(host);
         }
 
         DrawingCanvas.Children.Remove(host);
@@ -6339,7 +7487,8 @@ public partial class MainWindow : Window
                 continue;
             }
 
-            if (ReferenceEquals(child, _shapeSelectionAdorner))
+            if (ReferenceEquals(child, _shapeSelectionAdorner)
+                || ReferenceEquals(child, _rangeSelectionAdorner))
             {
                 continue;
             }
@@ -6409,6 +7558,25 @@ public partial class MainWindow : Window
         return new Point(left, top);
     }
 
+    private static Rect GetTextElementBounds(Border host)
+    {
+        Point position = GetTextElementPosition(host);
+        double width = host.ActualWidth > 0.0 ? host.ActualWidth : host.RenderSize.Width;
+        double height = host.ActualHeight > 0.0 ? host.ActualHeight : host.RenderSize.Height;
+
+        if (width <= 0.0)
+        {
+            width = Math.Max(1.0, host.DesiredSize.Width);
+        }
+
+        if (height <= 0.0)
+        {
+            height = Math.Max(1.0, host.DesiredSize.Height);
+        }
+
+        return new Rect(position.X, position.Y, width, height);
+    }
+
     private void SetTextElementPosition(Border host, Point point)
     {
         InkCanvas.SetLeft(host, point.X);
@@ -6419,6 +7587,7 @@ public partial class MainWindow : Window
     {
         _currentPenWidth = NormalizePenWidth(width);
         DrawingCanvas.DefaultDrawingAttributes = CreatePenAttributes(_currentPenColor, _currentPenWidth);
+        DrawingCanvas.SyncDynamicRendererDrawingAttributes();
         UpdatePenPresetButtonHighlight();
         UpdatePenWidthPresetButtonHighlight();
         SaveAppSettings();
@@ -6483,13 +7652,15 @@ public partial class MainWindow : Window
         Button selectedButton = _currentTool switch
         {
             ToolMode.Pen => PenButton,
+            ToolMode.Select => SelectButton,
             ToolMode.Rectangle => RectangleButton,
             ToolMode.Circle => CircleButton,
             ToolMode.Text => TextButton,
-            _ => EraserButton
+            ToolMode.Eraser => EraserButton,
+            _ => PenButton
         };
 
-        SetButtonSelected(selectedButton, PenButton, RectangleButton, CircleButton, TextButton, EraserButton);
+        SetButtonSelected(selectedButton, PenButton, SelectButton, RectangleButton, CircleButton, TextButton, EraserButton);
     }
 
     private void UpdateCursor()
@@ -6505,6 +7676,7 @@ public partial class MainWindow : Window
             nextCursor = _currentTool switch
             {
                 ToolMode.Pen => _penCursor,
+                ToolMode.Select => Cursors.Arrow,
                 ToolMode.Rectangle => _penCursor,
                 ToolMode.Circle => _penCursor,
                 ToolMode.Text => Cursors.IBeam,
@@ -6541,6 +7713,31 @@ public partial class MainWindow : Window
         ActivatePenTool();
         OpenPenPresetPopup();
     }
+
+    private void SelectButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_isClickThroughEnabled)
+        {
+            return;
+        }
+
+        CloseToolbarPopupsAndPendingClicks();
+        FinalizeOrCancelCurrentOperation();
+        CommitActiveTextInput();
+        ClearSelectedTextElement();
+
+        _isStraightLineDrawing = false;
+        _isRectangleDrawing = false;
+        _isCircleDrawing = false;
+
+        _currentTool = ToolMode.Select;
+        DrawingCanvas.EditingMode = InkCanvasEditingMode.None;
+        DrawingCanvas.Focus();
+
+        UpdateToolHighlight();
+        UpdateCursor();
+    }
+
 
     private void RectangleButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
@@ -6602,7 +7799,8 @@ public partial class MainWindow : Window
 
     private void RectangleOpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        _rectangleFillOpacityPercent = NormalizeRectangleFillOpacity((int)Math.Round(e.NewValue));
+        int rectangleFillTransparencyPercent = NormalizeRectangleFillOpacity((int)Math.Round(e.NewValue));
+        _rectangleFillOpacityPercent = NormalizeRectangleFillOpacity(100 - rectangleFillTransparencyPercent);
         UpdateShapeButtonToolTips();
         UpdateRectangleSettingsUi();
         SaveAppSettings();
@@ -6808,6 +8006,7 @@ public partial class MainWindow : Window
     {
         ColorPopup.IsOpen = false;
         PenPresetPopup.IsOpen = false;
+        LineStylePopup.IsOpen = false;
         EraserWidthPopup.IsOpen = false;
         RectangleSettingsPopup.IsOpen = false;
         HotkeySettingsPopup.IsOpen = false;
@@ -6942,6 +8141,7 @@ public partial class MainWindow : Window
 
         ColorPopup.IsOpen = false;
         PenPresetPopup.IsOpen = false;
+        LineStylePopup.IsOpen = false;
         EraserWidthPopup.IsOpen = false;
         RectangleSettingsPopup.IsOpen = false;
 
