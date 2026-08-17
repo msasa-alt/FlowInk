@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://msasa-alt.github.io/FlowInk/sitemap.xml
