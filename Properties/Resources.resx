@@ -419,4 +419,13 @@ Right-click:Edit preset value</value>
   <data name="DottedLine" xml:space="preserve">
     <value>Dotted</value>
   </data>
+  <data name="ToolbarOrientation" xml:space="preserve">
+    <value>Toolbar orientation</value>
+  </data>
+  <data name="Vertical" xml:space="preserve">
+    <value>Vertical</value>
+  </data>
+  <data name="Horizontal" xml:space="preserve">
+    <value>Horizontal</value>
+  </data>
 </root>

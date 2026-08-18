@@ -419,4 +419,13 @@
   <data name="DottedLine" xml:space="preserve">
     <value>点線</value>
   </data>
+  <data name="ToolbarOrientation" xml:space="preserve">
+    <value>ツールバーの向き</value>
+  </data>
+  <data name="Vertical" xml:space="preserve">
+    <value>縦</value>
+  </data>
+  <data name="Horizontal" xml:space="preserve">
+    <value>横</value>
+  </data>
 </root>

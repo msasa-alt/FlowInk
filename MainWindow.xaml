@@ -143,7 +143,8 @@
             <Grid>
                 <StackPanel x:Name="FullToolbarPanel"
                             Orientation="Vertical">
-                    <Border Height="8"
+                    <Border x:Name="FullToolbarLeadingSpacer"
+                            Height="8"
                             Background="#01000000"/>
 
                     <Button x:Name="ClickThroughButton"
@@ -446,6 +447,30 @@
                                 BorderBrush="#FF555555"
                                 BorderThickness="1">
                             <StackPanel Width="190">
+                                <TextBlock Text="{x:Static res:Resources.ToolbarOrientation}"
+                                           Foreground="White"
+                                           Margin="0,0,0,8"
+                                           FontWeight="Bold"/>
+
+                                <StackPanel Orientation="Horizontal"
+                                            Margin="0,0,0,10">
+                                    <RadioButton x:Name="ToolbarVerticalRadioButton"
+                                                 Content="{x:Static res:Resources.Vertical}"
+                                                 Foreground="White"
+                                                 Margin="0,0,16,0"
+                                                 GroupName="ToolbarOrientation"
+                                                 Click="ToolbarVerticalRadioButton_Click"/>
+                                    <RadioButton x:Name="ToolbarHorizontalRadioButton"
+                                                 Content="{x:Static res:Resources.Horizontal}"
+                                                 Foreground="White"
+                                                 GroupName="ToolbarOrientation"
+                                                 Click="ToolbarHorizontalRadioButton_Click"/>
+                                </StackPanel>
+
+                                <Border Height="1"
+                                        Background="#FF555555"
+                                        Margin="0,0,0,10"/>
+
                                 <TextBlock Text="{x:Static res:Resources.Hotkey}"
                                            Foreground="White"
                                            Margin="0,0,0,8"
@@ -510,7 +535,8 @@
                             ToolTip="{x:Static res:Resources.Exit}"
                             Click="ExitButton_Click"/>
 
-                    <Border Height="8"
+                    <Border x:Name="FullToolbarTrailingSpacer"
+                            Height="8"
                             Background="#01000000"/>
                 </StackPanel>
 
@@ -519,7 +545,8 @@
                             Orientation="Vertical"
                             HorizontalAlignment="Center"
                             Visibility="Collapsed">
-                    <Border Height="8"
+                    <Border x:Name="CtMiniLeadingSpacer"
+                            Height="8"
                             Background="#01000000"/>
 
                     <Button x:Name="CtReturnButton"
@@ -534,7 +561,8 @@
                                    VerticalAlignment="Center"/>
                     </Button>
 
-                    <Border Height="8"
+                    <Border x:Name="CtMiniTrailingSpacer"
+                            Height="8"
                             Background="#01000000"/>
                 </StackPanel>
             </Grid>

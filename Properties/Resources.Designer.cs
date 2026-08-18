@@ -440,6 +440,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   Horizontal に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Horizontal {
+            get {
+                return ResourceManager.GetString("Horizontal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Hotkey に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Hotkey {
@@ -882,6 +891,15 @@ namespace FlowInk.Properties {
         }
         
         /// <summary>
+        ///   Toolbar orientation に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ToolbarOrientation {
+            get {
+                return ResourceManager.GetString("ToolbarOrientation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Transparency に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Transparency {
@@ -959,6 +977,15 @@ namespace FlowInk.Properties {
         public static string VersionFormat {
             get {
                 return ResourceManager.GetString("VersionFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vertical に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Vertical {
+            get {
+                return ResourceManager.GetString("Vertical", resourceCulture);
             }
         }
     }
