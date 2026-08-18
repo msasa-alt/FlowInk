@@ -362,5 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 # Files managed outside this repository
-docs/
+# docs/
 installer-output/FlowInk-Setup.exe

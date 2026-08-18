@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlowInk | Windows画面に直接描ける描画・落書きツール</title>
+  <meta
+    name="description"
+    content="FlowInkはWindows画面に直接描ける軽量なオーバーレイ描画・落書きツールです。プレゼンやオンライン会議の画面説明・チャートへの書き込み等をすばやく行えます。"
+  />
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://msasa-alt.github.io/FlowInk/">
+  <link rel="alternate" hreflang="ja" href="https://msasa-alt.github.io/FlowInk/">
+  <link rel="alternate" hreflang="en" href="https://msasa-alt.github.io/FlowInk/en/">
+  <link rel="alternate" hreflang="x-default" href="https://msasa-alt.github.io/FlowInk/en/">
+  <script>
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      var selectedLang = params.get('lang');
+
+      if (selectedLang === 'ja') {
+        localStorage.setItem('flowink_lang', 'ja');
+        return;
+      }
+
+      if (selectedLang === 'en') {
+        localStorage.setItem('flowink_lang', 'en');
+      }
+
+      if (localStorage.getItem('flowink_lang') === 'ja') {
+        return;
+      }
+
+      var languages = navigator.languages || [navigator.language || navigator.userLanguage || ''];
+      var isJapanese = languages.some(function(lang) {
+        return String(lang).toLowerCase().indexOf('ja') === 0;
+      });
+
+      if (!isJapanese) {
+        window.location.replace(new URL('en/', window.location.href).href);
+      }
+    })();
+  </script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #111111;
+      --muted: #333333;
+      --line: #e9e9e9;
+      --soft: #f7f8fa;
+      --accent: #111111;
+      --accent-hover: #2a2a2a;
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+
+      /* toolbar diagram tuning */
+      --toolbar-image-width: 63px;
+            --line-len: 44px;
+      --dot-size: 8px;
+      --callout-card-min-h: 58px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 72px 20px;
+    }
+
+    .hero {
+      padding-top: 16px;
+      padding-bottom: 24px;
+    }
+
+    .logo-wrap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 132px;
+      height: 132px;
+      border-radius: 28px;
+      background: #ffffff;
+      /* box-shadow: var(--shadow); */
+      margin-bottom: 26px;
+    }
+
+    img.logo {
+      width: 84px;
+      height: 84px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: clamp(40px, 7vw, 64px);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin: 0 0 14px;
+    }
+
+    p.lead {
+      max-width: 700px;
+      margin: 0 auto 30px;
+      font-size: 19px;
+      color: var(--muted);
+    }
+
+    .btn-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 15px 30px;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 999px;
+      font-weight: 700;
+      transition: 0.18s ease;
+      box-shadow: var(--shadow);
+    }
+
+    .btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+
+    .language-switch {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 1000;
+      font-size: 14px;
+    }
+
+    .language-switch a {
+      display: inline-block;
+      padding: 8px 14px;
+      color: var(--text);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    .language-switch a:hover {
+      background: var(--soft);
+    }
+
+    .subnote {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
+    }
+
+
+    .guide {
+      max-width: 600px;
+      margin: 0 auto 22px;
+      padding: 0 30px;
+      text-align: left;
+      line-height: 1.8;
+    }
+
+    .guide ol,
+    .guide ul {
+      margin: 0 0 18px 1.4em;
+      padding: 0;
+    }
+
+    .guide p {
+      margin: 0;
+    }
+
+    .download-shot {
+      margin: 24px auto 32px;
+      text-align: center;
+    }
+
+    .download-shot a {
+      display: inline-block;
+      cursor: zoom-in;
+    }
+
+    .download-shot img {
+      width: 100%;
+      max-width: 450px;
+      height: auto;
+      border-radius: 14px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .download-shot figcaption {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .install-shot {
+      margin: 24px auto;
+      text-align: center;
+    }
+
+    .install-shot a {
+      display: inline-block;
+      cursor: zoom-in;
+    }
+
+    .install-shot img {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      border-radius: 14px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .install-shot figcaption {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .unzip-shot {
+      margin: 24px auto;
+      text-align: center;
+    }
+
+    .unzip-shot a {
+      display: inline-block;
+      cursor: zoom-in;
+    }
+
+    .unzip-shot img {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      border-radius: 14px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .unzip-shot figcaption {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--muted);
+    }    
+
+    .section {
+      margin-top: 72px;
+    }
+
+    h2 {
+      font-size: 32px;
+      letter-spacing: -0.02em;
+      margin: 0 0 12px;
+    }
+
+    .section-lead {
+      max-width: 700px;
+      margin: 0 auto 26px;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      text-align: left;
+      margin-top: 30px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      padding: 22px;
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+    }
+
+    .card strong {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .toolbar-diagram-wrap {
+      margin-top: 34px;
+      padding: 8px 0 0;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      overflow: visible;
+    }
+
+    .toolbar-diagram {
+      width: 100%;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 34px;
+      align-items: start;
+      text-align: left;
+    }
+
+    .toolbar-image-col {
+      height: auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .toolbar-image-col img {
+      width: var(--toolbar-image-width);
+      height: auto;
+      display: block;
+    }
+
+    .tool-list {
+      display: grid;
+      gap: 18px;
+    }
+
+    .tool-item {
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+      padding: 10px 0;
+      text-align: left;
+    }
+
+    .tool-item + .tool-item {
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .tool-icon {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 2px;
+    }
+
+    .tool-icon img {
+      width: 42px;
+      height: auto;
+      display: block;
+    }
+
+    .tool-body strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .tool-body p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    .toolbar-examples {
+      margin-top: 34px;
+      padding-top: 30px;
+      border-top: 1px solid var(--line);
+    }
+
+    .toolbar-example-gallery {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      max-width: 980px;
+      margin: 22px auto 0;
+    }
+
+    .toolbar-example-shot {
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+    }
+
+    .toolbar-example-shot a {
+      display: block;
+      cursor: zoom-in;
+    }
+
+    .toolbar-example-shot img {
+      width: 100%;
+      height: 170px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: 10px;
+      background: var(--soft);
+    }
+
+    .toolbar-example-shot figcaption {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .use-cases {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 28px;
+    }
+
+
+    .usage-gallery {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      margin-top: 28px;
+      max-width: 980px;
+      margin-left: auto;
+      margin-right: auto;
+      align-items: start;
+    }
+
+    .usage-shot {
+      margin: 0;
+    }
+
+    .usage-shot a {
+      display: block;
+      cursor: zoom-in;
+    }
+
+    .usage-shot img {
+      width: 100%;
+      max-width: 460px;
+      display: block;
+      margin: 0 auto;
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .usage-shot figcaption {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .feature-video {
+      max-width: 960px;
+      margin: 28px auto 0;
+    }
+
+    .feature-video video {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+      background: #000;
+    }
+
+    .use-case {
+      padding: 20px;
+      border-radius: var(--radius);
+      background: var(--soft);
+      border: 1px solid var(--line);
+    }
+
+    .use-case strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 17px;
+    }
+
+    .use-case p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .steps {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 12px;
+      text-align: left;
+      margin-top: 8px;
+      max-width: 520px;
+      width: 100%;
+    }
+
+    .step {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      background: #fff;
+    }
+
+    .step strong {
+      display: inline-block;
+      margin-right: 6px;
+    }
+
+    .cta-box {
+      margin-top: 72px;
+      padding: 36px 24px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8f9fb 100%);
+      box-shadow: var(--shadow);
+    }
+
+    .cta-box h2 {
+      margin-bottom: 10px;
+    }
+
+    .cta-box p {
+      max-width: 620px;
+      margin: 0 auto 22px;
+      color: var(--muted);
+    }
+
+    footer {
+      margin-top: 84px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      font-size: 14px;
+      color: #888;
+    }
+
+    @media (max-width: 900px) {
+
+      .usage-gallery {
+        grid-template-columns: 1fr;
+        max-width: 560px;
+      }
+
+      .toolbar-example-gallery {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-width: 620px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .features,
+      .use-cases {
+        grid-template-columns: 1fr;
+      }
+
+      .container {
+        padding: 56px 18px;
+      }
+
+      .section {
+        margin-top: 56px;
+      }
+
+      .cta-box {
+        margin-top: 56px;
+      }
+
+      .toolbar-diagram-wrap {
+        margin-top: 24px;
+      }
+
+      .toolbar-diagram {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        text-align: left;
+      }
+
+      .toolbar-image-col {
+        width: 100%;
+      }
+
+      .toolbar-image-col img {
+        width: 40px;      /* ←これ追加（本質） */
+        height: auto;
+        margin: 0 auto;
+        display: block;
+      }
+
+      .tool-item {
+        grid-template-columns: 46px minmax(0, 1fr);
+        gap: 12px;
+      }
+
+      .tool-icon img {
+        width: 38px;
+      }
+
+      .toolbar-example-gallery {
+        gap: 12px;
+      }
+
+      .toolbar-example-shot {
+        padding: 10px;
+      }
+
+      .toolbar-example-shot img {
+        height: 150px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <nav class="language-switch" aria-label="Language switch">
+      <a href="en/" onclick="localStorage.setItem('flowink_lang', 'en')">English</a>
+    </nav>
+    <section class="hero">
+      <div class="logo-wrap">
+        <img src="images/FlowInk_logo.png" class="logo" alt="FlowInk icon" />
+      </div>
+
+      <div class="eyebrow">Desktop RAKUGAKI Tool</div>
+
+      <h1>FlowInk</h1>
+
+      <p class="lead">
+        Windows画面に直接描ける<br>
+        軽量なオーバーレイ描画・落書きツール
+      </p>
+    </section>
+
+    <section class="section">
+      <h2>特長</h2>
+      <p class="section-lead">
+        余計な操作を増やさず、必要な機能をすぐ使えることを重視した設計です。
+      </p>
+
+      <div class="features">
+        <div class="card">
+          <strong>オーバーレイ描画</strong>
+          <p>デスクトップ画面の上にそのまま書き込めるので、説明や確認が直感的です。</p>
+        </div>
+
+        <div class="card">
+          <strong>シンプル操作</strong>
+          <p>最小構成のUIで、迷いにくく、起動してすぐ使い始められます。</p>
+        </div>
+
+        <div class="card">
+          <strong>テキスト入力</strong>
+          <p>線や図形だけでなく、補足説明やラベルもその場で追加できます。</p>
+        </div>
+
+        <div class="card">
+          <strong>軽量設計</strong>
+          <p>重たいセットアップなしで、必要なときにすぐ立ち上げて使えます。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>こんな用途に</h2>
+      <p class="section-lead">
+        ちょっと書き込みたい場面に、手早く使えるツールです。
+      </p>
+
+      <div class="use-cases">
+        <div class="use-case">
+          <strong>プレゼン／オンライン会議</strong>
+          <p>表示／共有している画面に直接直接書き込みできます。</p>
+        </div>
+
+        <div class="use-case">
+          <strong>作業メモ</strong>
+          <p>一時的な書き込みや補足メモを画面上に残せます。</p>
+        </div>
+
+        <div class="use-case">
+          <strong>チャートへの書き込み</strong>
+          <p>デイトレード等のチャート画面にラインや矢印などを記入できます。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <p class="section-lead">
+        使用例
+      </p>
+
+      <div class="usage-gallery">
+        <figure class="usage-shot">
+          <a href="images/PresoWithFlowInk.png" target="_blank" rel="noopener noreferrer">
+            <img
+              src="images/PresoWithFlowInk.png"
+              alt="FlowInkを使ったプレゼン時の書き込み例"
+            />
+          </a>
+          <figcaption>プレゼン中の画面説明</figcaption>
+        </figure>
+
+        <figure class="usage-shot">
+          <a href="images/ChartWithFlowInk.png" target="_blank" rel="noopener noreferrer">
+            <img
+              src="images/ChartWithFlowInk.png"
+              alt="FlowInkを使ったチャートへの書き込み例"
+            />
+          </a>
+          <figcaption>チャート分析</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>v1.5.0の新機能：描画オブジェクトの選択・編集</h2>
+      <p class="section-lead">
+        描画した線や図形、テキストを選択して、移動または削除できます。
+      </p>
+
+      <div class="feature-video">
+        <video controls preload="metadata" playsinline aria-label="描画オブジェクトを選択・移動・削除する操作の紹介動画">
+          <source src="videos/Flowink_video01.mp4" type="video/mp4">
+          お使いのブラウザは動画の再生に対応していません。
+        </video>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>ツールバーの各ボタンの説明</h2>
+      <p class="section-lead">
+        左クリックで主な操作を選択または実行します。右クリックで対応している設定・メニュー・プリセットを開きます。
+      </p>
+
+      <div class="toolbar-diagram-wrap">
+        <div class="toolbar-diagram">
+          <div class="toolbar-image-col">
+            <img src="images/toolbar.png" alt="FlowInk toolbar" />
+          </div>
+
+          <div class="tool-list">
+            <div class="tool-item">
+              <div class="tool-icon">
+                <img src="images/08ct.png" alt="クリック透過ボタン" />
+              </div>
+              <div class="tool-body">
+                <strong>描画ON/OFFボタン</strong>
+                <p>左クリックで描画のオン／オフを切り替えます。描画がオフのときは、FlowInkの背後にあるウィンドウを操作できます。描画がオフになるとツールバーは折りたたまれます。これは Ctrl+Alt+T を押したときと同じ操作です。</p>
+              </div>
+            </div>
+
+            <div class="tool-item">
+              <div class="tool-icon">
+                <img src="images/01pen_button.png" alt="ペンボタン" />
+              </div>
+              <div class="tool-body">
+                <strong>ペンボタン</strong>
+                <p>マウスの左ボタンを押してドラッグすると線を描画できます。Shiftキーを押しながらドラッグすると直線、Shift+Altキーで矢印を描画できます。ペンボタンを右クリックするとプリセットポップアップが開きます。また、プリセットを右クリックするとプリセット値を変更できます。</p>
+              </div>
+            </div>
+
+            <div class="tool-item">
+              <div class="tool-icon">
+                <img src="images/02rectangle.png" alt="四角形ボタン" />
+              </div>
+              <div class="tool-body">
+                <strong>四角形ボタン</strong>
+                <p>マウスの左ボタンをクリックしてドラッグすると四角形を描画できます。四角形ボタンにカーソルを当てて右クリックすると塗りつぶし／塗りつぶす色の透明度を変更できます。</p>
+              </div>
+            </div>
+
+            <div class="tool-item">
+              <div class="tool-icon">
+                <img src="images/03ellipse.png" alt="円ボタン" />
+              </div>
+              <div class="tool-body">
+                <strong>円ボタン</strong>
+                <p>マウスの左ボタンをクリックしてドラッグすると円を描画できます。円ボタンにカーソルを当てて右クリックすると塗りつぶし／塗りつぶす色の透明度を変更できます。</p>
+              </div>
+            </div>
+
+            <div class="tool-item">
+              <div class="tool-icon">
+                <img src="images/04text.png" alt="テキストボタン" />
+              </div>
+              <div class="tool-body">
+                <strong>テキストボタン</strong>
+                <p>キーボードからテキストが入力できます。Enterで文字列確定、Shift+Enterでテキストボックス内で改行できます。テキストボタンを右クリックするとフォントを変更できます。入力したテキストをクリックするとテキスト選択状態となり、ドラッグするとテキストを移動できます。また、テキストにカーソルを当てて右クリックするとテキストの編集／削除ができます。</p>
+              </div>
+            </div>
+
+            <div class="tool-item">
+              <div class="tool-icon">
+                <img src="images/05eraser.png" alt="消しゴムボタン" />
+              </div>
+              <div class="tool-body">
+                <strong>消しゴムボタン</strong>
+                <p>マウスの左ボタンを押しっぱなしにすることで、描いた線／円／四角をカーソルで消せます、ただしテキストは消せません。テキストボタンを右クリックすると消しゴム幅プリセットメニューが開き、消しゴム幅が変更できます。また、プリセットの消しゴム幅を右クリックするとプリセット値を変更できます。</p>
+              </div>
+            </div>
+
+            <div class="tool-item">
+              <div class="tool-icon">
+                <img src="images/06color.png" alt="カラーボタン" />
+              </div>
+              <div class="tool-body">
+                <strong>カラーボタン</strong>
+                <p>描画色を変更できます。マウスの左ボタンをクリックすると、色選択ポップアップが開きます。選択することで描画色を変更できます。プリセットカラーの各色タイルを右クリックするとプリセットの色を変更できます。色ボタンを右クリックすると現在の色を変更できます。</p>
+              </div>
+            </div>
+
+            <div class="tool-item">
+              <div class="tool-icon">
+                <img src="images/11undo_redo_btn.png" alt="Undo/Redoボタン" />
+              </div>
+              <div class="tool-body">
+                <strong>Undo/Redoボタン</strong>
+                <p>左クリックでUndo、右クリックでRedoができます。</p>
+              </div>
+            </div>
+
+            <div class="tool-item">
+              <div class="tool-icon">
+                <img src="images/07clear.png" alt="クリアボタン" />
+              </div>
+              <div class="tool-body">
+                <strong>クリアボタン</strong>
+                <p>画面上に描いた内容をすべて消去します。テキストも消去されます。</p>
+              </div>
+            </div>
+
+            <div class="tool-item">
+              <div class="tool-icon">
+                <img src="images/09settings.png" alt="設定ボタン" />
+              </div>
+              <div class="tool-body">
+                <strong>設定ボタン</strong>
+                <p>描画ON/OFFができるグローバルホットキーを設定できます。デフォルトはCtrl+Alt+Tです。</p>
+              </div>
+            </div>
+
+            <div class="tool-item">
+              <div class="tool-icon">
+                <img src="images/10exit.png" alt="終了ボタン" />
+              </div>
+              <div class="tool-body">
+                <strong>終了ボタン</strong>
+                <p>FlowInkを終了します。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+<!--  Toolbar right-click gallery start-->
+      <div class="toolbar-examples">
+        <h3>右クリックメニューと設定</h3>
+        <p class="section-lead">
+          ツールバーボタンを右クリックすると、ペン、消しゴム幅、図形、テキスト、色に関するプリセット、メニュー、設定を開けます。画像をクリックすると原寸大で表示できます。
+        </p>
+
+        <div class="toolbar-example-gallery">
+          <figure class="toolbar-example-shot">
+            <a href="images/01PenBtn_ja.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/01PenBtn_ja.png"
+                alt="Pen preset popup opened from the pen button"
+              />
+            </a>
+            <figcaption>ペンプリセット値の設定</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/02RectBtn_ja.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/02RectBtn_ja.png"
+                alt="Right-click the rectangle button"
+              />
+            </a>
+            <figcaption>四角形の設定</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/03EllBtn_ja.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/03EllBtn_ja.png"
+                alt="Right-click the ellipse button"
+              />
+            </a>
+            <figcaption>円の設定</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/04TxtBtn_ja.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/04TxtBtn_ja.png"
+                alt="Right-click the text button"
+              />
+            </a>
+            <figcaption>テキストの設定</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/05EraserBtn_ja.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/05EraserBtn_ja.png"
+                alt="Right-click the eraser button"
+              />
+            </a>
+            <figcaption>消しゴム幅プリセット値の変更</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/06ColorBtn_ja.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/06ColorBtn_ja.png"
+                alt="Right-click the Color button"
+              />
+            </a>
+            <figcaption>現在色の変更</figcaption>
+          </figure>
+           </div>
+      </div>
+<!--  Toolbar right-click gallery end-->
+    </section>
+
+    
+    <section class="section">
+      <h2>その他の機能</h2>
+      <p class="section-lead">
+        ツールバーボタン以外の機能です。
+      </p>
+      <div style="max-width:700px;margin:0 auto;text-align:left;color:var(--muted);line-height:1.8;">
+        <ul>
+          <li>Ctrl + Alt + T で描画ON/OFFを切り替えられます。設定ボタンでキーの組み合わせを変更できます</li>
+          <li>ペンボタン選択時、Shiftキーで直線、Shift + Altキーで矢印を描画できます</li>
+          <li>Ctrl-z / Ctrl-yでUndo / Redoができます。履歴は200です</li>
+          <li>テキスト入力時にEnterで文字列確定。Shifet+Enterで改行できます</li>
+          <li>テキスト入力時に Ctrl + マウスホイールの上下で文字サイズを拡大・縮小できます</li>
+          <li>ツールバーの余白をつかむと移動できます。(余白にカーソルを合わせて左ボタンクリックでドラッグ)</li>
+          <li>図形や文字列上で右クリックすると、メニューが開き、選択(移動)や編集(文字列のみ)ができます。</li>
+        </ul>
+      </div>
+
+<!--  Other features gallery start-->
+      <div class="toolbar-examples">
+        <!--
+        <h3>その他の操作例</h3>
+        <p class="section-lead">
+          図形やテキストの右クリックメニュー、描画ON/OFFのホットキー設定などの操作例です。画像をクリックすると原寸大で表示できます。
+        </p>
+        -->
+        <div class="toolbar-example-gallery">
+          <figure class="toolbar-example-shot">
+            <a href="images/01RightClickTheRect_ja.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/01RightClickTheRect_ja.png"
+                alt="四角形を右クリックしたときのメニュー"
+              />
+            </a>
+            <figcaption>四角形の右クリックメニュー</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/02RightClickTheEll_ja.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/02RightClickTheEll_ja.png"
+                alt="円を右クリックしたときのメニュー"
+              />
+            </a>
+            <figcaption>円の右クリックメニュー</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/03RightClickTheTxt_ja.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/03RightClickTheTxt_ja.png"
+                alt="テキストを右クリックしたときのメニュー"
+              />
+            </a>
+            <figcaption>テキストの右クリックメニュー</figcaption>
+          </figure>
+
+          <figure class="toolbar-example-shot">
+            <a href="images/04SettingDlg_ja.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="images/04SettingDlg_ja.png"
+                alt="ホットキー設定画面"
+              />
+            </a>
+            <figcaption>ホットキー設定</figcaption>
+          </figure>
+        </div>
+      </div>
+<!--  Other features gallery end-->
+    </section>
+
+<section class="cta-box">
+      <h2>FlowInkを試す</h2>
+      <p>
+        必要なときにすぐ起動して、画面上にすぐ書ける。<br>
+        まずはダウンロードして、使い心地を試してみてください。
+      </p>
+      <a
+        class="btn"
+        href="https://github.com/msasa-alt/FlowInk/releases"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        ダウンロード
+      </a>
+      <h2>ダウンロード方法</h2>
+      <div class="guide">
+        <ol>
+          <li>ダウンロードボタンをクリックします</li>
+          <li>表示されたページの「Assets」（ダウンロード一覧）から以下のファイルをダウンロードしてください
+            <ul>
+              <li>FlowInk-Setup.exe（通常はこちら / インストーラー版）</li>
+              <li>FlowInk.zip（インストーラー版がダウンロードできない場合 / ZIP版）</li>
+            </ul>
+          </li>
+        </ol>
+        <p>
+        ※ インストーラー版はブラウザによりダウンロードがブロックされる場合があります。その時はZIP版をダウンロードしてください。<br>
+        ※ 「Source code」と書かれたZIPではありません。
+        </p>
+      </div>
+      <figure class="download-shot">
+        <a href="images/AssetsBox_with_annotation.png" target="_blank" rel="noopener noreferrer">
+          <img
+            src="images/AssetsBox_with_annotation.png"
+            alt="GitHub ReleasesのAssetsからFlowInkをダウンロードする場所の説明"
+          />
+        </a>
+        <figcaption>Assetsからインストーラー版またはZIP版をダウンロードします</figcaption>
+      </figure>
+      <h2>インストール方法</h2>
+      <h3>FlowInk-Setup.exe（インストーラー版）</h3>
+      <div class="guide">
+        <ol>
+          <li>(無事に)FlowInk-Setup.exeがダウンロードできた方は、ダブルクリックで実行してください。インストーラーが起動しますので、それに従ってインストールしてください</li>
+          <li>インストーラー実行時にWindowsのPC保護画面が表示される場合があります。その場合はPC保護画面の詳細リンクをクリックし、実行ボタンを押してください</li>
+        </ol>
+        <figure class="install-shot">
+          <a href="images/PC保護画面_説明追記.png" target="_blank" rel="noopener noreferrer">
+            <img
+              src="images/PC保護画面_説明追記.png"
+              alt="WindowsによってPCが保護されました画面の操作説明"
+            />
+          </a>
+          <figcaption>PC保護画面が表示された場合の操作</figcaption>
+        </figure>
+      </div><br>
+      <h3>FlowInk.zip(ZIP版)</h3>
+      <div class="guide">
+        <ol>
+          <li>ZIPファイルを右クリックし「すべて展開」より、展開されたファイル内のFlowInk.exeを実行してください</li>
+            <figure class="unzip-shot">
+              <a href="images/unziped_ja.png" target="_blank" rel="noopener noreferrer">
+                <img
+                  src="images/unziped_ja.png"
+                  alt="ZIP解凍後に実行するファイル"
+                />
+              </a>
+              <figcaption>ZIP解凍後に実行するファイル</figcaption>
+            </figure>
+          <li>初回のFlowInk.exe実行時にWindowsのPC保護画面が表示される場合があります。その場合はPC保護画面の詳細リンクをクリックし、実行ボタンを押してください</li>
+            <figure class="install-shot">
+              <a href="images/PC保護画面_説明追記.png" target="_blank" rel="noopener noreferrer">
+                <img
+                  src="images/PC保護画面_説明追記.png"
+                  alt="WindowsによってPCが保護されました画面の操作説明"
+                />
+              </a>
+              <figcaption>PC保護画面が表示された場合の操作</figcaption>
+            </figure>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>FlowInkを開発した経緯</h2>
+
+      <div style="max-width: 760px; margin: 0 auto; text-align: left; color: var(--muted); line-height: 1.9;">
+        <p>
+          FXやCFDのテクニカルデイトレーダーにとってMT4やMT5のチャートソフトの画面に線や文字を書き込む落書きツールは必須です。
+          Epic Penはデファクトスタンダードとして多くのトレーダーに使われていますが、少し前にサブスクになりました。
+          必須なツールとはいえ、たかだが落書きソフトにサブスクって？(OfficeやAcrobatならともかく)、
+          安いとは言え、使わなくなっても契約解除しない限り(忘れたら)一生お金を払い続けるの？
+          となにか釈然としない。
+          と言うことで代替ソフトを探したところginkと言うフリーのソフトを見つけました。
+          ginkこれはこれで多機能だが、なーんか挙動がおかしく不安定。
+          さらに最近は起動時に例外を吐いて起動できないバージョンもありでストレスが溜まっていました。
+          幸いgink はソースが公開されており、チャッピー(ChatGPT)を相手に中身を調べていたんですが、
+          チャッピー曰く設計が古い、WPFで書き直して云々ってなことを言ってくるので、
+          WPFで書き直すチャレンジをしたけどコンパイルエラーを吐きまくるわ、
+          チャッピーは自分の言ったことを忘れて聞くたびに違うコードを吐くわで、ginkを改良することはあきらめました。
+        </p>
+
+        <p>
+          その後しばらくして(あらためて)チャッピーに相談したところ、WPFで新たに書き直すのが早いとかいうので、
+          試しにコードを書いてもらったところ、こちらはサクッと簡単な落書きできるソフトを仕上げてきました。
+          そうなるとこっちも盛り上がって機能を追加していきました。
+        </p>
+
+        <p>
+          こうして出来上がったのが、FlowInkです。
+        </p>
+
+        <figure style="margin: 32px 0 0;">
+          <img
+            src="images/FlowInk1stVer.png"
+            alt="FlowInkの最初バージョン"
+            style="width: 100%; max-width: 900px; display: block; margin: 0 auto; border-radius: 16px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);"
+          />
+          <figcaption style="margin-top: 10px; font-size: 14px; color: var(--muted); text-align: center;">
+            FlowInkの最初バージョン
+          </figcaption>
+        </figure>
+        <p>
+          このような経緯なので、FlowInkはデイトレーダーがginkやEpic Penの代替ソフトウェアとして使える最低限の機能を持たせています。
+        <ul>
+          <li>直線や矢印が簡単に引ける</li>
+          <li>サポート／レジスタンス帯の長方形(塗りつぶし)</li>
+          <li>色の透明度の設定(下のチャートが見えるように)</li>
+          <li>テキスト入力</li>
+          <li>線幅、色をプリセットしておける</li>
+          <li>ツールバーの余白をつかむと移動できます。(余白にカーソルを合わせて左ボタンクリックでドラッグ)</li>
+        </ul>
+          最低限といっても、チャートへの書き込みならこれぐらいの機能で十分と考えています。<br>
+          同じく、プレゼンやオンラインミーティングの画面説明にもシンプルで使いやすいかと。<br>
+          ぜひ使ってみてください。
+        </p>
+      </div>
+    </section>
+<section class="section">
+      <h2>フィードバック・お問い合わせ</h2>
+      <p class="section-lead">
+        FlowInkの改善のため、ご意見・不具合報告・ご要望などをお待ちしています。
+      </p>
+
+      <p style="color: var(--muted);">
+        📩 dev.sasaya@gmail.com<br>
+        𝕏 <a href="https://x.com/m338" target="_blank" rel="noopener noreferrer" style="color: var(--text);">@m338</a><br>
+        wiki: <a href="https://github.com/msasa-alt/FlowInk/wiki" target="_blank" rel="noopener noreferrer" style="color: var(--text);">https://github.com/msasa-alt/FlowInk/wiki</a>
+      </p>
+
+      <div style="max-width:700px;margin:0 auto;text-align:left;color:var(--muted);line-height:1.8;">
+        <ul>
+          <li>発生した内容</li>
+          <li>操作手順</li>
+          <li>スクリーンショット（あれば）</li>
+          <li>使用環境（Windowsバージョンなど）</li>
+        </ul>
+      </div>
+    </section>
+    <footer>
+      © FlowInk
+    </footer>
+  </div>
+</body>
+</html>
