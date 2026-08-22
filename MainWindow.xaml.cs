@@ -120,6 +120,7 @@ public partial class MainWindow : Window
     private bool _isDraggingTextElement;
 
     private bool _isToolbarDragging;
+    private ToolbarOrientationKind _toolbarOrientation = ToolbarOrientationKind.Vertical;
     private Point _toolbarDragStartMousePoint;
     private Point _toolbarDragStartPanelPoint;
     private bool _hasPendingToolbarPosition;
@@ -192,6 +193,12 @@ public partial class MainWindow : Window
     {
         Rectangle,
         Ellipse
+    }
+
+    private enum ToolbarOrientationKind
+    {
+        Vertical,
+        Horizontal
     }
 
     private enum InteractionState
@@ -774,6 +781,7 @@ public partial class MainWindow : Window
         public bool TextItalic { get; set; }
         public bool RectangleFillEnabled { get; set; }
         public int RectangleFillOpacity { get; set; } = 35;
+        public string? ToolbarOrientation { get; set; }
         public double? ToolbarLeft { get; set; }
         public double? ToolbarTop { get; set; }
         public bool HotkeyCtrl { get; set; } = true;
@@ -796,6 +804,7 @@ public partial class MainWindow : Window
         InitializeButtonStyles();
 
         LoadAppSettings();
+        ApplyToolbarOrientation(_toolbarOrientation, saveSettings: false);
         UpdateShapeButtonToolTips();
         UpdateRectangleSettingsUi();
         _penWidthPresets = NormalizePenWidthPresets(_penWidthPresets);
@@ -1460,6 +1469,69 @@ public partial class MainWindow : Window
     }
 
 
+    private void ApplyToolbarOrientation(ToolbarOrientationKind orientation, bool saveSettings)
+    {
+        _toolbarOrientation = orientation;
+
+        bool isHorizontal = orientation == ToolbarOrientationKind.Horizontal;
+
+        FullToolbarPanel.Orientation = isHorizontal
+            ? Orientation.Horizontal
+            : Orientation.Vertical;
+
+        CtMiniPanel.Orientation = isHorizontal
+            ? Orientation.Horizontal
+            : Orientation.Vertical;
+
+        CtMiniPanel.Width = isHorizontal ? double.NaN : 38.0;
+        CtMiniPanel.Height = isHorizontal ? 38.0 : double.NaN;
+
+        UpdateToolbarSpacerForOrientation(FullToolbarLeadingSpacer, isHorizontal);
+        UpdateToolbarSpacerForOrientation(FullToolbarTrailingSpacer, isHorizontal);
+        UpdateToolbarSpacerForOrientation(CtMiniLeadingSpacer, isHorizontal);
+        UpdateToolbarSpacerForOrientation(CtMiniTrailingSpacer, isHorizontal);
+
+        ToolbarPanel.UpdateLayout();
+
+        if (IsLoaded)
+        {
+            ClampToolbarPositionToViewport(saveSettings: false);
+        }
+
+        UpdateToolbarOrientationSettingsUi();
+
+        if (saveSettings)
+        {
+            SaveAppSettings();
+        }
+    }
+
+    private static void UpdateToolbarSpacerForOrientation(Border spacer, bool isHorizontal)
+    {
+        spacer.Width = isHorizontal ? 8.0 : double.NaN;
+        spacer.Height = isHorizontal ? double.NaN : 8.0;
+    }
+
+    private void UpdateToolbarOrientationSettingsUi()
+    {
+        if (ToolbarVerticalRadioButton == null || ToolbarHorizontalRadioButton == null)
+        {
+            return;
+        }
+
+        ToolbarVerticalRadioButton.IsChecked = _toolbarOrientation == ToolbarOrientationKind.Vertical;
+        ToolbarHorizontalRadioButton.IsChecked = _toolbarOrientation == ToolbarOrientationKind.Horizontal;
+    }
+
+    private static ToolbarOrientationKind ParseToolbarOrientation(string? value)
+    {
+        return Enum.TryParse(value, ignoreCase: true, out ToolbarOrientationKind parsed)
+            && Enum.IsDefined(parsed)
+            ? parsed
+            : ToolbarOrientationKind.Vertical;
+    }
+
+
     private void ApplyInitialToolbarPosition()
     {
         if (_hasPendingToolbarPosition)
@@ -2104,9 +2176,33 @@ public partial class MainWindow : Window
         }
 
         UpdateHotkeySettingsUi();
+        UpdateToolbarOrientationSettingsUi();
         HotkeySettingsPopup.IsOpen = false;
         HotkeySettingsPopup.IsOpen = true;
     }
+
+    private void ToolbarVerticalRadioButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_toolbarOrientation == ToolbarOrientationKind.Vertical)
+        {
+            return;
+        }
+
+        ApplyToolbarOrientation(ToolbarOrientationKind.Vertical, saveSettings: true);
+        HotkeySettingsPopup.IsOpen = false;
+    }
+
+    private void ToolbarHorizontalRadioButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_toolbarOrientation == ToolbarOrientationKind.Horizontal)
+        {
+            return;
+        }
+
+        ApplyToolbarOrientation(ToolbarOrientationKind.Horizontal, saveSettings: true);
+        HotkeySettingsPopup.IsOpen = false;
+    }
+
 
     private void HotkeySettingControl_Changed(object sender, RoutedEventArgs e)
     {
@@ -2229,6 +2325,7 @@ public partial class MainWindow : Window
                 _currentTextFontWeight = FontWeights.Normal;
                 _isRectangleFilled = false;
                 _rectangleFillOpacityPercent = 35;
+                _toolbarOrientation = ToolbarOrientationKind.Vertical;
                 _hasPendingToolbarPosition = false;
                 _clickThroughHotkeyModifiers = DefaultHotkeyModifiers;
                 _clickThroughHotkeyKey = DefaultHotkeyKey;
@@ -2257,6 +2354,7 @@ public partial class MainWindow : Window
                 _currentTextFontWeight = FontWeights.Normal;
                 _isRectangleFilled = false;
                 _rectangleFillOpacityPercent = 35;
+                _toolbarOrientation = ToolbarOrientationKind.Vertical;
                 _hasPendingToolbarPosition = false;
                 _clickThroughHotkeyModifiers = DefaultHotkeyModifiers;
                 _clickThroughHotkeyKey = DefaultHotkeyKey;
@@ -2279,6 +2377,7 @@ public partial class MainWindow : Window
             _currentTextFontWeight = settings.TextBold ? FontWeights.Bold : FontWeights.Normal;
             _isRectangleFilled = settings.RectangleFillEnabled;
             _rectangleFillOpacityPercent = NormalizeRectangleFillOpacity(settings.RectangleFillOpacity);
+            _toolbarOrientation = ParseToolbarOrientation(settings.ToolbarOrientation);
             _hasPendingToolbarPosition = settings.ToolbarLeft.HasValue && settings.ToolbarTop.HasValue;
             if (_hasPendingToolbarPosition)
             {
@@ -2325,6 +2424,7 @@ public partial class MainWindow : Window
             _currentTextFontWeight = FontWeights.Normal;
             _isRectangleFilled = false;
             _rectangleFillOpacityPercent = 35;
+            _toolbarOrientation = ToolbarOrientationKind.Vertical;
             _hasPendingToolbarPosition = false;
             _clickThroughHotkeyModifiers = DefaultHotkeyModifiers;
             _clickThroughHotkeyKey = DefaultHotkeyKey;
@@ -2363,6 +2463,7 @@ public partial class MainWindow : Window
             TextItalic = _currentTextFontStyle == FontStyles.Italic,
             RectangleFillEnabled = _isRectangleFilled,
             RectangleFillOpacity = NormalizeRectangleFillOpacity(_rectangleFillOpacityPercent),
+            ToolbarOrientation = _toolbarOrientation.ToString(),
             ToolbarLeft = _hasPendingToolbarPosition ? _toolbarLeft : null,
             ToolbarTop = _hasPendingToolbarPosition ? _toolbarTop : null,
             HotkeyCtrl = (_clickThroughHotkeyModifiers & MOD_CONTROL) != 0,
